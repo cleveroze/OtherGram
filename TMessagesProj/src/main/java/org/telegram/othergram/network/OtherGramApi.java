@@ -25,7 +25,7 @@ public class OtherGramApi {
      * Backend address. Empty until the Worker is deployed; while empty no request is ever made
      * and OtherGram-only features (badges, banners, admin panel) stay inactive.
      */
-    public static final String BASE_URL = "";
+    public static final String BASE_URL = "https://othergram-backend.othergram.workers.dev";
 
     private static final String KEY_TOKEN = "server_token";
     private static final String KEY_USER_ID = "server_user_id";

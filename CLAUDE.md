@@ -319,6 +319,20 @@ Telegram API не умеет хранить произвольные данны�
   Иконка из логотипа владельца (`Tools/othergram/generate-icons.ps1`), название OtherGram.
   На устройстве ещё не проверено.
 
+- 2026-10-18: бейджи, баннеры, аккаунт OtherGram и админ-панель в приложении
+  (`org.telegram.othergram.{badges,banners,network,settings}`). Сервер выложен.
+
+### Сервер (OtherGram Backend)
+- Код: `C:\Users\FunkyUser\OtherGram-Backend` (отдельный локальный git, на GitHub не выложен).
+- Адрес: https://othergram-backend.othergram.workers.dev (`OtherGramApi.BASE_URL`).
+- Cloudflare: Worker `othergram-backend`, D1 `othergram`, KV `BANNERS`, бот `@othergrambot`.
+- Секреты Worker: `BOT_TOKEN`, `WEBHOOK_SECRET`, `ADMIN_IDS` (milvet 766926193, velvet71 5182531383).
+- Токены на этой машине лежат в переменных окружения пользователя Windows:
+  `CLOUDFLARE_API_TOKEN`, `OTHERGRAM_BOT_TOKEN`, `OTHERGRAM_WEBHOOK_SECRET`. Никогда не выводить и не коммитить.
+- Деплой: в PowerShell взять токен из `[Environment]::GetEnvironmentVariable('CLOUDFLARE_API_TOKEN','User')`,
+  `CLOUDFLARE_ACCOUNT_ID=1548ae809daddbccf8cc3111ef3e560f`, затем `npx wrangler deploy`
+  (Node: `C:\Program Files\nodejs`, может не быть в PATH старых терминалов).
+
 ### Как собирать
 - Android Studio 2026.2, Gradle JDK 21 (`.gradle/config.properties`), SDK 36, NDK 27.2.12479018, CMake 3.22.1.
 - В репозитории нет `gradlew.bat`, запуск через Git Bash:
