@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- OtherGram: launcher icon from Tools/othergram/generate-icons.ps1 (Telegram's monochrome plane layer removed) -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/icon_background" />
-    <foreground android:drawable="@mipmap/icon_foreground" />
-    <monochrome android:drawable="@drawable/icon_plane" />
+    <background android:drawable="@color/og_ic_launcher_background" />
+    <foreground android:drawable="@mipmap/og_ic_launcher_foreground" />
 </adaptive-icon>

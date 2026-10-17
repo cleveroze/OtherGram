@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- OtherGram: adaptive launcher icon background, sampled from Tools/othergram/icon-source.png -->
+    <color name="og_ic_launcher_background">#ECD9BD</color>
+</resources>
