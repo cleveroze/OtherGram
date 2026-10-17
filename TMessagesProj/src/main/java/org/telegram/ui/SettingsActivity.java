@@ -697,6 +697,10 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             items.add(UItem.asShadow(null));
         }
 
+        // OtherGram: entry point to OtherGram Settings, shown as its own block above the standard settings
+        items.add(SettingCell.Factory.of(26, 0xFFC2A48C, 0xFFA68770, R.drawable.og_settings_othergram, getString(R.string.OG_Settings), getString(R.string.OG_SettingsInfo)));
+        items.add(UItem.asShadow(null));
+
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
         items.add(SettingCell.Factory.of(2, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
         items.add(SettingCell.Factory.of(3, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));
@@ -856,6 +860,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 break;
             case 25:
                 presentSettingFragment(new WalletActivity());
+                break;
+            case 26: // OtherGram
+                presentSettingFragment(new org.telegram.othergram.settings.OtherGramSettingsActivity());
                 break;
             case 15:
                 presentSettingFragment(new PremiumPreviewFragment(PremiumPreviewFragment.FEATURES_BUSINESS, "settings"));

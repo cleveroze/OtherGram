@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="OG_Settings">Настройки OtherGram</string>
+    <string name="OG_SettingsInfo">Темы, аватарки, шрифты и профиль</string>
+    <string name="OG_SectionCustomization">Кастомизация</string>
+    <string name="OG_SectionProfile">Профиль</string>
+    <string name="OG_SectionData">Данные настроек</string>
+    <string name="OG_Appearance">Оформление</string>
+    <string name="OG_Avatars">Аватарки</string>
+    <string name="OG_Typography">Типографика</string>
+    <string name="OG_Chats">Чаты</string>
+    <string name="OG_Navigation">Навигация</string>
+    <string name="OG_ProfileCustomization">Кастомизация профиля</string>
+    <string name="OG_ExportImport">Экспорт и импорт</string>
+    <string name="OG_ResetAll">Восстановить стандартное оформление</string>
+    <string name="OG_ThemeVanillaBeige">Vanilla Beige</string>
+    <string name="OG_ThemeVanillaBeigeDark">Vanilla Beige тёмная</string>
+    <string name="OG_InDevelopment">В разработке</string>
+    <string name="OG_InDevelopmentInfo">Разделы с пометкой «В разработке» пока недоступны. Они будут включены, когда заработают по-настоящему.</string>
+</resources>

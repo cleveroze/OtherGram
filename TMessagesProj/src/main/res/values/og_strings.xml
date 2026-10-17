@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="OG_Settings">OtherGram Settings</string>
+    <string name="OG_SettingsInfo">Themes, avatars, fonts and profile</string>
+    <string name="OG_SectionCustomization">Customization</string>
+    <string name="OG_SectionProfile">Profile</string>
+    <string name="OG_SectionData">Settings data</string>
+    <string name="OG_Appearance">Appearance</string>
+    <string name="OG_Avatars">Avatars</string>
+    <string name="OG_Typography">Typography</string>
+    <string name="OG_Chats">Chats</string>
+    <string name="OG_Navigation">Navigation</string>
+    <string name="OG_ProfileCustomization">Profile customization</string>
+    <string name="OG_ExportImport">Export and import</string>
+    <string name="OG_ResetAll">Restore default design</string>
+    <string name="OG_ThemeVanillaBeige">Vanilla Beige</string>
+    <string name="OG_ThemeVanillaBeigeDark">Vanilla Beige Dark</string>
+    <string name="OG_InDevelopment">In development</string>
+    <string name="OG_InDevelopmentInfo">Sections marked as in development are not available yet. They will be enabled once they actually work.</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- OtherGram: settings entry icon (ring with a soft four-point spark), drawn on SettingCell's colored tile -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M13,40 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0 Z M20.5,40 a11.5,11.5 0 1,0 23,0 a11.5,11.5 0 1,0 -23,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,8 C55,13.5 57.5,16 63,17 C57.5,18 55,20.5 54,26 C53,20.5 50.5,18 45,17 C50.5,16 53,13.5 54,8 Z" />
+</vector>
