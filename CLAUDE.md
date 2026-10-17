@@ -336,8 +336,11 @@ Telegram API не умеет хранить произвольные данны�
 ### Как собирать
 - Android Studio 2026.2, Gradle JDK 21 (`.gradle/config.properties`), SDK 36, NDK 27.2.12479018, CMake 3.22.1.
 - В репозитории нет `gradlew.bat`, запуск через Git Bash:
-  `JAVA_HOME=~/.jdks/jbr-21.0.11 ./gradlew :TMessagesProj_App:assembleAfatDebug -Pandroid.injected.build.abi=arm64-v8a`
+  `JAVA_HOME=~/.jdks/jbr-21.0.11 ./gradlew :TMessagesProj_App:assembleAfatDebug -Pandroid.injected.build.abi=arm64-v8a -Pandroid.injected.testOnly=false`
   (параметр ABI собирает нативную часть только под arm64; первая сборка ~50 мин, повторные 1–2 мин).
+  **`-Pandroid.injected.testOnly=false` обязателен**: без него в манифест попадает `testOnly=true`,
+  и телефон отказывается ставить APK из файла («пакет недействителен»). Перед релизом проверять:
+  `aapt2 dump xmltree --file AndroidManifest.xml app.apk | grep testOnly` — должно быть пусто.
 - APK: `TMessagesProj_App/build/intermediates/apk/afat/debug/app.apk`, пакет `org.telegram.messenger.beta`.
 
 ## Следующие задачи
