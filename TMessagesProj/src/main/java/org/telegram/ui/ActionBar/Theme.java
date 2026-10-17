@@ -95,6 +95,7 @@ import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.time.SunDate;
+import org.telegram.othergram.theme.OtherGramThemes;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
@@ -1530,6 +1531,8 @@ public class Theme {
                 return getString(R.string.ThemeDay);
             } else if ("Night".equals(name)) {
                 return getString(R.string.ThemeNight);
+            } else if (OtherGramThemes.isBuiltIn(name)) { // OtherGram
+                return OtherGramThemes.getDisplayName(name);
             }
             return info != null ? info.title : name;
         }
@@ -1650,6 +1653,8 @@ public class Theme {
                 isDark = DARK;
             } else if ("Blue".equals(name) || "Arctic Blue".equals(name) || "Day".equals(name)) {
                 isDark = LIGHT;
+            } else if (OtherGramThemes.isBuiltIn(name)) { // OtherGram: asset themes have no file to inspect
+                isDark = OtherGramThemes.isDark(name) ? DARK : LIGHT;
             }
             if (isDark == UNKNOWN) {
                 String[] wallpaperLink = new String[1];
@@ -4016,6 +4021,20 @@ public class Theme {
         themes.add(themeInfo);
         themesDict.put("Night", themeInfo);
 
+        // OtherGram: built-in Vanilla Beige themes, listed before Telegram's own
+        for (int a = 0; a < 2; a++) {
+            final boolean dark = a == 1;
+            themeInfo = new ThemeInfo();
+            themeInfo.name = dark ? OtherGramThemes.VANILLA_BEIGE_DARK : OtherGramThemes.VANILLA_BEIGE;
+            themeInfo.assetName = dark ? OtherGramThemes.VANILLA_BEIGE_DARK_ASSET : OtherGramThemes.VANILLA_BEIGE_ASSET;
+            themeInfo.previewBackgroundColor = dark ? 0xff17110d : 0xffe5cfb5;
+            themeInfo.previewInColor = dark ? 0xff2e241d : 0xfffff7ed;
+            themeInfo.previewOutColor = dark ? 0xff6e5644 : 0xffe0cdb8;
+            themeInfo.sortIndex = dark ? -1 : -2;
+            themes.add(themeInfo);
+            themesDict.put(themeInfo.name, themeInfo);
+        }
+
         String themesString = themeConfig.getString("themes2", null);
 
         int remoteVersion = themeConfig.getInt("remote_version", 0);
@@ -4094,6 +4113,8 @@ public class Theme {
                 if (t != null) {
                     currentNightTheme = t;
                 }
+            } else { // OtherGram: Vanilla Beige Dark is the night theme until the user picks another one
+                currentNightTheme = themesDict.get(OtherGramThemes.VANILLA_BEIGE_DARK);
             }
 
             if (currentNightTheme != null && !themeConfig.contains("lastDarkTheme")) {
@@ -4281,7 +4302,8 @@ public class Theme {
             throw new RuntimeException(e);
         }
         if (applyingTheme == null) {
-            applyingTheme = defaultTheme;
+            // OtherGram: Vanilla Beige is the day theme until the user picks another one
+            applyingTheme = currentDayTheme = themesDict.get(OtherGramThemes.VANILLA_BEIGE);
         } else {
             currentDayTheme = applyingTheme;
         }
