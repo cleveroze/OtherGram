@@ -314,8 +314,17 @@ Telegram API не умеет хранить произвольные данны�
 
 - 2026-10-17: репозиторий клонирован в `C:\Users\FunkyUser\OtherGram`
   (shallow clone, `--depth 1`, сабмодули тоже shallow).
-- 2026-10-17: сохранено ТЗ (`OTHERGRAM_SPEC.md`), написан код этапа 1.
-  **Код не скомпилирован**: на машине нет JDK, Android SDK и NDK.
+- 2026-10-17: сохранено ТЗ (`OTHERGRAM_SPEC.md`), написан код этапов 1–3.
+- 2026-10-18: первая успешная сборка debug APK, этапы 1–3 компилируются.
+  Иконка из логотипа владельца (`Tools/othergram/generate-icons.ps1`), название OtherGram.
+  На устройстве ещё не проверено.
+
+### Как собирать
+- Android Studio 2026.2, Gradle JDK 21 (`.gradle/config.properties`), SDK 36, NDK 27.2.12479018, CMake 3.22.1.
+- В репозитории нет `gradlew.bat`, запуск через Git Bash:
+  `JAVA_HOME=~/.jdks/jbr-21.0.11 ./gradlew :TMessagesProj_App:assembleAfatDebug -Pandroid.injected.build.abi=arm64-v8a`
+  (параметр ABI собирает нативную часть только под arm64; первая сборка ~50 мин, повторные 1–2 мин).
+- APK: `TMessagesProj_App/build/intermediates/apk/afat/debug/app.apk`, пакет `org.telegram.messenger.beta`.
 
 ## Следующие задачи
 
