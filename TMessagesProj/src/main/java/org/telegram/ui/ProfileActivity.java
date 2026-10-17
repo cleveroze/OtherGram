@@ -167,6 +167,8 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.othergram.badges.OtherGramBadges;
+import org.telegram.othergram.banners.OtherGramBannerDrawer;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
@@ -1217,6 +1219,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         private int currentColor;
         private Paint paint = new Paint();
+        private final OtherGramBannerDrawer ogBanner = new OtherGramBannerDrawer(this); // OtherGram
 
         public TopView(Context context) {
             super(context);
@@ -1289,12 +1292,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
             emoji.attach();
+            ogBanner.onAttachedToWindow(); // OtherGram
         }
 
         @Override
         protected void onDetachedFromWindow() {
             super.onDetachedFromWindow();
             emoji.detach();
+            ogBanner.onDetachedFromWindow(); // OtherGram
         }
 
         public final AnimatedFloat emojiLoadedT = new AnimatedFloat(this, 0, 440, CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -1379,6 +1384,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         canvas.restore();
                     }
                 }
+                ogBanner.draw(canvas, userId, getMeasuredWidth(), y1, hasColorById ? color1Animated.get() : currentColor); // OtherGram: profile banner
                 if (previousTransitionFragment != null) {
                     ActionBar actionBar = previousTransitionFragment.getActionBar();
                     ActionBarMenu menu = actionBar.menu;
@@ -11407,6 +11413,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 newString = Emoji.replaceEmoji(newString, nameTextView[1].getPaint().getFontMetricsInt(), false);
             } catch (Exception ignore) {
             }
+            newString = OtherGramBadges.appendBadges(newString, user.id); // OtherGram
+            final long ogBadgesUserId = user.id;
             if (copyFromChatActivity) {
                 ChatActivity chatActivity = (ChatActivity) prevFragment;
                 BackupImageView fromAvatarImage = chatActivity.avatarContainer.getAvatarImageView();
@@ -11427,6 +11435,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     nameTextView[a].setText(PhoneFormat.getInstance().format("+" + user.phone));
                 } else {
                     nameTextView[a].setText(newString);
+                }
+                if (a == 1) { // OtherGram: tapping the name explains the badges
+                    if (OtherGramBadges.hasBadges(ogBadgesUserId)) {
+                        nameTextView[a].setOnClickListener(v -> OtherGramBadges.showInfo(ProfileActivity.this, ogBadgesUserId));
+                    } else {
+                        nameTextView[a].setOnClickListener(null);
+                        nameTextView[a].setClickable(false);
+                    }
                 }
                 if (a == 0 && onlineTextOverride != null) {
                     onlineTextView[a].setText(onlineTextOverride);

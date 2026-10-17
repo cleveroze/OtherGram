@@ -86,6 +86,8 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.utils.DrawableUtils;
+import org.telegram.othergram.badges.OtherGramBadgeSpan;
+import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -2391,6 +2393,11 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 nameString = ((String) nameString).replace('\n', ' ');
             }
             CharSequence nameStringFinal = nameString;
+            // OtherGram: badges go after the name and are kept out of the ellipsized part
+            final OtherGramBadgeSpan ogBadges = user != null && chat == null && !isTopic && !UserObject.isUserSelf(user) ? OtherGramBadges.span(user.id) : null;
+            if (ogBadges != null) {
+                ellipsizeWidth = Math.max(0, ellipsizeWidth - ogBadges.getWidth(Theme.dialogs_namePaint[paintIndex]));
+            }
             if (nameLayoutEllipsizeByGradient) {
                 nameLayoutFits = nameStringFinal.length() == TextUtils.ellipsize(nameStringFinal, Theme.dialogs_namePaint[paintIndex], ellipsizeWidth, TextUtils.TruncateAt.END).length();
                 ellipsizeWidth += dp(48);
@@ -2409,6 +2416,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     nameStringFinal = s;
                 }
             }
+            nameStringFinal = OtherGramBadges.append(nameStringFinal, ogBadges); // OtherGram
             if (twoLinesForName) {
                 nameLayout = StaticLayoutEx.createStaticLayout(nameStringFinal, Theme.dialogs_namePaint[paintIndex], ellipsizeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false, TextUtils.TruncateAt.END, ellipsizeWidth, 2);
             } else {

@@ -7,10 +7,15 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.othergram.badges.OtherGramBadges;
+import org.telegram.othergram.network.OtherGramApi;
+import org.telegram.othergram.network.OtherGramAuth;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
@@ -32,8 +37,21 @@ public class OtherGramSettingsActivity extends BaseFragment {
     private static final int ID_PROFILE = 6;
     private static final int ID_EXPORT_IMPORT = 7;
     private static final int ID_RESET = 8;
+    private static final int ID_ACCOUNT = 9;
+    private static final int ID_ADMIN = 10;
 
     private UniversalRecyclerView listView;
+    private boolean connecting;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        OtherGramApi.refreshMe(() -> {
+            if (listView != null) {
+                listView.adapter.update(true);
+            }
+        });
+    }
 
     @Override
     public View createView(Context context) {
@@ -61,6 +79,21 @@ public class OtherGramSettingsActivity extends BaseFragment {
     }
 
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
+        items.add(UItem.asHeader(getString(R.string.OG_SectionAccount)));
+        if (!OtherGramApi.isConfigured()) {
+            items.add(UItem.asButton(ID_ACCOUNT, R.drawable.msg_openprofile, getString(R.string.OG_AccountNoServer)).setEnabled(false));
+        } else if (connecting) {
+            items.add(UItem.asButton(ID_ACCOUNT, R.drawable.msg_openprofile, getString(R.string.OG_AccountConnecting)).setEnabled(false));
+        } else if (OtherGramApi.isLoggedIn()) {
+            items.add(UItem.asButton(ID_ACCOUNT, R.drawable.msg_openprofile, getString(R.string.OG_AccountDisconnect), getString(R.string.OG_AccountConnected)));
+        } else {
+            items.add(UItem.asButton(ID_ACCOUNT, R.drawable.msg_openprofile, getString(R.string.OG_AccountConnect)).accent());
+        }
+        if (OtherGramApi.isLoggedIn() && OtherGramApi.isAdmin()) {
+            items.add(UItem.asButton(ID_ADMIN, R.drawable.msg_admins, getString(R.string.OG_AdminPanel)));
+        }
+        items.add(UItem.asShadow(getString(R.string.OG_AccountInfo)));
+
         items.add(UItem.asHeader(getString(R.string.OG_SectionCustomization)));
         items.add(section(ID_APPEARANCE, R.drawable.msg_palette, R.string.OG_Appearance));
         items.add(section(ID_AVATARS, R.drawable.msg_contacts, R.string.OG_Avatars));
@@ -84,6 +117,28 @@ public class OtherGramSettingsActivity extends BaseFragment {
     }
 
     private void onItemClick(UItem item, View view, int position, float x, float y) {
-        // Sections open their screens here as they are implemented; all of them are disabled for now.
+        if (item.id == ID_ACCOUNT) {
+            if (OtherGramApi.isLoggedIn()) {
+                OtherGramApi.logout();
+                listView.adapter.update(true);
+            } else {
+                connecting = true;
+                listView.adapter.update(true);
+                OtherGramAuth.login(currentAccount, (success, error) -> {
+                    connecting = false;
+                    if (listView != null) {
+                        listView.adapter.update(true);
+                    }
+                    if (success) {
+                        OtherGramBadges.invalidate(getUserConfig().getClientUserId());
+                    } else {
+                        BulletinFactory.of(this).createErrorBulletin(LocaleController.formatString(R.string.OG_AccountFailed, error)).show();
+                    }
+                });
+            }
+        } else if (item.id == ID_ADMIN) {
+            presentFragment(new OtherGramAdminActivity());
+        }
+        // Customization sections open their screens here as they are implemented.
     }
 }

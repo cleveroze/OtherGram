@@ -200,6 +200,7 @@ import org.telegram.messenger.utils.ViewOutlineProviderImpl;
 import org.telegram.messenger.utils.tlutils.TLKeyboardHelper;
 import org.telegram.messenger.utils.tlutils.TlUtils;
 import org.telegram.messenger.voip.VoIPService;
+import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -19572,7 +19573,7 @@ public class ChatActivity extends BaseFragment implements
                     }
                 } else if (threadMessageId > 0) {
                     final TLRPC.User user = getMessagesController().getUser(threadMessageId);
-                    avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user))), user.scam, user.fake, user.verified, user.premium, user.emoji_status, animated);
+                    avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user))), user.id), user.scam, user.fake, user.verified, user.premium, user.emoji_status, animated); // OtherGram: badges
                 } else {
                     TLRPC.Chat chat = getMessagesController().getChat(-threadMessageId);
                     if (chat == null) chat = currentChat;
