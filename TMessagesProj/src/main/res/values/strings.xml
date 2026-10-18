@@ -11636,4 +11636,20 @@
     <string name="OG_ProfileColorsInfo">Visible only in OtherGram. In official Telegram your profile looks as usual.</string>
     <string name="OG_ProfileReset">Reset profile customization</string>
     <string name="OG_ProfilePreviewBio">This is how your profile looks</string>
+    <string name="OG_Fonts">Fonts</string>
+    <string name="OG_FontHeadings">Headings and names</string>
+    <string name="OG_FontMessages">Messages</string>
+    <string name="OG_FontInterface">Interface text</string>
+    <string name="OG_FontsInfo">Fonts apply after restarting the app. Bundled fonts are distributed under the SIL Open Font License.</string>
+    <string name="OG_TextSize">Text size</string>
+    <string name="OG_TextSizeInfo">Message text size is set in the Telegram chat settings.</string>
+    <string name="OG_RestartNow">Restart the app now</string>
+    <string name="OG_FontSystem">System</string>
+    <string name="OG_FontManrope">Manrope</string>
+    <string name="OG_FontNunito">Nunito</string>
+    <string name="OG_FontComfortaa">Comfortaa</string>
+    <string name="OG_FontLora">Lora</string>
+    <string name="OG_FontPreviewHeading">OtherGram</string>
+    <string name="OG_FontPreviewMessage">See you at seven by the old cafe?</string>
+    <string name="OG_FontPreviewInterface">Last seen recently</string>
 </resources>

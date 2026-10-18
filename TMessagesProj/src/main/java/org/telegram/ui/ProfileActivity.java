@@ -169,6 +169,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.othergram.banners.OtherGramBannerDrawer;
+import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
@@ -11436,7 +11437,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } else {
                     nameTextView[a].setText(newString);
                 }
-                if (a == 1) { // OtherGram: tapping the name explains the badges
+                if (a == 1) { // OtherGram: published name color, and tapping the name explains the badges
+                    final OtherGramProfiles.Profile ogProfile = OtherGramProfiles.getProfile(ogBadgesUserId);
+                    if (ogProfile != null && ogProfile.nameColor != null) {
+                        nameTextView[a].setTextColor(ogProfile.nameColor);
+                    }
                     if (OtherGramBadges.hasBadges(ogBadgesUserId)) {
                         nameTextView[a].setOnClickListener(v -> OtherGramBadges.showInfo(ProfileActivity.this, ogBadgesUserId));
                     } else {

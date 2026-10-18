@@ -97,7 +97,7 @@ public class OtherGramSettingsActivity extends BaseFragment {
         items.add(UItem.asHeader(getString(R.string.OG_SectionCustomization)));
         items.add(UItem.asButton(ID_APPEARANCE, R.drawable.msg_palette, getString(R.string.OG_Appearance)));
         items.add(UItem.asButton(ID_AVATARS, R.drawable.msg_contacts, getString(R.string.OG_Avatars)));
-        items.add(section(ID_TYPOGRAPHY, R.drawable.msg_text_outlined, R.string.OG_Typography));
+        items.add(UItem.asButton(ID_TYPOGRAPHY, R.drawable.msg_text_outlined, getString(R.string.OG_Typography)));
         items.add(section(ID_CHATS, R.drawable.msg_msgbubble3, R.string.OG_Chats));
         items.add(section(ID_NAVIGATION, R.drawable.msg_list, R.string.OG_Navigation));
         items.add(UItem.asShadow(null));
@@ -144,6 +144,8 @@ public class OtherGramSettingsActivity extends BaseFragment {
             presentFragment(new OtherGramAvatarsActivity());
         } else if (item.id == ID_PROFILE) {
             presentFragment(new OtherGramProfileActivity());
+        } else if (item.id == ID_TYPOGRAPHY) {
+            presentFragment(new OtherGramTypographyActivity());
         }
         // Customization sections open their screens here as they are implemented.
     }

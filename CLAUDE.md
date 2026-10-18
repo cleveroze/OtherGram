@@ -325,6 +325,14 @@ Telegram API не умеет хранить произвольные данны�
 - 2026-10-18: бейджи, баннеры, аккаунт OtherGram и админ-панель в приложении
   (`org.telegram.othergram.{badges,banners,network,settings}`). Сервер выложен.
 
+- 2026-10-18 (0.3.0): цвета интерфейса (14 групп, палитры, светлая/тёмная отдельно —
+  `OtherGramColors`, хук в `Theme.refreshThemeColors`), формы аватарок (круг, сквиркл, скруглённый
+  квадрат, квадрат — `OtherGramAvatars`, хуки в `ImageReceiver.setRoundRadius/setForUserOrChat` и
+  `AvatarDrawable`), кастомизация профиля с загрузкой баннера (`OtherGramProfileActivity`), шрифты
+  (`OtherGramFonts`, OFL-шрифты в `assets/fonts/othergram`, хуки в `AndroidUtilities.bold()` и
+  `Theme` paints), исправлены иконки нижней панели (генератор тем не пишет ключи с fallback).
+  Ещё не сделано: шестиугольник/восьмиугольник аватарок, Chats, Navigation, экспорт/импорт, поиск.
+
 ### Сервер (OtherGram Backend)
 - Код: `C:\Users\FunkyUser\OtherGram-Backend` (отдельный локальный git, на GitHub не выложен).
 - Адрес: https://othergram-backend.othergram.workers.dev (`OtherGramApi.BASE_URL`).

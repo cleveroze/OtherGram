@@ -364,4 +364,20 @@
     <string name="OG_ProfileColorsInfo">Видно только в OtherGram. В официальном Telegram ваш профиль выглядит как обычно.</string>
     <string name="OG_ProfileReset">Сбросить кастомизацию профиля</string>
     <string name="OG_ProfilePreviewBio">Так выглядит ваш профиль</string>
+    <string name="OG_Fonts">Шрифты</string>
+    <string name="OG_FontHeadings">Заголовки и имена</string>
+    <string name="OG_FontMessages">Сообщения</string>
+    <string name="OG_FontInterface">Текст интерфейса</string>
+    <string name="OG_FontsInfo">Шрифты применяются после перезапуска приложения. Встроенные шрифты распространяются по лицензии SIL Open Font License.</string>
+    <string name="OG_TextSize">Размер текста</string>
+    <string name="OG_TextSizeInfo">Размер текста сообщений настраивается в настройках чатов Telegram.</string>
+    <string name="OG_RestartNow">Перезапустить приложение</string>
+    <string name="OG_FontSystem">Системный</string>
+    <string name="OG_FontManrope">Manrope</string>
+    <string name="OG_FontNunito">Nunito</string>
+    <string name="OG_FontComfortaa">Comfortaa</string>
+    <string name="OG_FontLora">Lora</string>
+    <string name="OG_FontPreviewHeading">OtherGram</string>
+    <string name="OG_FontPreviewMessage">Встретимся в семь у старого кафе?</string>
+    <string name="OG_FontPreviewInterface">Был(а) недавно</string>
 </resources>
