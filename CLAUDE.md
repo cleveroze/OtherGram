@@ -332,6 +332,11 @@ Telegram API не умеет хранить произвольные данны�
 - Секреты Worker: `BOT_TOKEN`, `WEBHOOK_SECRET`, `ADMIN_IDS` (milvet 766926193, velvet71 5182531383).
 - Токены на этой машине лежат в переменных окружения пользователя Windows:
   `CLOUDFLARE_API_TOKEN`, `OTHERGRAM_BOT_TOKEN`, `OTHERGRAM_WEBHOOK_SECRET`. Никогда не выводить и не коммитить.
+- Секреты загружать **только** через `npx wrangler secret bulk <file.json>` (временный файл, удалить после).
+  Конвейер `"значение" | wrangler secret put` в PowerShell добавляет перевод строки — 2026-10-18 из-за этого
+  вебхук бота отвечал 403 и вход в OtherGram не работал.
+- Вход: бот присылает в чат пользователя `OtherGram code: NNNNNNNN`, приложение читает его через
+  `messages.getHistory` и отправляет в `/v1/auth/finish` (защита от фишинговых deep link). Формат строки не менять.
 - Деплой: в PowerShell взять токен из `[Environment]::GetEnvironmentVariable('CLOUDFLARE_API_TOKEN','User')`,
   `CLOUDFLARE_ACCOUNT_ID=1548ae809daddbccf8cc3111ef3e560f`, затем `npx wrangler deploy`
   (Node: `C:\Program Files\nodejs`, может не быть в PATH старых терминалов).
