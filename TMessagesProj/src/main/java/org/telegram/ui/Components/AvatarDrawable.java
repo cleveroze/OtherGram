@@ -36,6 +36,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.othergram.theme.OtherGramAvatars;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
@@ -591,6 +592,10 @@ public class AvatarDrawable extends Drawable {
             if (roundRadius > 0) {
                 AndroidUtilities.rectTmp.set(0, 0, size, size);
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, roundRadius, roundRadius, backgroundPaint);
+            } else if (!OtherGramAvatars.isCircle()) { // OtherGram: chosen avatar shape
+                final float r = size / 2.0f * OtherGramAvatars.radiusFactor();
+                AndroidUtilities.rectTmp.set(0, 0, size, size);
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, backgroundPaint);
             } else {
                 canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f, backgroundPaint);
             }

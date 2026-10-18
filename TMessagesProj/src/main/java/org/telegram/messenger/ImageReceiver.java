@@ -35,6 +35,7 @@ import androidx.annotation.Keep;
 
 
 
+import org.telegram.othergram.theme.OtherGramAvatars;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -427,6 +428,12 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     public void setForUserOrChat(TLObject object, Drawable avatarDrawable, Object parentObject, boolean animationEnabled, int vectorType, boolean big) {
         if (parentObject == null) {
             parentObject = object;
+        }
+        // OtherGram: users and regular groups follow the chosen avatar shape, forums keep their own
+        final boolean ogWasAvatar = ogAvatar;
+        ogAvatar = object instanceof TLRPC.User || object instanceof TLRPC.Chat && !((TLRPC.Chat) object).forum;
+        if (ogAvatar != ogWasAvatar || ogAvatar) {
+            setRoundRadius(ogRequestedRadius.clone());
         }
         setUseRoundForThumbDrawable(true);
         BitmapDrawable strippedBitmap = null;
@@ -2543,7 +2550,15 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         setRoundRadius(new int[]{tl, tr, br, bl});
     }
 
+    // OtherGram: callers' radius is kept so the avatar shape can be applied on top of it at any time
+    private final int[] ogRequestedRadius = new int[4];
+    private boolean ogAvatar;
+
     public void setRoundRadius(int[] value) {
+        System.arraycopy(value, 0, ogRequestedRadius, 0, 4);
+        if (ogAvatar && !OtherGramAvatars.isCircle()) {
+            value = new int[]{OtherGramAvatars.adjust(value[0]), OtherGramAvatars.adjust(value[1]), OtherGramAvatars.adjust(value[2]), OtherGramAvatars.adjust(value[3])};
+        }
         boolean changed = false;
         int firstValue = value[0];
         isRoundRect = true;

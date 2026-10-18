@@ -63,6 +63,19 @@ public class OtherGramProfiles {
         }
     }
 
+    /** Applies a /v1/me response (own badges and profile) to the caches so own screens update at once. */
+    public static void applyMe(JSONObject me) {
+        if (me == null || !me.has("user_id")) {
+            return;
+        }
+        try {
+            final JSONObject users = new JSONObject();
+            users.put(String.valueOf(me.optLong("user_id")), me);
+            apply(users);
+        } catch (Exception ignore) {
+        }
+    }
+
     static void apply(JSONObject users) {
         if (users == null) {
             return;

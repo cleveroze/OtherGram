@@ -95,15 +95,15 @@ public class OtherGramSettingsActivity extends BaseFragment {
         items.add(UItem.asShadow(getString(R.string.OG_AccountInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionCustomization)));
-        items.add(section(ID_APPEARANCE, R.drawable.msg_palette, R.string.OG_Appearance));
-        items.add(section(ID_AVATARS, R.drawable.msg_contacts, R.string.OG_Avatars));
+        items.add(UItem.asButton(ID_APPEARANCE, R.drawable.msg_palette, getString(R.string.OG_Appearance)));
+        items.add(UItem.asButton(ID_AVATARS, R.drawable.msg_contacts, getString(R.string.OG_Avatars)));
         items.add(section(ID_TYPOGRAPHY, R.drawable.msg_text_outlined, R.string.OG_Typography));
         items.add(section(ID_CHATS, R.drawable.msg_msgbubble3, R.string.OG_Chats));
         items.add(section(ID_NAVIGATION, R.drawable.msg_list, R.string.OG_Navigation));
         items.add(UItem.asShadow(null));
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionProfile)));
-        items.add(section(ID_PROFILE, R.drawable.msg_openprofile, R.string.OG_ProfileCustomization));
+        items.add(UItem.asButton(ID_PROFILE, R.drawable.msg_openprofile, getString(R.string.OG_ProfileCustomization)));
         items.add(UItem.asShadow(null));
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionData)));
@@ -138,6 +138,12 @@ public class OtherGramSettingsActivity extends BaseFragment {
             }
         } else if (item.id == ID_ADMIN) {
             presentFragment(new OtherGramAdminActivity());
+        } else if (item.id == ID_APPEARANCE) {
+            presentFragment(new OtherGramAppearanceActivity());
+        } else if (item.id == ID_AVATARS) {
+            presentFragment(new OtherGramAvatarsActivity());
+        } else if (item.id == ID_PROFILE) {
+            presentFragment(new OtherGramProfileActivity());
         }
         // Customization sections open their screens here as they are implemented.
     }

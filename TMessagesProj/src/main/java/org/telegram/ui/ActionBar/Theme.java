@@ -95,6 +95,7 @@ import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.time.SunDate;
+import org.telegram.othergram.theme.OtherGramColors;
 import org.telegram.othergram.theme.OtherGramThemes;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
@@ -6103,6 +6104,7 @@ public class Theme {
         }
         applyCalculatedTableColors(currentColorsNoAccent, currentColors, currentTheme.isDark());
         applyCalculatedArticleCodeColors(currentColorsNoAccent, currentColors, currentTheme.isDark());
+        OtherGramColors.apply(currentColors, currentTheme.isDark()); // OtherGram: user color overrides
         if (!messages) {
             boolean async = !(LaunchActivity.getLastFragment() instanceof ChatActivity);
             reloadWallpaper(async);

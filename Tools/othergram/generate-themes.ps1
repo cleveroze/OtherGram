@@ -86,6 +86,13 @@ function Read-ThemeColors {
         if (-not $names.ContainsKey($m.Groups[1].Value)) { continue }
         $colors[$names[$m.Groups[1].Value]] = [uint32]$v
     }
+    # Keys with a fallback in Theme.java (e.g. glass_tabUnselected -> windowBackgroundWhiteBlackText) must stay
+    # out of the theme unless the base theme sets them: writing their light defaults disables the fallback and
+    # made the bottom tab icons dark-on-dark in the dark theme.
+    $themeSrc = Get-Content (Join-Path (Split-Path $themeColors) 'Theme.java') -Raw
+    foreach ($m in [regex]::Matches($themeSrc, 'fallbackKeys\.put\((key_\w+),')) {
+        if ($names.ContainsKey($m.Groups[1].Value)) { $colors.Remove($names[$m.Groups[1].Value]) }
+    }
     $colors
 }
 
