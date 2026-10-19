@@ -113,7 +113,7 @@ public class OtherGramProfiles {
         for (int i = 0; i < array.length(); i++) {
             final JSONObject b = array.optJSONObject(i);
             if (b != null) {
-                list.add(new OtherGramBadge(b.optString("id"), b.optString("title"), b.optString("description"), b.optInt("color"), b.optString("icon", OtherGramBadge.ICON_CHECK)));
+                list.add(new OtherGramBadge(b.optString("id"), b.optString("title"), b.optString("label"), b.optString("description"), b.optInt("color"), b.optString("icon", OtherGramBadge.ICON_CHECK)));
             }
         }
         return list;

@@ -39,6 +39,7 @@ public class OtherGramSettingsActivity extends BaseFragment {
     private static final int ID_RESET = 8;
     private static final int ID_ACCOUNT = 9;
     private static final int ID_ADMIN = 10;
+    private static final int ID_PRIVACY = 11;
 
     private UniversalRecyclerView listView;
     private boolean connecting;
@@ -102,6 +103,10 @@ public class OtherGramSettingsActivity extends BaseFragment {
         items.add(section(ID_NAVIGATION, R.drawable.msg_list, R.string.OG_Navigation));
         items.add(UItem.asShadow(null));
 
+        items.add(UItem.asHeader(getString(R.string.OG_Privacy)));
+        items.add(UItem.asButton(ID_PRIVACY, R.drawable.msg_secret, getString(R.string.OG_PrivacyEntry)));
+        items.add(UItem.asShadow(null));
+
         items.add(UItem.asHeader(getString(R.string.OG_SectionProfile)));
         items.add(UItem.asButton(ID_PROFILE, R.drawable.msg_openprofile, getString(R.string.OG_ProfileCustomization)));
         items.add(UItem.asShadow(null));
@@ -146,6 +151,8 @@ public class OtherGramSettingsActivity extends BaseFragment {
             presentFragment(new OtherGramProfileActivity());
         } else if (item.id == ID_TYPOGRAPHY) {
             presentFragment(new OtherGramTypographyActivity());
+        } else if (item.id == ID_PRIVACY) {
+            presentFragment(new OtherGramPrivacyActivity());
         }
         // Customization sections open their screens here as they are implemented.
     }

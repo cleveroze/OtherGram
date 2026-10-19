@@ -2394,7 +2394,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
             CharSequence nameStringFinal = nameString;
             // OtherGram: badges go after the name and are kept out of the ellipsized part
-            final OtherGramBadgeSpan ogBadges = user != null && chat == null && !isTopic && !UserObject.isUserSelf(user) ? OtherGramBadges.span(user.id) : null;
+            final OtherGramBadgeSpan ogBadges = user != null && chat == null && !isTopic && !UserObject.isUserSelf(user) ? OtherGramBadges.span(user.id, true) : null;
             if (ogBadges != null) {
                 ellipsizeWidth = Math.max(0, ellipsizeWidth - ogBadges.getWidth(Theme.dialogs_namePaint[paintIndex]));
             }

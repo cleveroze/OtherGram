@@ -96,7 +96,7 @@ public class OtherGramAdminActivity extends BaseFragment {
 
     private void onItemClick(UItem item, View view, int position, float x, float y) {
         if (item.id == ID_GRANT) {
-            askUser(user -> pickBadgeType(type -> grant(user, type)));
+            askUser(user -> pickBadgeType(type -> askLabel(type.optString("title"), label -> grant(user, type, label))));
         } else if (item.id == ID_USER_BADGES) {
             askUser(this::showUserBadges);
         } else if (item.id == ID_CREATE_TYPE) {
@@ -128,10 +128,11 @@ public class OtherGramAdminActivity extends BaseFragment {
         }
     }
 
-    private void grant(TLRPC.User user, JSONObject type) {
+    private void grant(TLRPC.User user, JSONObject type, String label) {
         final JSONObject body = new JSONObject();
         try {
             body.put("badge_id", type.optString("id"));
+            body.put("label", label);
         } catch (Exception ignore) {
         }
         OtherGramApi.sendJson("POST", "/v1/admin/users/" + user.id + "/badges", body, (status, response) -> {
@@ -156,13 +157,46 @@ public class OtherGramAdminActivity extends BaseFragment {
             }
             final CharSequence[] titles = new CharSequence[count];
             for (int i = 0; i < count; i++) {
-                titles[i] = badgeTitle(granted.optJSONObject(i).optString("badge_id"));
+                final JSONObject g = granted.optJSONObject(i);
+                final String typeTitle = badgeTitle(g.optString("badge_id"));
+                final String label = g.isNull("label") ? null : g.optString("label");
+                titles[i] = TextUtils.isEmpty(label) || label.equals(typeTitle) ? typeTitle : label + " (" + typeTitle + ")";
             }
             new AlertDialog.Builder(getParentActivity(), resourceProvider)
-                    .setTitle(LocaleController.formatString(R.string.OG_AdminRevokeTitle, UserObject.getUserName(user)))
-                    .setItems(titles, (dialog, which) -> revoke(user, granted.optJSONObject(which).optString("badge_id")))
+                    .setTitle(LocaleController.formatString(R.string.OG_AdminUserBadgesTitle, UserObject.getUserName(user)))
+                    .setItems(titles, (dialog, which) -> badgeActions(user, granted.optJSONObject(which), titles[which]))
                     .setNegativeButton(getString(R.string.Cancel), null)
                     .show();
+        });
+    }
+
+    private void badgeActions(TLRPC.User user, JSONObject granted, CharSequence title) {
+        final String badgeId = granted.optString("badge_id");
+        final String currentLabel = granted.isNull("label") ? badgeTitle(badgeId) : granted.optString("label");
+        new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                .setTitle(title)
+                .setItems(new CharSequence[]{getString(R.string.OG_AdminEditLabel), getString(R.string.OG_AdminRevoke)}, (dialog, which) -> {
+                    if (which == 0) {
+                        askLabel(currentLabel, label -> setLabel(user, badgeId, label));
+                    } else {
+                        revoke(user, badgeId);
+                    }
+                })
+                .setNegativeButton(getString(R.string.Cancel), null)
+                .show();
+    }
+
+    private void setLabel(TLRPC.User user, String badgeId, String label) {
+        final JSONObject body = new JSONObject();
+        try {
+            body.put("label", label);
+        } catch (Exception ignore) {
+        }
+        OtherGramApi.sendJson("PUT", "/v1/admin/users/" + user.id + "/badges/" + badgeId + "/label", body, (status, response) -> {
+            if (checkOk(status, response)) {
+                OtherGramBadges.invalidate(user.id);
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.contact_check, getString(R.string.OG_AdminLabelSaved)).show();
+            }
         });
     }
 
@@ -234,6 +268,29 @@ public class OtherGramAdminActivity extends BaseFragment {
 
     private interface TypeCallback {
         void onType(JSONObject type);
+    }
+
+    private interface LabelCallback {
+        void onLabel(String label);
+    }
+
+    /** Caption for the badge pill; empty falls back to the badge type title on the server. */
+    private void askLabel(String initial, LabelCallback callback) {
+        final Context context = getParentActivity();
+        if (context == null) {
+            return;
+        }
+        final EditTextBoldCursor input = createInput(context, getString(R.string.OG_AdminLabelHint), initial, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(24)});
+        final FrameLayout container = new FrameLayout(context);
+        container.addView(input, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.TOP, 24, 8, 24, 8));
+        new AlertDialog.Builder(context, resourceProvider)
+                .setTitle(getString(R.string.OG_AdminLabel))
+                .setMessage(getString(R.string.OG_AdminLabelInfo))
+                .setView(container)
+                .setPositiveButton(getString(R.string.OK), (dialog, which) -> callback.onLabel(input.getText().toString().trim()))
+                .setNegativeButton(getString(R.string.Cancel), null)
+                .show();
     }
 
     private EditTextBoldCursor createInput(Context context, String hint, String value, int inputType) {

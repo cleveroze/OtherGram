@@ -380,4 +380,24 @@
     <string name="OG_FontPreviewHeading">OtherGram</string>
     <string name="OG_FontPreviewMessage">Встретимся в семь у старого кафе?</string>
     <string name="OG_FontPreviewInterface">Был(а) недавно</string>
+    <string name="OG_AdminUserBadgesTitle">Бейджи: %1$s</string>
+    <string name="OG_AdminEditLabel">Изменить подпись</string>
+    <string name="OG_AdminRevoke">Отозвать бейдж</string>
+    <string name="OG_AdminLabelSaved">Подпись сохранена</string>
+    <string name="OG_AdminLabel">Подпись бейджа</string>
+    <string name="OG_AdminLabelHint">Например, Основатель</string>
+    <string name="OG_AdminLabelInfo">Показывается в плашке рядом с именем, до 24 символов. Оставьте пустым, чтобы было название типа бейджа.</string>
+    <string name="OG_Privacy">Приватность</string>
+    <string name="OG_PrivacyEntry">Режим призрака и удалённые сообщения</string>
+    <string name="OG_GhostMode">Режим призрака</string>
+    <string name="OG_GhostNoRead">Не отправлять «прочитано»</string>
+    <string name="OG_GhostNoTyping">Не отправлять «печатает…»</string>
+    <string name="OG_GhostNoOnline">Не показывать «в сети»</string>
+    <string name="OG_GhostInfo">На этом телефоне сообщения всё равно отмечаются прочитанными, просто собеседник этого не видит. Если вы ответите на сообщение, для собеседника чат обычно отметится прочитанным.</string>
+    <string name="OG_DeletedMessages">Удалённые сообщения</string>
+    <string name="OG_KeepDeleted">Сохранять сообщения, удалённые собеседником</string>
+    <string name="OG_ClearDeletedMarks">Сбросить пометки «удалено»</string>
+    <string name="OG_KeepDeletedInfo">Сообщения, которые кто-то удалил, останутся на этом телефоне с пометкой «удалено» рядом со временем. Работает только для уже полученных сообщений, ничего никуда не отправляется. Учтите, что отправитель рассчитывает, что сообщение исчезло.</string>
+    <string name="OG_DeletedMarksCleared">Пометки сброшены</string>
+    <string name="OG_DeletedMark">удалено</string>
 </resources>

@@ -2,36 +2,82 @@ package org.telegram.othergram.badges;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.text.TextPaint;
 import android.text.style.ReplacementSpan;
+
+import androidx.core.graphics.ColorUtils;
+
+import org.telegram.messenger.AndroidUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Draws a user's badges inline right after the name, sized to the surrounding text.
+ * Draws a user's badges after the name as rounded pills: badge color fill, a white check and the
+ * badge caption. Sized from the surrounding text; the compact form (chat list) shows one pill with
+ * a shortened caption.
  */
 public class OtherGramBadgeSpan extends ReplacementSpan {
 
-    private static final float SIZE_TO_TEXT = 0.95f;
-    private static final float GAP_TO_SIZE = 0.18f;
-    private static final float LEADING_TO_SIZE = 0.28f;
+    private static final float PILL_HEIGHT_TO_TEXT = 0.92f;
+    private static final float CAPTION_TO_TEXT = 0.6f;
+    private static final float LEADING_TO_HEIGHT = 0.3f;
+    private static final float GAP_TO_HEIGHT = 0.2f;
+    private static final int COMPACT_MAX_CHARS = 14;
 
-    private final List<OtherGramBadgeDrawable> drawables = new ArrayList<>();
+    private final List<OtherGramBadge> badges = new ArrayList<>();
+    private final List<String> captions = new ArrayList<>();
+    private final TextPaint captionPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path checkPath = new Path();
+    private final RectF rect = new RectF();
 
-    public OtherGramBadgeSpan(List<OtherGramBadge> badges) {
+    public OtherGramBadgeSpan(List<OtherGramBadge> badges, boolean compact) {
         for (OtherGramBadge badge : badges) {
-            drawables.add(new OtherGramBadgeDrawable(badge.color));
+            this.badges.add(badge);
+            String caption = badge.label;
+            if (compact && caption.length() > COMPACT_MAX_CHARS) {
+                caption = caption.substring(0, COMPACT_MAX_CHARS - 1).trim() + "…";
+            }
+            captions.add(caption);
+            if (compact) {
+                break;
+            }
         }
+        captionPaint.setTypeface(AndroidUtilities.bold());
+        captionPaint.setColor(0xFFFFF7ED);
+        checkPaint.setStyle(Paint.Style.STROKE);
+        checkPaint.setColor(0xFFFFFFFF);
+        checkPaint.setStrokeCap(Paint.Cap.ROUND);
+        checkPaint.setStrokeJoin(Paint.Join.ROUND);
     }
 
-    private static float badgeSize(Paint paint) {
-        return paint.getTextSize() * SIZE_TO_TEXT;
+    private float pillHeight(Paint paint) {
+        return paint.getTextSize() * PILL_HEIGHT_TO_TEXT;
+    }
+
+    private float pillWidth(int index, float height) {
+        final float pad = height * 0.42f;
+        final float check = height * 0.5f;
+        final float gap = height * 0.22f;
+        return pad + check + gap + captionPaint.measureText(captions.get(index)) + pad;
+    }
+
+    private void prepare(Paint paint) {
+        captionPaint.setTextSize(paint.getTextSize() * CAPTION_TO_TEXT);
     }
 
     public int getWidth(Paint paint) {
-        final float size = badgeSize(paint);
-        final int n = drawables.size();
-        return (int) Math.ceil(size * LEADING_TO_SIZE + n * size + Math.max(0, n - 1) * size * GAP_TO_SIZE);
+        prepare(paint);
+        final float h = pillHeight(paint);
+        float w = h * LEADING_TO_HEIGHT;
+        for (int i = 0; i < captions.size(); i++) {
+            w += pillWidth(i, h) + (i > 0 ? h * GAP_TO_HEIGHT : 0);
+        }
+        return (int) Math.ceil(w);
     }
 
     @Override
@@ -44,15 +90,37 @@ public class OtherGramBadgeSpan extends ReplacementSpan {
 
     @Override
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        final float size = badgeSize(paint);
+        prepare(paint);
+        final float h = pillHeight(paint);
         final Paint.FontMetrics fm = paint.getFontMetrics();
         final float centerY = y + (fm.ascent + fm.descent) / 2f;
-        float left = x + size * LEADING_TO_SIZE;
-        for (OtherGramBadgeDrawable drawable : drawables) {
-            drawable.setBounds((int) left, (int) (centerY - size / 2f), (int) (left + size), (int) (centerY + size / 2f));
-            drawable.setAlpha(paint.getAlpha());
-            drawable.draw(canvas);
-            left += size * (1 + GAP_TO_SIZE);
+        final int alpha = paint.getAlpha();
+        float left = x + h * LEADING_TO_HEIGHT;
+        for (int i = 0; i < captions.size(); i++) {
+            final float w = pillWidth(i, h);
+            rect.set(left, centerY - h / 2f, left + w, centerY + h / 2f);
+            // Slightly deepened badge color keeps the light caption readable on beige badges
+            fillPaint.setColor(ColorUtils.blendARGB(badges.get(i).color | 0xFF000000, 0xFF000000, 0.12f));
+            fillPaint.setAlpha(alpha);
+            canvas.drawRoundRect(rect, h / 2f, h / 2f, fillPaint);
+
+            final float pad = h * 0.42f;
+            final float cs = h * 0.5f;
+            final float cx = left + pad;
+            checkPath.reset();
+            checkPath.moveTo(cx, centerY + cs * 0.02f);
+            checkPath.lineTo(cx + cs * 0.36f, centerY + cs * 0.36f);
+            checkPath.lineTo(cx + cs, centerY - cs * 0.34f);
+            checkPaint.setStrokeWidth(Math.max(1.5f, h * 0.11f));
+            checkPaint.setAlpha(alpha);
+            canvas.drawPath(checkPath, checkPaint);
+
+            captionPaint.setAlpha(alpha);
+            final Paint.FontMetrics cfm = captionPaint.getFontMetrics();
+            final float baseline = centerY - (cfm.ascent + cfm.descent) / 2f;
+            canvas.drawText(captions.get(i), cx + cs + h * 0.22f, baseline, captionPaint);
+
+            left += w + h * GAP_TO_HEIGHT;
         }
     }
 }

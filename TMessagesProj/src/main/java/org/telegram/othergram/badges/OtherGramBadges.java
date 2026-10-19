@@ -117,10 +117,13 @@ public class OtherGramBadges {
         });
     }
 
-    /** Span with the user's badges, or null when the user has none. */
-    public static OtherGramBadgeSpan span(long userId) {
+    /**
+     * Span with the user's badge pills, or null when the user has none.
+     * @param compact one pill with a shortened caption, for tight places like the chat list
+     */
+    public static OtherGramBadgeSpan span(long userId, boolean compact) {
         final List<OtherGramBadge> badges = get(userId);
-        return badges.isEmpty() ? null : new OtherGramBadgeSpan(badges);
+        return badges.isEmpty() ? null : new OtherGramBadgeSpan(badges, compact);
     }
 
     public static CharSequence append(CharSequence text, OtherGramBadgeSpan span) {
@@ -136,7 +139,7 @@ public class OtherGramBadges {
 
     /** Name followed by the user's badges. */
     public static CharSequence appendBadges(CharSequence name, long userId) {
-        return append(name, span(userId));
+        return append(name, span(userId, false));
     }
 
     public static boolean hasBadges(long userId) {
@@ -176,13 +179,15 @@ public class OtherGramBadges {
             title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             title.setTypeface(AndroidUtilities.bold());
             title.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
-            title.setText(badge.title);
+            title.setText(badge.label);
             texts.addView(title);
-            if (!TextUtils.isEmpty(badge.description)) {
+            final String details = badge.label.equals(badge.title) ? badge.description
+                    : TextUtils.isEmpty(badge.description) ? badge.title : badge.title + " · " + badge.description;
+            if (!TextUtils.isEmpty(details)) {
                 final TextView description = new TextView(context);
                 description.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
                 description.setTextColor(Theme.getColor(Theme.key_dialogTextGray3, resourcesProvider));
-                description.setText(badge.description);
+                description.setText(details);
                 texts.addView(description, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 2, 0, 0));
             }
             row.addView(texts, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));

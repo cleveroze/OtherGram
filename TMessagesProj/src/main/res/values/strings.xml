@@ -11652,4 +11652,24 @@
     <string name="OG_FontPreviewHeading">OtherGram</string>
     <string name="OG_FontPreviewMessage">See you at seven by the old cafe?</string>
     <string name="OG_FontPreviewInterface">Last seen recently</string>
+    <string name="OG_AdminUserBadgesTitle">Badges of %1$s</string>
+    <string name="OG_AdminEditLabel">Change caption</string>
+    <string name="OG_AdminRevoke">Revoke badge</string>
+    <string name="OG_AdminLabelSaved">Caption saved</string>
+    <string name="OG_AdminLabel">Badge caption</string>
+    <string name="OG_AdminLabelHint">For example, Founder</string>
+    <string name="OG_AdminLabelInfo">Shown in the badge pill next to the name, up to 24 characters. Leave it empty to use the badge type name.</string>
+    <string name="OG_Privacy">Privacy</string>
+    <string name="OG_PrivacyEntry">Ghost mode and deleted messages</string>
+    <string name="OG_GhostMode">Ghost mode</string>
+    <string name="OG_GhostNoRead">Don\'t send read receipts</string>
+    <string name="OG_GhostNoTyping">Don\'t send \"typing…\"</string>
+    <string name="OG_GhostNoOnline">Don\'t show \"online\"</string>
+    <string name="OG_GhostInfo">Messages are still marked as read on this device, others just don\'t see it. Replying to a message usually marks the chat as read for the other side anyway.</string>
+    <string name="OG_DeletedMessages">Deleted messages</string>
+    <string name="OG_KeepDeleted">Keep messages deleted by others</string>
+    <string name="OG_ClearDeletedMarks">Clear \"deleted\" marks</string>
+    <string name="OG_KeepDeletedInfo">Messages that someone deletes stay on this phone with a \"deleted\" mark next to the time. Works only for messages already received; nothing is sent anywhere. Keep in mind that the sender expects them to be gone.</string>
+    <string name="OG_DeletedMarksCleared">Marks cleared</string>
+    <string name="OG_DeletedMark">deleted</string>
 </resources>
