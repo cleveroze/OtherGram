@@ -11672,4 +11672,26 @@
     <string name="OG_KeepDeletedInfo">Messages that someone deletes stay on this phone with a \"deleted\" mark next to the time. Works only for messages already received; nothing is sent anywhere. Keep in mind that the sender expects them to be gone.</string>
     <string name="OG_DeletedMarksCleared">Marks cleared</string>
     <string name="OG_DeletedMark">deleted</string>
+    <string name="OG_AvatarMaterialStar">Material You star</string>
+    <string name="OG_AvatarStar">Star</string>
+    <string name="OG_AvatarHexagon">Hexagon</string>
+    <string name="OG_AvatarOctagon">Octagon</string>
+    <string name="OG_AvatarRing">Avatar ring</string>
+    <string name="OG_RingStyle">Ring style</string>
+    <string name="OG_RingNone">No ring</string>
+    <string name="OG_RingSolid">Solid</string>
+    <string name="OG_RingGradient">Gradient</string>
+    <string name="OG_RingDashed">Dashed</string>
+    <string name="OG_RingDouble">Double</string>
+    <string name="OG_RingColor">Ring color</string>
+    <string name="OG_RingColor2">Second gradient color</string>
+    <string name="OG_AvatarRingInfo">Other OtherGram users see this ring around your avatar in chats, the chat list and your profile. It follows the avatar shape each person has chosen.</string>
+    <string name="OG_MyFonts">My fonts</string>
+    <string name="OG_ImportFont">Import a font (TTF or OTF)</string>
+    <string name="OG_DeleteFont">Delete an imported font</string>
+    <string name="OG_ImportFontInfo">The file is copied into OtherGram and checked before use, up to 15 MB. Make sure the font license allows using it.</string>
+    <string name="OG_ImportFontFailed">This file is not a font Android can use</string>
+    <string name="OG_ImportFontDone">Font %1$s added</string>
+    <string name="OG_GhostNoStoryViews">Watch stories unseen</string>
+    <string name="OG_UserIdCopied">User ID %1$d copied</string>
 </resources>

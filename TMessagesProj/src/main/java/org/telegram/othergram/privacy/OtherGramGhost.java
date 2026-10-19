@@ -11,6 +11,7 @@ public class OtherGramGhost {
     public static final String KEY_NO_READ = "ghost_no_read";
     public static final String KEY_NO_TYPING = "ghost_no_typing";
     public static final String KEY_NO_ONLINE = "ghost_no_online";
+    public static final String KEY_NO_STORY_VIEWS = "ghost_no_story_views";
 
     /** Do not send read receipts (including "voice message listened"). */
     public static boolean hideRead() {
@@ -27,7 +28,12 @@ public class OtherGramGhost {
         return OtherGramConfig.getBoolean(KEY_NO_ONLINE, false);
     }
 
+    /** Watch stories without the author seeing the view. */
+    public static boolean hideStoryViews() {
+        return OtherGramConfig.getBoolean(KEY_NO_STORY_VIEWS, false);
+    }
+
     public static boolean isAnyEnabled() {
-        return hideRead() || hideTyping() || hideOnline();
+        return hideRead() || hideTyping() || hideOnline() || hideStoryViews();
     }
 }

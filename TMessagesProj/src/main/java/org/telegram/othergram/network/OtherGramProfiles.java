@@ -35,6 +35,10 @@ public class OtherGramProfiles {
         public Integer nameColor;
         public Integer bioColor;
         public Integer accentColor;
+        /** Avatar ring: "solid", "gradient", "dashed", "double" or null. */
+        public String ringStyle;
+        public int ringColor;
+        public int ringColor2;
     }
 
     private static final Map<Long, Profile> profiles = new ConcurrentHashMap<>();
@@ -137,6 +141,12 @@ public class OtherGramProfiles {
         p.nameColor = json.isNull("name_color") ? null : json.optInt("name_color");
         p.bioColor = json.isNull("bio_color") ? null : json.optInt("bio_color");
         p.accentColor = json.isNull("accent_color") ? null : json.optInt("accent_color");
+        final JSONObject ring = json.optJSONObject("ring");
+        if (ring != null) {
+            p.ringStyle = ring.optString("style", null);
+            p.ringColor = ring.optInt("color", 0xFFA68770);
+            p.ringColor2 = ring.optInt("color2", p.ringColor);
+        }
         return p;
     }
 }

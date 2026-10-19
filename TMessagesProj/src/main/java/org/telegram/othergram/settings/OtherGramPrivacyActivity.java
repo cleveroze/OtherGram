@@ -30,6 +30,7 @@ public class OtherGramPrivacyActivity extends BaseFragment {
     private static final int ID_NO_ONLINE = 3;
     private static final int ID_KEEP_DELETED = 4;
     private static final int ID_CLEAR_DELETED = 5;
+    private static final int ID_NO_STORY_VIEWS = 6;
 
     private UniversalRecyclerView listView;
 
@@ -61,6 +62,7 @@ public class OtherGramPrivacyActivity extends BaseFragment {
         items.add(UItem.asCheck(ID_NO_READ, getString(R.string.OG_GhostNoRead)).setChecked(OtherGramGhost.hideRead()));
         items.add(UItem.asCheck(ID_NO_TYPING, getString(R.string.OG_GhostNoTyping)).setChecked(OtherGramGhost.hideTyping()));
         items.add(UItem.asCheck(ID_NO_ONLINE, getString(R.string.OG_GhostNoOnline)).setChecked(OtherGramGhost.hideOnline()));
+        items.add(UItem.asCheck(ID_NO_STORY_VIEWS, getString(R.string.OG_GhostNoStoryViews)).setChecked(OtherGramGhost.hideStoryViews()));
         items.add(UItem.asShadow(getString(R.string.OG_GhostInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_DeletedMessages)));
@@ -84,6 +86,9 @@ public class OtherGramPrivacyActivity extends BaseFragment {
                 break;
             case ID_NO_ONLINE:
                 toggle(OtherGramGhost.KEY_NO_ONLINE);
+                break;
+            case ID_NO_STORY_VIEWS:
+                toggle(OtherGramGhost.KEY_NO_STORY_VIEWS);
                 break;
             case ID_KEEP_DELETED:
                 toggle(OtherGramDeletedMessages.KEY_ENABLED);

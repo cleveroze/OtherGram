@@ -64,6 +64,12 @@ public class OtherGramProfileActivity extends BaseFragment {
     private static final int ID_ACCENT_COLOR = 6;
     private static final int ID_RESET = 7;
     private static final int ID_CONNECT = 8;
+    private static final int ID_RING_STYLE = 9;
+    private static final int ID_RING_COLOR = 10;
+    private static final int ID_RING_COLOR2 = 11;
+
+    private static final String[] RING_STYLES = {null, "solid", "gradient", "dashed", "double"};
+    private static final int[] RING_STYLE_TITLES = {R.string.OG_RingNone, R.string.OG_RingSolid, R.string.OG_RingGradient, R.string.OG_RingDashed, R.string.OG_RingDouble};
 
     private static final DispatchQueue imageQueue = new DispatchQueue("othergramBanner");
 
@@ -75,6 +81,9 @@ public class OtherGramProfileActivity extends BaseFragment {
     private int bannerColor = 0xFFA68770;
     private float bannerOffset = 0.5f;
     private Integer nameColor, bioColor, accentColor;
+    private String ringStyle;
+    private int ringColor = 0xFFA68770;
+    private int ringColor2 = 0xFFE5CFB5;
     private Bitmap bannerBitmap;
     private boolean busy;
 
@@ -131,6 +140,16 @@ public class OtherGramProfileActivity extends BaseFragment {
         }
         items.add(UItem.asShadow(getString("image".equals(bannerKind) ? R.string.OG_BannerPositionInfo : R.string.OG_BannerInfo)));
 
+        items.add(UItem.asHeader(getString(R.string.OG_AvatarRing)));
+        items.add(UItem.asButton(ID_RING_STYLE, R.drawable.msg_contacts, getString(R.string.OG_RingStyle), getString(RING_STYLE_TITLES[ringStyleIndex()])));
+        if (ringStyle != null) {
+            items.add(colorRow(ID_RING_COLOR, R.string.OG_RingColor, ringColor));
+            if ("gradient".equals(ringStyle)) {
+                items.add(colorRow(ID_RING_COLOR2, R.string.OG_RingColor2, ringColor2));
+            }
+        }
+        items.add(UItem.asShadow(getString(R.string.OG_AvatarRingInfo)));
+
         items.add(UItem.asHeader(getString(R.string.OG_ProfileColors)));
         items.add(colorRow(ID_NAME_COLOR, R.string.OG_NameColor, nameColor));
         items.add(colorRow(ID_BIO_COLOR, R.string.OG_BioColor, bioColor));
@@ -183,12 +202,49 @@ public class OtherGramProfileActivity extends BaseFragment {
                     saveProfile();
                 }, accentColor != null ? () -> { accentColor = null; saveProfile(); } : null);
                 break;
+            case ID_RING_STYLE: {
+                final CharSequence[] names = new CharSequence[RING_STYLES.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = getString(RING_STYLE_TITLES[i]);
+                }
+                new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity(), resourceProvider)
+                        .setTitle(getString(R.string.OG_RingStyle))
+                        .setItems(names, (dialog, which) -> {
+                            ringStyle = RING_STYLES[which];
+                            saveProfile();
+                        })
+                        .setNegativeButton(getString(R.string.Cancel), null)
+                        .show();
+                break;
+            }
+            case ID_RING_COLOR:
+                OtherGramColorPicker.show(this, getString(R.string.OG_RingColor), ringColor, c -> {
+                    ringColor = c;
+                    saveProfile();
+                }, null);
+                break;
+            case ID_RING_COLOR2:
+                OtherGramColorPicker.show(this, getString(R.string.OG_RingColor2), ringColor2, c -> {
+                    ringColor2 = c;
+                    saveProfile();
+                }, null);
+                break;
             case ID_RESET:
                 bannerKind = null;
+                ringStyle = null;
                 nameColor = bioColor = accentColor = null;
                 OtherGramApi.sendJson("DELETE", "/v1/me/banner", null, (s, r) -> saveProfile());
                 break;
         }
+    }
+
+    private int ringStyleIndex() {
+        for (int i = 1; i < RING_STYLES.length; i++) {
+            if (RING_STYLES[i].equals(ringStyle)) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private int textColor() {
@@ -226,6 +282,12 @@ public class OtherGramProfileActivity extends BaseFragment {
         nameColor = profile != null && !profile.isNull("name_color") ? profile.optInt("name_color") : null;
         bioColor = profile != null && !profile.isNull("bio_color") ? profile.optInt("bio_color") : null;
         accentColor = profile != null && !profile.isNull("accent_color") ? profile.optInt("accent_color") : null;
+        final JSONObject ring = profile != null ? profile.optJSONObject("ring") : null;
+        ringStyle = ring != null ? ring.optString("style", null) : null;
+        if (ring != null) {
+            ringColor = ring.optInt("color", ringColor);
+            ringColor2 = ring.optInt("color2", ringColor2);
+        }
         refresh();
     }
 
@@ -238,6 +300,9 @@ public class OtherGramProfileActivity extends BaseFragment {
             body.put("name_color", nameColor == null ? JSONObject.NULL : nameColor);
             body.put("bio_color", bioColor == null ? JSONObject.NULL : bioColor);
             body.put("accent_color", accentColor == null ? JSONObject.NULL : accentColor);
+            body.put("ring_style", ringStyle == null ? JSONObject.NULL : ringStyle);
+            body.put("ring_color", ringColor);
+            body.put("ring_color2", ringColor2);
         } catch (Exception ignore) {
         }
         refresh();
@@ -370,6 +435,7 @@ public class OtherGramProfileActivity extends BaseFragment {
         private final TextPaint namePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         private final TextPaint bioPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         private final RectF rect = new RectF();
+        private final android.graphics.Path shapePath = new android.graphics.Path();
 
         PreviewView(Context context) {
             super(context);
@@ -416,7 +482,15 @@ public class OtherGramProfileActivity extends BaseFragment {
             paint.setColor(accentColor != null ? accentColor : Theme.getColor(Theme.key_featuredStickers_addButton, resourceProvider));
             final float r = size / 2f * OtherGramAvatars.radiusFactor();
             rect.set(cx - size / 2f, ay, cx + size / 2f, ay + size);
-            canvas.drawRoundRect(rect, r, r, paint);
+            if (OtherGramAvatars.hasPathShape()) {
+                OtherGramAvatars.shapePath(rect, shapePath);
+                canvas.drawPath(shapePath, paint);
+            } else {
+                canvas.drawRoundRect(rect, r, r, paint);
+            }
+            if (ringStyle != null) {
+                OtherGramAvatars.drawRing(canvas, rect, ringStyle, ringColor, ringColor2, 255);
+            }
 
             final TLRPC.User self = getUserConfig().getCurrentUser();
             final String name = self != null ? UserObject.getUserName(self) : "OtherGram";

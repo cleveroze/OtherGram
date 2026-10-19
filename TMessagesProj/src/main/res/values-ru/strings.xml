@@ -400,4 +400,26 @@
     <string name="OG_KeepDeletedInfo">Сообщения, которые кто-то удалил, останутся на этом телефоне с пометкой «удалено» рядом со временем. Работает только для уже полученных сообщений, ничего никуда не отправляется. Учтите, что отправитель рассчитывает, что сообщение исчезло.</string>
     <string name="OG_DeletedMarksCleared">Пометки сброшены</string>
     <string name="OG_DeletedMark">удалено</string>
+    <string name="OG_AvatarMaterialStar">Звезда Material You</string>
+    <string name="OG_AvatarStar">Звезда</string>
+    <string name="OG_AvatarHexagon">Шестиугольник</string>
+    <string name="OG_AvatarOctagon">Восьмиугольник</string>
+    <string name="OG_AvatarRing">Обводка аватарки</string>
+    <string name="OG_RingStyle">Стиль обводки</string>
+    <string name="OG_RingNone">Без обводки</string>
+    <string name="OG_RingSolid">Сплошная</string>
+    <string name="OG_RingGradient">Градиент</string>
+    <string name="OG_RingDashed">Пунктир</string>
+    <string name="OG_RingDouble">Двойная</string>
+    <string name="OG_RingColor">Цвет обводки</string>
+    <string name="OG_RingColor2">Второй цвет градиента</string>
+    <string name="OG_AvatarRingInfo">Другие пользователи OtherGram видят эту обводку вокруг вашей аватарки в чатах, списке чатов и профиле. Она повторяет форму аватарок, которую выбрал каждый из них.</string>
+    <string name="OG_MyFonts">Мои шрифты</string>
+    <string name="OG_ImportFont">Загрузить шрифт (TTF или OTF)</string>
+    <string name="OG_DeleteFont">Удалить загруженный шрифт</string>
+    <string name="OG_ImportFontInfo">Файл копируется в OtherGram и проверяется перед использованием, до 15 МБ. Убедитесь, что лицензия шрифта разрешает его использовать.</string>
+    <string name="OG_ImportFontFailed">Этот файл не является шрифтом, который может открыть Android</string>
+    <string name="OG_ImportFontDone">Шрифт %1$s добавлен</string>
+    <string name="OG_GhostNoStoryViews">Смотреть истории незаметно</string>
+    <string name="OG_UserIdCopied">ID пользователя %1$d скопирован</string>
 </resources>

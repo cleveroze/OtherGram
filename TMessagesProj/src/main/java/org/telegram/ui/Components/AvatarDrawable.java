@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -62,6 +63,8 @@ public class AvatarDrawable extends Drawable {
     private float scaleSize = 1f;
     private StringBuilder stringBuilder = new StringBuilder(5);
     private int roundRadius = -1;
+    private long ogUserId;
+    private final Path ogShapePath = new Path();
 
     private int gradientTop, gradientBottom;
     private int gradientColor1, gradientColor2;
@@ -222,6 +225,7 @@ public class AvatarDrawable extends Drawable {
         if (user != null) {
             setInfo(user.id, user.first_name, user.last_name, null, user != null && user.color != null ? UserObject.getColorId(user) : null, UserObject.getPeerColorForAvatar(currentAccount, user));
             drawDeleted = UserObject.isDeleted(user);
+            ogUserId = user.id; // OtherGram: for the published avatar ring
         }
     }
 
@@ -417,6 +421,7 @@ public class AvatarDrawable extends Drawable {
 
     public void setInfo(long id, String firstName, String lastName, String custom, Integer customColor, MessagesController.PeerColor profileColor, boolean advancedGradient) {
         invalidateTextLayout = true;
+        ogUserId = 0;
         if (advancedGradient) {
             hasGradient = false;
             hasAdvancedGradient = true;
@@ -592,12 +597,20 @@ public class AvatarDrawable extends Drawable {
             if (roundRadius > 0) {
                 AndroidUtilities.rectTmp.set(0, 0, size, size);
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, roundRadius, roundRadius, backgroundPaint);
-            } else if (!OtherGramAvatars.isCircle()) { // OtherGram: chosen avatar shape
+            } else if (OtherGramAvatars.hasPathShape()) { // OtherGram: chosen avatar shape
+                AndroidUtilities.rectTmp.set(0, 0, size, size);
+                OtherGramAvatars.shapePath(AndroidUtilities.rectTmp, ogShapePath);
+                canvas.drawPath(ogShapePath, backgroundPaint);
+            } else if (!OtherGramAvatars.isCircle()) {
                 final float r = size / 2.0f * OtherGramAvatars.radiusFactor();
                 AndroidUtilities.rectTmp.set(0, 0, size, size);
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, backgroundPaint);
             } else {
                 canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f, backgroundPaint);
+            }
+            if (roundRadius <= 0 && ogUserId != 0) { // OtherGram: avatar ring published by the user
+                AndroidUtilities.rectTmp.set(0, 0, size, size);
+                OtherGramAvatars.drawRing(canvas, AndroidUtilities.rectTmp, ogUserId, backgroundPaint.getAlpha());
             }
             if (rotate45Background) {
                 canvas.restore();

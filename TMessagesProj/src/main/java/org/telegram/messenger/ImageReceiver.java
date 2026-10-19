@@ -432,6 +432,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         // OtherGram: users and regular groups follow the chosen avatar shape, forums keep their own
         final boolean ogWasAvatar = ogAvatar;
         ogAvatar = object instanceof TLRPC.User || object instanceof TLRPC.Chat && !((TLRPC.Chat) object).forum;
+        ogUserId = object instanceof TLRPC.User ? ((TLRPC.User) object).id : 0;
         if (ogAvatar != ogWasAvatar || ogAvatar) {
             setRoundRadius(ogRequestedRadius.clone());
         }
@@ -1411,7 +1412,10 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                         roundPaint.setAlpha(alpha);
                         roundRect.set(drawRegion);
 
-                        if (isRoundRect && useRoundRadius) {
+                        if (ogAvatar && canvas != null && OtherGramAvatars.hasPathShape()) { // OtherGram: star/polygon avatar shapes
+                            OtherGramAvatars.shapePath(roundRect, ogShapePath);
+                            canvas.drawPath(ogShapePath, roundPaint);
+                        } else if (isRoundRect && useRoundRadius) {
                             try {
                                 if (canvas != null) {
                                     if (roundRadius[0] == 0) {
@@ -1435,6 +1439,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                             if (canvas != null) {
                                 canvas.drawPath(roundPath, roundPaint);
                             }
+                        }
+                        if (ogAvatar && canvas != null && backgroundThreadDrawHolder == null) { // OtherGram: avatar ring published by the user
+                            OtherGramAvatars.drawRing(canvas, roundRect, ogUserId, alpha);
                         }
                     }
                 } else {
@@ -1521,7 +1528,10 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
 
                         roundPaint.setAlpha(alpha);
 
-                        if (isRoundRect && useRoundRadius) {
+                        if (ogAvatar && canvas != null && OtherGramAvatars.hasPathShape()) { // OtherGram: star/polygon avatar shapes
+                            OtherGramAvatars.shapePath(roundRect, ogShapePath);
+                            canvas.drawPath(ogShapePath, roundPaint);
+                        } else if (isRoundRect && useRoundRadius) {
                             try {
                                 if (canvas != null) {
                                     if (roundRadius[0] == 0) {
@@ -1553,6 +1563,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                             if (canvas != null) {
                                 canvas.drawPath(roundPath, roundPaint);
                             }
+                        }
+                        if (ogAvatar && canvas != null && backgroundThreadDrawHolder == null) { // OtherGram: avatar ring published by the user
+                            OtherGramAvatars.drawRing(canvas, roundRect, ogUserId, alpha);
                         }
                     }
                 }
@@ -2552,7 +2565,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
 
     // OtherGram: callers' radius is kept so the avatar shape can be applied on top of it at any time
     private final int[] ogRequestedRadius = new int[4];
+    private final Path ogShapePath = new Path();
     private boolean ogAvatar;
+    private long ogUserId;
 
     public void setRoundRadius(int[] value) {
         System.arraycopy(value, 0, ogRequestedRadius, 0, 4);

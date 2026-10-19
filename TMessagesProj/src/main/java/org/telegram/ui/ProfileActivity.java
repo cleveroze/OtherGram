@@ -11448,6 +11448,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setOnClickListener(null);
                         nameTextView[a].setClickable(false);
                     }
+                    // OtherGram: long press on the name copies the user id
+                    nameTextView[a].setOnLongClickListener(v -> {
+                        AndroidUtilities.addToClipboard(String.valueOf(ogBadgesUserId));
+                        BulletinFactory.of(ProfileActivity.this).createCopyBulletin(LocaleController.formatString(R.string.OG_UserIdCopied, ogBadgesUserId)).show();
+                        return true;
+                    });
                 }
                 if (a == 0 && onlineTextOverride != null) {
                     onlineTextView[a].setText(onlineTextOverride);

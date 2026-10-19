@@ -6,6 +6,7 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -79,6 +80,7 @@ public class OtherGramAvatarsActivity extends BaseFragment {
     /** Three sample avatars in the theme colors, drawn with the selected shape. */
     private class PreviewView extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path path = new Path();
 
         PreviewView(Context context) {
             super(context);
@@ -100,7 +102,12 @@ public class OtherGramAvatarsActivity extends BaseFragment {
             for (int color : colors) {
                 paint.setColor(color);
                 AndroidUtilities.rectTmp.set(left, top, left + size, top + size);
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, paint);
+                if (OtherGramAvatars.hasPathShape()) {
+                    OtherGramAvatars.shapePath(AndroidUtilities.rectTmp, path);
+                    canvas.drawPath(path, paint);
+                } else {
+                    canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, paint);
+                }
                 left += size + gap;
             }
         }
