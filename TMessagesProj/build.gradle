@@ -138,6 +138,12 @@ android {
         minSdkVersion 23
         targetSdkVersion 36
 
+        // OtherGram: own api_id/api_hash from env vars or local.properties (git-ignored), never committed
+        def ogApiId = (System.getenv("OTHERGRAM_API_ID") ?: getProps("OTHERGRAM_API_ID") ?: "0").toString().trim()
+        def ogApiHash = (System.getenv("OTHERGRAM_API_HASH") ?: getProps("OTHERGRAM_API_HASH") ?: "").toString().trim()
+        buildConfigField "int", "OG_APP_ID", ogApiId
+        buildConfigField "String", "OG_APP_HASH", "\"" + ogApiHash + "\""
+
         vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
 
         multiDexEnabled true
