@@ -88,6 +88,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.utils.DrawableUtils;
 import org.telegram.othergram.badges.OtherGramBadgeSpan;
 import org.telegram.othergram.badges.OtherGramBadges;
+import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -2394,7 +2395,9 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
             CharSequence nameStringFinal = nameString;
             // OtherGram: badges go after the name and are kept out of the ellipsized part
-            final OtherGramBadgeSpan ogBadges = user != null && chat == null && !isTopic && !UserObject.isUserSelf(user) ? OtherGramBadges.span(user.id, true) : null;
+            final long ogPeerId = isTopic ? 0 : user != null && chat == null ? (UserObject.isUserSelf(user) ? 0 : user.id) : chat != null ? -chat.id : 0;
+            final OtherGramBadgeSpan ogBadges = ogPeerId != 0 ? OtherGramBadges.span(ogPeerId, true) : null;
+            nameStringFinal = OtherGramProfiles.colorName(nameStringFinal, ogPeerId); // OtherGram: published name color
             if (ogBadges != null) {
                 ellipsizeWidth = Math.max(0, ellipsizeWidth - ogBadges.getWidth(Theme.dialogs_namePaint[paintIndex]));
             }

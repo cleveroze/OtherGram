@@ -290,18 +290,18 @@
     <string name="OG_AccountInfo">При подключении бот OtherGram подтверждает ваш Telegram-аккаунт. Это нужно, чтобы другие пользователи OtherGram видели ваши бейджи и баннер. Сообщения и контакты на сервер OtherGram не отправляются.</string>
     <string name="OG_AccountFailed">Не удалось подключиться: %1$s</string>
     <string name="OG_AdminPanel">Админ-панель</string>
-    <string name="OG_AdminUsers">Пользователи</string>
+    <string name="OG_AdminUsers">Пользователи и каналы</string>
     <string name="OG_AdminGrant">Выдать бейдж</string>
-    <string name="OG_AdminUserBadges">Бейджи пользователя и отзыв</string>
+    <string name="OG_AdminUserBadges">Бейджи пользователя или канала</string>
     <string name="OG_AdminBadgeTypes">Типы бейджей</string>
     <string name="OG_AdminCreateType">Создать тип бейджа</string>
     <string name="OG_AdminEditType">Изменить тип бейджа</string>
     <string name="OG_AdminHistory">История действий</string>
     <string name="OG_AdminHistoryEmpty">Действий пока нет</string>
     <string name="OG_AdminInfo">Права проверяются сервером при каждом действии.</string>
-    <string name="OG_AdminChooseUser">Пользователь</string>
-    <string name="OG_AdminUsernameHint">@username</string>
-    <string name="OG_AdminUserNotFound">Пользователь не найден</string>
+    <string name="OG_AdminChooseUser">Пользователь или канал</string>
+    <string name="OG_AdminUsernameHint">@username или ID</string>
+    <string name="OG_AdminUserNotFound">Не найдено. Проверьте ник или укажите числовой ID.</string>
     <string name="OG_AdminChooseBadge">Выберите бейдж</string>
     <string name="OG_AdminNoTypes">Типов бейджей пока нет</string>
     <string name="OG_AdminNoBadges">У пользователя нет бейджей</string>
@@ -422,4 +422,5 @@
     <string name="OG_ImportFontDone">Шрифт %1$s добавлен</string>
     <string name="OG_GhostNoStoryViews">Смотреть истории незаметно</string>
     <string name="OG_UserIdCopied">ID пользователя %1$d скопирован</string>
+    <string name="OG_UserIdCopiedAge">ID %1$d скопирован · аккаунт создан примерно в %2$d году</string>
 </resources>

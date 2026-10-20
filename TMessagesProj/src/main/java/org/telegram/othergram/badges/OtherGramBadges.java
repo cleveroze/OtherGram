@@ -82,7 +82,8 @@ public class OtherGramBadges {
     }
 
     private static void request(long userId) {
-        if (userId <= 0 || fetcher == null || !requested.add(userId)) {
+        // Positive ids are users, negative ids are channels/groups (-chat.id)
+        if (userId == 0 || fetcher == null || !requested.add(userId)) {
             return;
         }
         AndroidUtilities.runOnUIThread(() -> {

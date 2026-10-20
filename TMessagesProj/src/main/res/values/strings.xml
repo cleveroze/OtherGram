@@ -11562,18 +11562,18 @@
     <string name="OG_AccountInfo">Connecting confirms your Telegram account through the OtherGram bot. It is needed to show badges and banners to other OtherGram users. Messages and contacts are never sent to the OtherGram server.</string>
     <string name="OG_AccountFailed">Could not connect: %1$s</string>
     <string name="OG_AdminPanel">Admin panel</string>
-    <string name="OG_AdminUsers">Users</string>
+    <string name="OG_AdminUsers">Users and channels</string>
     <string name="OG_AdminGrant">Grant a badge</string>
-    <string name="OG_AdminUserBadges">User badges and revoking</string>
+    <string name="OG_AdminUserBadges">Badges of a user or channel</string>
     <string name="OG_AdminBadgeTypes">Badge types</string>
     <string name="OG_AdminCreateType">Create badge type</string>
     <string name="OG_AdminEditType">Edit badge type</string>
     <string name="OG_AdminHistory">Action history</string>
     <string name="OG_AdminHistoryEmpty">No actions yet</string>
     <string name="OG_AdminInfo">Rights are checked by the server for every action.</string>
-    <string name="OG_AdminChooseUser">User</string>
-    <string name="OG_AdminUsernameHint">@username</string>
-    <string name="OG_AdminUserNotFound">User not found</string>
+    <string name="OG_AdminChooseUser">User or channel</string>
+    <string name="OG_AdminUsernameHint">@username or ID</string>
+    <string name="OG_AdminUserNotFound">Not found. Check the username or use the numeric ID.</string>
     <string name="OG_AdminChooseBadge">Choose a badge</string>
     <string name="OG_AdminNoTypes">There are no badge types yet</string>
     <string name="OG_AdminNoBadges">This user has no badges</string>
@@ -11694,4 +11694,5 @@
     <string name="OG_ImportFontDone">Font %1$s added</string>
     <string name="OG_GhostNoStoryViews">Watch stories unseen</string>
     <string name="OG_UserIdCopied">User ID %1$d copied</string>
+    <string name="OG_UserIdCopiedAge">ID %1$d copied · account created around %2$d</string>
 </resources>

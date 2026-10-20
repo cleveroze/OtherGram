@@ -2569,6 +2569,16 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private boolean ogAvatar;
     private long ogUserId;
 
+    /**
+     * OtherGram: marks this receiver as an avatar of a user (id &gt; 0) or a regular group/channel (id 0) for
+     * screens that load avatars with setImage() instead of setForUserOrChat(), e.g. the profile header.
+     */
+    public void setOtherGramAvatar(boolean avatar, long userId) {
+        ogAvatar = avatar;
+        ogUserId = avatar ? userId : 0;
+        setRoundRadius(ogRequestedRadius.clone());
+    }
+
     public void setRoundRadius(int[] value) {
         System.arraycopy(value, 0, ogRequestedRadius, 0, 4);
         if (ogAvatar && !OtherGramAvatars.isCircle()) {

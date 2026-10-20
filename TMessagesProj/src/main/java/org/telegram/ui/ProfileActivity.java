@@ -11347,6 +11347,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (avatar == null) {
                 avatarsViewPager.initIfEmpty(vectorAvatarThumbDrawable, imageLocation, thumbLocation, reload);
             }
+            avatarImage.getImageReceiver().setOtherGramAvatar(true, user.id); // OtherGram: avatar shape and ring in the profile
             if (avatarBig == null) {
                 if (vectorAvatar != null) {
                     avatarImage.setImageDrawable(vectorAvatarThumbDrawable);
@@ -11448,10 +11449,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setOnClickListener(null);
                         nameTextView[a].setClickable(false);
                     }
-                    // OtherGram: long press on the name copies the user id
+                    // OtherGram: long press on the name copies the user id and shows the approximate registration year
                     nameTextView[a].setOnLongClickListener(v -> {
                         AndroidUtilities.addToClipboard(String.valueOf(ogBadgesUserId));
-                        BulletinFactory.of(ProfileActivity.this).createCopyBulletin(LocaleController.formatString(R.string.OG_UserIdCopied, ogBadgesUserId)).show();
+                        BulletinFactory.of(ProfileActivity.this).createCopyBulletin(LocaleController.formatString(R.string.OG_UserIdCopiedAge, ogBadgesUserId,
+                                org.telegram.othergram.OtherGramAccountAge.estimateYear(ogBadgesUserId))).show();
                         return true;
                     });
                 }
@@ -11791,8 +11793,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         title = Emoji.replaceEmoji(title, nameTextView[a].getPaint().getFontMetricsInt(), false);
                     } catch (Exception ignore) {
                     }
+                    final long ogChatPeerId = -chat.id;
+                    title = OtherGramBadges.appendBadges(title, ogChatPeerId); // OtherGram: channel/group badges
                     if (nameTextView[a].setText(title)) {
                         changed = true;
+                    }
+                    if (a == 1) { // OtherGram: tapping the title explains the badges
+                        if (OtherGramBadges.hasBadges(ogChatPeerId)) {
+                            nameTextView[a].setOnClickListener(v -> OtherGramBadges.showInfo(ProfileActivity.this, ogChatPeerId));
+                        } else {
+                            nameTextView[a].setOnClickListener(null);
+                            nameTextView[a].setClickable(false);
+                        }
                     }
                 }
                 nameTextView[a].setLeftDrawableOutside(false);
@@ -11938,6 +11950,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 filter = null;
             }
             if (avatarBig == null && !isTopic) {
+                avatarImage.getImageReceiver().setOtherGramAvatar(!chat.forum, 0); // OtherGram: avatar shape in the profile
                 avatarImage.setImage(videoLocation, filter, thumbLocation, "50_50", avatarDrawable, chat);
             }
             if (imageLocation != null && (prevLoadedImageLocation == null || imageLocation.photoId != prevLoadedImageLocation.photoId)) {

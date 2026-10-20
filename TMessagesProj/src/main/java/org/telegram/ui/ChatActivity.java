@@ -201,6 +201,7 @@ import org.telegram.messenger.utils.tlutils.TLKeyboardHelper;
 import org.telegram.messenger.utils.tlutils.TlUtils;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.othergram.badges.OtherGramBadges;
+import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -19567,20 +19568,20 @@ public class ChatActivity extends BaseFragment implements
                     if (currentChat.linked_monoforum_id != 0) {
                         TLRPC.Chat chat = getMessagesController().getChat(currentChat.linked_monoforum_id);
                         if (chat == null) chat = currentChat;
-                        avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title)), chat.scam, chat.fake, chat.verified, false, chat.emoji_status, animated);
+                        avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title)), -chat.id), chat.scam, chat.fake, chat.verified, false, chat.emoji_status, animated);
                     } else {
-                        avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
+                        avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), -currentChat.id), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
                     }
                 } else if (threadMessageId > 0) {
                     final TLRPC.User user = getMessagesController().getUser(threadMessageId);
-                    avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user))), user.id), user.scam, user.fake, user.verified, user.premium, user.emoji_status, animated); // OtherGram: badges
+                    avatarContainer.setTitle(OtherGramBadges.appendBadges(OtherGramProfiles.colorName(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user))), user.id), user.id), user.scam, user.fake, user.verified, user.premium, user.emoji_status, animated); // OtherGram: badges
                 } else {
                     TLRPC.Chat chat = getMessagesController().getChat(-threadMessageId);
                     if (chat == null) chat = currentChat;
-                    avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title)), chat.scam, chat.fake, chat.verified, false, chat.emoji_status, animated);
+                    avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title)), -chat.id), chat.scam, chat.fake, chat.verified, false, chat.emoji_status, animated);
                 }
             } else {
-                avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
+                avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), -currentChat.id), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
             }
         } else if (chatMode == MODE_WELCOME_MESSAGES) {
             avatarContainer.setTitle(getString(R.string.WelcomeMessage));
@@ -19645,7 +19646,7 @@ public class ChatActivity extends BaseFragment implements
         } else if (chatMode == MODE_PINNED) {
             avatarContainer.setTitle(LocaleController.formatPluralString("PinnedMessagesCount", getPinnedMessagesCount()));
         } else if (currentChat != null) {
-            avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
+            avatarContainer.setTitle(OtherGramBadges.appendBadges(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(currentChat.title)), -currentChat.id), currentChat.scam, currentChat.fake, currentChat.verified, false, currentChat.emoji_status, animated);
         } else if (currentUser != null) {
             if (currentUser.self) {
                 avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));

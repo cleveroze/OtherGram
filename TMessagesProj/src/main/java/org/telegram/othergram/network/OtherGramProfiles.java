@@ -55,6 +55,17 @@ public class OtherGramProfiles {
         return profiles.get(userId);
     }
 
+    /** The name painted with the color the user published, or the name unchanged. */
+    public static CharSequence colorName(CharSequence name, long userId) {
+        final Profile profile = userId != 0 && name != null && name.length() > 0 ? profiles.get(userId) : null;
+        if (profile == null || profile.nameColor == null) {
+            return name;
+        }
+        final android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(name);
+        sb.setSpan(new android.text.style.ForegroundColorSpan(profile.nameColor | 0xFF000000), 0, sb.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return sb;
+    }
+
     public static void fetch(Set<Long> userIds) {
         final List<Long> ids = new ArrayList<>(userIds);
         for (int from = 0; from < ids.size(); from += MAX_IDS_PER_REQUEST) {

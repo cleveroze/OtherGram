@@ -128,7 +128,7 @@ public class OtherGramAdminActivity extends BaseFragment {
         }
     }
 
-    private void grant(TLRPC.User user, JSONObject type, String label) {
+    private void grant(Target user, JSONObject type, String label) {
         final JSONObject body = new JSONObject();
         try {
             body.put("badge_id", type.optString("id"));
@@ -139,12 +139,12 @@ public class OtherGramAdminActivity extends BaseFragment {
             if (checkOk(status, response)) {
                 OtherGramBadges.invalidate(user.id);
                 BulletinFactory.of(this).createSimpleBulletin(R.raw.contact_check,
-                        LocaleController.formatString(R.string.OG_AdminGranted, type.optString("title"), UserObject.getUserName(user))).show();
+                        LocaleController.formatString(R.string.OG_AdminGranted, type.optString("title"), user.name)).show();
             }
         });
     }
 
-    private void showUserBadges(TLRPC.User user) {
+    private void showUserBadges(Target user) {
         OtherGramApi.getJson("/v1/admin/users/" + user.id + "/badges", (status, response) -> {
             if (!checkOk(status, response)) {
                 return;
@@ -163,14 +163,14 @@ public class OtherGramAdminActivity extends BaseFragment {
                 titles[i] = TextUtils.isEmpty(label) || label.equals(typeTitle) ? typeTitle : label + " (" + typeTitle + ")";
             }
             new AlertDialog.Builder(getParentActivity(), resourceProvider)
-                    .setTitle(LocaleController.formatString(R.string.OG_AdminUserBadgesTitle, UserObject.getUserName(user)))
+                    .setTitle(LocaleController.formatString(R.string.OG_AdminUserBadgesTitle, user.name))
                     .setItems(titles, (dialog, which) -> badgeActions(user, granted.optJSONObject(which), titles[which]))
                     .setNegativeButton(getString(R.string.Cancel), null)
                     .show();
         });
     }
 
-    private void badgeActions(TLRPC.User user, JSONObject granted, CharSequence title) {
+    private void badgeActions(Target user, JSONObject granted, CharSequence title) {
         final String badgeId = granted.optString("badge_id");
         final String currentLabel = granted.isNull("label") ? badgeTitle(badgeId) : granted.optString("label");
         new AlertDialog.Builder(getParentActivity(), resourceProvider)
@@ -186,7 +186,7 @@ public class OtherGramAdminActivity extends BaseFragment {
                 .show();
     }
 
-    private void setLabel(TLRPC.User user, String badgeId, String label) {
+    private void setLabel(Target user, String badgeId, String label) {
         final JSONObject body = new JSONObject();
         try {
             body.put("label", label);
@@ -200,7 +200,7 @@ public class OtherGramAdminActivity extends BaseFragment {
         });
     }
 
-    private void revoke(TLRPC.User user, String badgeId) {
+    private void revoke(Target user, String badgeId) {
         OtherGramApi.sendJson("DELETE", "/v1/admin/users/" + user.id + "/badges/" + badgeId, null, (status, response) -> {
             if (checkOk(status, response)) {
                 OtherGramBadges.invalidate(user.id);
@@ -263,7 +263,7 @@ public class OtherGramAdminActivity extends BaseFragment {
     // ------------------------------------------------------------ dialogs
 
     private interface UserCallback {
-        void onUser(TLRPC.User user);
+        void onUser(Target user);
     }
 
     private interface TypeCallback {
@@ -325,21 +325,66 @@ public class OtherGramAdminActivity extends BaseFragment {
                 .setTitle(getString(R.string.OG_AdminChooseUser))
                 .setView(container)
                 .setPositiveButton(getString(R.string.OK), (dialog, which) -> {
-                    final String username = input.getText().toString().trim().replace("@", "");
-                    if (username.isEmpty()) {
+                    final String text = input.getText().toString().trim().replace("@", "").replace("https://t.me/", "").replace("t.me/", "");
+                    if (text.isEmpty()) {
                         return;
                     }
-                    getMessagesController().getUserNameResolver().resolve(username, peerId -> {
-                        final TLRPC.User user = peerId != null && peerId > 0 ? getMessagesController().getUser(peerId) : null;
-                        if (user == null) {
+                    final Long numericId = parseNumericPeer(text);
+                    if (numericId != null) {
+                        callback.onUser(targetFor(numericId));
+                        return;
+                    }
+                    getMessagesController().getUserNameResolver().resolve(text, peerId -> {
+                        if (peerId == null || peerId == 0) {
                             BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_AdminUserNotFound)).show();
                         } else {
-                            callback.onUser(user);
+                            callback.onUser(targetFor(peerId));
                         }
                     });
                 })
                 .setNegativeButton(getString(R.string.Cancel), null)
                 .show();
+    }
+
+    /**
+     * Numeric input: a user id ("7669266193"), a Bot API channel id ("-1001234567890") or a plain
+     * negative dialog id ("-1234567890"). Returns the peer id used by the server: users positive,
+     * channels and groups negative (-chat.id); null for non-numeric input.
+     */
+    private static Long parseNumericPeer(String text) {
+        if (!text.matches("-?\\d{1,19}")) {
+            return null;
+        }
+        try {
+            final long value = Long.parseLong(text);
+            if (text.startsWith("-100") && text.length() > 4) {
+                return -Long.parseLong(text.substring(4));
+            }
+            return value == 0 ? null : value;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Badge holder with a readable name when Telegram already knows it, otherwise the bare id. */
+    private Target targetFor(long peerId) {
+        if (peerId > 0) {
+            final TLRPC.User u = getMessagesController().getUser(peerId);
+            return new Target(peerId, u != null ? UserObject.getUserName(u) : String.valueOf(peerId));
+        }
+        final TLRPC.Chat c = getMessagesController().getChat(-peerId);
+        return new Target(peerId, c != null && c.title != null ? c.title : String.valueOf(peerId));
+    }
+
+    /** User (positive id) or channel/group (negative id) that receives badges. */
+    private static class Target {
+        final long id;
+        final String name;
+
+        Target(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
     private void pickBadgeType(TypeCallback callback) {
