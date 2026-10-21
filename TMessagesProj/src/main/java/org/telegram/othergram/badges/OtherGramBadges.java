@@ -47,8 +47,11 @@ public class OtherGramBadges {
     }
 
     private static final long BATCH_DELAY_MS = 300;
+    /** Cached badges are refreshed after this time, so badges granted by admins show up without a restart. */
+    private static final long REFRESH_AFTER_MS = 10 * 60 * 1000;
 
     private static final Map<Long, List<OtherGramBadge>> cache = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> fetchedAt = new ConcurrentHashMap<>();
     private static final Set<Long> requested = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private static final Set<Long> pending = new HashSet<>();
     private static volatile Fetcher fetcher;
@@ -78,7 +81,19 @@ public class OtherGramBadges {
             request(userId);
             return Collections.emptyList();
         }
+        final Long at = fetchedAt.get(userId);
+        if (at != null && System.currentTimeMillis() - at > REFRESH_AFTER_MS) {
+            // Stale: keep showing what we have and refresh in the background
+            fetchedAt.remove(userId);
+            requested.remove(userId);
+            request(userId);
+        }
         return badges;
+    }
+
+    /** The server could not be reached: allow these ids to be requested again later. */
+    public static void onFetchFailed(Set<Long> userIds) {
+        requested.removeAll(userIds);
     }
 
     private static void request(long userId) {
@@ -95,8 +110,10 @@ public class OtherGramBadges {
 
     /** Stores fetched badges (an empty list means "no badges") and redraws names everywhere. */
     public static void put(Map<Long, List<OtherGramBadge>> badges) {
+        final long now = System.currentTimeMillis();
         for (Map.Entry<Long, List<OtherGramBadge>> e : badges.entrySet()) {
             cache.put(e.getKey(), Collections.unmodifiableList(new ArrayList<>(e.getValue())));
+            fetchedAt.put(e.getKey(), now);
         }
         notifyNamesChanged();
     }
@@ -104,6 +121,7 @@ public class OtherGramBadges {
     /** Forgets cached badges so they are fetched again, e.g. after an admin changed them. */
     public static void invalidate(long userId) {
         cache.remove(userId);
+        fetchedAt.remove(userId);
         requested.remove(userId);
         notifyNamesChanged();
     }
@@ -141,6 +159,14 @@ public class OtherGramBadges {
     /** Name followed by the user's badges. */
     public static CharSequence appendBadges(CharSequence name, long userId) {
         return append(name, span(userId, false));
+    }
+
+    /** Name with the published color and one compact badge pill, for lists (members, contacts, search). */
+    public static CharSequence decorateCompact(CharSequence name, long peerId) {
+        if (peerId == 0 || name == null) {
+            return name;
+        }
+        return append(OtherGramProfiles.colorName(name, peerId), span(peerId, true));
     }
 
     public static boolean hasBadges(long userId) {

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.BuildVars;
+import org.telegram.othergram.chats.OtherGramChats;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MessageObject;
@@ -349,9 +350,12 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
         if (!(chatMessageCell != null && chatMessageCell.getTransitionParams().ignoreAlpha)) {
             holder.itemView.setAlpha(1);
         }
+        boolean ogSendAnimation = false;
         if (activity != null && chatMessageCell != null && activity.animatingMessageObjects.contains(chatMessageCell.getMessageObject())) {
             activity.animatingMessageObjects.remove(chatMessageCell.getMessageObject());
-            if (activity.getChatActivityEnterView().canShowMessageTransition()) {
+            if (OtherGramChats.sendAnimation() && chatMessageCell.getMessageObject().isOutOwner()) {
+                ogSendAnimation = true; // OtherGram: own send animation instead of Telegram's flying bubble
+            } else if (activity.getChatActivityEnterView().canShowMessageTransition()) {
                 if (chatMessageCell.getMessageObject().isVoice()) {
                     if (Math.abs(view.getTranslationY()) < view.getMeasuredHeight() * 3f) {
                         VoiceMessageEnterTransition transition = new VoiceMessageEnterTransition(chatMessageCell, activity.getChatActivityEnterView(), recyclerListView, activity.messageEnterTransitionContainer, resourcesProvider);
@@ -365,6 +369,9 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
                 }
                 activity.getChatActivityEnterView().startMessageTransition();
             }
+        }
+        if (ogSendAnimation) {
+            OtherGramChats.playSendAnimation(view, true);
         }
         animation.translationY(0).setDuration(getMoveDuration())
                 .setInterpolator(translationInterpolator)

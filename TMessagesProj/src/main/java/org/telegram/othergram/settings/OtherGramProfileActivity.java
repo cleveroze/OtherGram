@@ -67,6 +67,7 @@ public class OtherGramProfileActivity extends BaseFragment {
     private static final int ID_RING_STYLE = 9;
     private static final int ID_RING_COLOR = 10;
     private static final int ID_RING_COLOR2 = 11;
+    private static final int ID_NAME_COLOR2 = 12;
 
     private static final String[] RING_STYLES = {null, "solid", "gradient", "dashed", "double"};
     private static final int[] RING_STYLE_TITLES = {R.string.OG_RingNone, R.string.OG_RingSolid, R.string.OG_RingGradient, R.string.OG_RingDashed, R.string.OG_RingDouble};
@@ -80,7 +81,7 @@ public class OtherGramProfileActivity extends BaseFragment {
     private String bannerKind;
     private int bannerColor = 0xFFA68770;
     private float bannerOffset = 0.5f;
-    private Integer nameColor, bioColor, accentColor;
+    private Integer nameColor, nameColor2, bioColor, accentColor;
     private String ringStyle;
     private int ringColor = 0xFFA68770;
     private int ringColor2 = 0xFFE5CFB5;
@@ -152,6 +153,9 @@ public class OtherGramProfileActivity extends BaseFragment {
 
         items.add(UItem.asHeader(getString(R.string.OG_ProfileColors)));
         items.add(colorRow(ID_NAME_COLOR, R.string.OG_NameColor, nameColor));
+        if (nameColor != null) {
+            items.add(colorRow(ID_NAME_COLOR2, R.string.OG_NameColor2, nameColor2));
+        }
         items.add(colorRow(ID_BIO_COLOR, R.string.OG_BioColor, bioColor));
         items.add(colorRow(ID_ACCENT_COLOR, R.string.OG_ProfileAccent, accentColor));
         items.add(UItem.asShadow(getString(R.string.OG_ProfileColorsInfo)));
@@ -188,7 +192,13 @@ public class OtherGramProfileActivity extends BaseFragment {
                 OtherGramColorPicker.show(this, getString(R.string.OG_NameColor), nameColor != null ? nameColor : textColor(), c -> {
                     nameColor = c;
                     saveProfile();
-                }, nameColor != null ? () -> { nameColor = null; saveProfile(); } : null);
+                }, nameColor != null ? () -> { nameColor = null; nameColor2 = null; saveProfile(); } : null);
+                break;
+            case ID_NAME_COLOR2:
+                OtherGramColorPicker.show(this, getString(R.string.OG_NameColor2), nameColor2 != null ? nameColor2 : 0xFFC2A48C, c -> {
+                    nameColor2 = c;
+                    saveProfile();
+                }, nameColor2 != null ? () -> { nameColor2 = null; saveProfile(); } : null);
                 break;
             case ID_BIO_COLOR:
                 OtherGramColorPicker.show(this, getString(R.string.OG_BioColor), bioColor != null ? bioColor : textColor(), c -> {
@@ -232,7 +242,7 @@ public class OtherGramProfileActivity extends BaseFragment {
             case ID_RESET:
                 bannerKind = null;
                 ringStyle = null;
-                nameColor = bioColor = accentColor = null;
+                nameColor = nameColor2 = bioColor = accentColor = null;
                 OtherGramApi.sendJson("DELETE", "/v1/me/banner", null, (s, r) -> saveProfile());
                 break;
         }
@@ -280,6 +290,7 @@ public class OtherGramProfileActivity extends BaseFragment {
             bannerBitmap = null;
         }
         nameColor = profile != null && !profile.isNull("name_color") ? profile.optInt("name_color") : null;
+        nameColor2 = profile != null && !profile.isNull("name_color2") ? profile.optInt("name_color2") : null;
         bioColor = profile != null && !profile.isNull("bio_color") ? profile.optInt("bio_color") : null;
         accentColor = profile != null && !profile.isNull("accent_color") ? profile.optInt("accent_color") : null;
         final JSONObject ring = profile != null ? profile.optJSONObject("ring") : null;
@@ -298,6 +309,7 @@ public class OtherGramProfileActivity extends BaseFragment {
             body.put("banner_color", bannerColor);
             body.put("banner_offset", (double) bannerOffset);
             body.put("name_color", nameColor == null ? JSONObject.NULL : nameColor);
+            body.put("name_color2", nameColor == null || nameColor2 == null ? JSONObject.NULL : nameColor2);
             body.put("bio_color", bioColor == null ? JSONObject.NULL : bioColor);
             body.put("accent_color", accentColor == null ? JSONObject.NULL : accentColor);
             body.put("ring_style", ringStyle == null ? JSONObject.NULL : ringStyle);
@@ -436,12 +448,34 @@ public class OtherGramProfileActivity extends BaseFragment {
         private final TextPaint bioPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         private final RectF rect = new RectF();
         private final android.graphics.Path shapePath = new android.graphics.Path();
+        // The user's real avatar, drawn in the chosen shape; the ring is drawn from the unsaved edits below
+        private final org.telegram.messenger.ImageReceiver avatarReceiver = new org.telegram.messenger.ImageReceiver(this);
+        private final org.telegram.ui.Components.AvatarDrawable avatarDrawable = new org.telegram.ui.Components.AvatarDrawable();
 
         PreviewView(Context context) {
             super(context);
             namePaint.setTypeface(AndroidUtilities.bold());
             namePaint.setTextSize(dp(20));
             bioPaint.setTextSize(dp(14));
+            final TLRPC.User self = getUserConfig().getCurrentUser();
+            if (self != null) {
+                avatarDrawable.setInfo(currentAccount, self);
+                avatarReceiver.setForUserOrChat(self, avatarDrawable);
+            }
+            avatarReceiver.setOtherGramAvatar(true, 0);
+            avatarReceiver.setRoundRadius(dp(36));
+        }
+
+        @Override
+        protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            avatarReceiver.onAttachedToWindow();
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            avatarReceiver.onDetachedFromWindow();
         }
 
         @Override
@@ -475,28 +509,27 @@ public class OtherGramProfileActivity extends BaseFragment {
                 paint.setShader(null);
             }
 
-            // Avatar placeholder in the chosen shape, with the profile accent as its color
+            // The user's own avatar in the chosen shape, with the ring being edited
             final float size = dp(72);
             final float cx = w / 2f;
             final float ay = bannerH - size * 0.55f;
-            paint.setColor(accentColor != null ? accentColor : Theme.getColor(Theme.key_featuredStickers_addButton, resourceProvider));
-            final float r = size / 2f * OtherGramAvatars.radiusFactor();
             rect.set(cx - size / 2f, ay, cx + size / 2f, ay + size);
-            if (OtherGramAvatars.hasPathShape()) {
-                OtherGramAvatars.shapePath(rect, shapePath);
-                canvas.drawPath(shapePath, paint);
-            } else {
-                canvas.drawRoundRect(rect, r, r, paint);
-            }
+            avatarReceiver.setImageCoords(rect.left, rect.top, size, size);
+            avatarReceiver.draw(canvas);
             if (ringStyle != null) {
                 OtherGramAvatars.drawRing(canvas, rect, ringStyle, ringColor, ringColor2, 255);
             }
 
             final TLRPC.User self = getUserConfig().getCurrentUser();
             final String name = self != null ? UserObject.getUserName(self) : "OtherGram";
-            namePaint.setColor(nameColor != null ? nameColor : textColor());
             final float nameW = namePaint.measureText(name);
-            canvas.drawText(name, cx - nameW / 2f, ay + size + dp(26), namePaint);
+            final float nameX = cx - nameW / 2f;
+            namePaint.setColor(nameColor != null ? nameColor : textColor());
+            namePaint.setShader(nameColor != null && nameColor2 != null
+                    ? new LinearGradient(nameX, 0, nameX + nameW, 0, nameColor | 0xFF000000, nameColor2 | 0xFF000000, Shader.TileMode.CLAMP)
+                    : null);
+            canvas.drawText(name, nameX, ay + size + dp(26), namePaint);
+            namePaint.setShader(null);
 
             final String bio = getString(R.string.OG_ProfilePreviewBio);
             bioPaint.setColor(bioColor != null ? bioColor : Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourceProvider));

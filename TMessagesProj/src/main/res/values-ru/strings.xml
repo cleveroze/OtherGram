@@ -423,4 +423,22 @@
     <string name="OG_GhostNoStoryViews">Смотреть истории незаметно</string>
     <string name="OG_UserIdCopied">ID пользователя %1$d скопирован</string>
     <string name="OG_UserIdCopiedAge">ID %1$d скопирован · аккаунт создан примерно в %2$d году</string>
+    <string name="OG_NameColor2">Второй цвет имени (градиент)</string>
+    <string name="OG_MessageSize">Размер сообщений</string>
+    <string name="OG_MessageSizeInfo">Размер текста в сообщениях. Открытые чаты обновятся после повторного открытия.</string>
+    <string name="OG_MyBubbles">Мои пузыри</string>
+    <string name="OG_BubbleStyle">Стиль пузырей</string>
+    <string name="OG_BubbleTelegram">Как в теме</string>
+    <string name="OG_BubbleSolid">Однотонный</string>
+    <string name="OG_BubbleGlass">Жидкое стекло</string>
+    <string name="OG_BubbleColor">Цвет пузырей</string>
+    <string name="OG_MyBubblesInfo">Ваши сообщения получают этот стиль и прозрачность. Если OtherGram подключён, другие пользователи OtherGram тоже видят ваши сообщения в этом стиле. Если на вашем цвете текст будет плохо читаться, цвет подстроится для того, кто читает.</string>
+    <string name="OG_BubbleLocalOnly">Применено на этом телефоне. Подключите OtherGram, чтобы видели и другие.</string>
+    <string name="OG_ChatTweaks">Дополнительно</string>
+    <string name="OG_SendAnimation">Анимация при отправке сообщения</string>
+    <string name="OG_TimeSeconds">Показывать время с секундами</string>
+    <string name="OG_NoRounding">Точные числа вместо 1,2K</string>
+    <string name="OG_HideEdited">Скрывать пометку «изменено»</string>
+    <string name="OG_HideShare">Скрывать кнопку «Поделиться» у постов каналов</string>
+    <string name="OG_ChatTweaksInfo">Точные числа — экспериментальная настройка: некоторые счётчики могут отображаться неправильно или наезжать друг на друга. Изменения применяются по мере перерисовки чатов.</string>
 </resources>

@@ -11415,7 +11415,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 newString = Emoji.replaceEmoji(newString, nameTextView[1].getPaint().getFontMetricsInt(), false);
             } catch (Exception ignore) {
             }
-            newString = OtherGramBadges.appendBadges(newString, user.id); // OtherGram
+            newString = OtherGramBadges.appendBadges(OtherGramProfiles.colorName(newString, user.id), user.id); // OtherGram: name color/gradient and badges
             final long ogBadgesUserId = user.id;
             if (copyFromChatActivity) {
                 ChatActivity chatActivity = (ChatActivity) prevFragment;

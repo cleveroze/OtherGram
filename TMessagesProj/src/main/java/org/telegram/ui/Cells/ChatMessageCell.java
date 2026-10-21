@@ -144,6 +144,8 @@ import org.telegram.messenger.utils.DrawableUtils;
 import org.telegram.messenger.utils.tlutils.TLKeyboardHelper;
 import org.telegram.messenger.utils.tlutils.TlUtils;
 import org.telegram.messenger.video.OldVideoPlayerRewinder;
+import org.telegram.othergram.chats.OtherGramBubbles;
+import org.telegram.othergram.chats.OtherGramChats;
 import org.telegram.othergram.privacy.OtherGramDeletedMessages;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -18458,6 +18460,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 }
             }
         }
+        if (OtherGramChats.hideEdited()) { // OtherGram: Chats setting
+            edited = false;
+        }
         if (currentMessageObject.isWelcomeMessage()) {
             timeString = ""; // Long.toString(currentMessageObject.getId());
         } else if (currentMessageObject.notime || currentMessageObject.isSponsored() || currentMessageObject.isQuickReply() || currentMessageObject.isWelcomeMessage()) {
@@ -18465,9 +18470,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeString = "";
         } else if (currentMessageObject.realDate != 0) {
-            timeString = LocaleController.formatSmallDateChat(currentMessageObject.realDate) + ", " + LocaleController.getInstance().getFormatterDay().format((long) (currentMessageObject.realDate) * 1000);
+            timeString = LocaleController.formatSmallDateChat(currentMessageObject.realDate) + ", " + OtherGramChats.formatMessageTime((long) (currentMessageObject.realDate) * 1000);
         } else if (currentMessageObject.isRepostPreview) {
-            timeString = LocaleController.formatSmallDateChat(messageObject.messageOwner.date) + ", " + LocaleController.getInstance().getFormatterDay().format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = LocaleController.formatSmallDateChat(messageObject.messageOwner.date) + ", " + OtherGramChats.formatMessageTime((long) (messageObject.messageOwner.date) * 1000);
         } else if (edited) {
             if (AppGlobalConfig.getInstance(currentAccount).messagePrimaryEditedDate.get()) {
                 int editDate = currentMessagesGroup != null ? currentMessagesGroup.getMaxEditDate() : messageObject.messageOwner.edit_date;
@@ -18476,7 +18481,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 }
                 timeString = LocaleController.formatPmEditedDate(editDate);
             } else {
-                timeString = (getString(R.string.EditedMessage) + " " + LocaleController.getInstance().getFormatterDay().format((long) (messageObject.messageOwner.date) * 1000));
+                timeString = (getString(R.string.EditedMessage) + " " + OtherGramChats.formatMessageTime((long) (messageObject.messageOwner.date) * 1000));
             }
         } else if (currentMessageObject.isSaved && currentMessageObject.messageOwner.fwd_from != null && (currentMessageObject.messageOwner.fwd_from.date != 0 || currentMessageObject.messageOwner.fwd_from.saved_date != 0)) {
             int date = currentMessageObject.messageOwner.fwd_from.saved_date;
@@ -18485,7 +18490,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
             timeString = LocaleController.formatSeenDate(date);
         } else {
-            timeString = LocaleController.getInstance().getFormatterDay().format((long) (messageObject.messageOwner.date) * 1000);
+            timeString = OtherGramChats.formatMessageTime((long) (messageObject.messageOwner.date) * 1000);
         }
         if (currentMessageObject.messageOwner.video_processing_pending) {
             timeString = formatString(R.string.ScheduledTimeApprox, timeString);
@@ -18661,8 +18666,17 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         return messageObject.messageOwner.fwd_from != null && messageObject.messageOwner.fwd_from.saved_from_peer != null && (delegate == null || delegate.isReplyOrSelf());
     }
 
+    // OtherGram: bubble in the style its sender published (or own local style for outgoing messages)
+    private void ogDrawBubble(Canvas canvas, int alpha) {
+        final int textColor = getThemedColor(currentMessageObject != null && currentMessageObject.isOutOwner() ? Theme.key_chat_messageTextOut : Theme.key_chat_messageTextIn);
+        if (!OtherGramBubbles.draw(canvas, currentBackgroundDrawable, currentMessageObject, alpha, textColor)) {
+            currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+        }
+    }
+
     protected boolean checkNeedDrawShareButton(MessageObject messageObject) {
         if (isReportChat) return false;
+        if (OtherGramChats.hideShareButton()) return false; // OtherGram: Chats setting
         if (currentMessageObject.deleted && !currentMessageObject.deletedByThanos) return false;
         if (currentMessageObject.isSponsored()) return false;
         if (currentMessageObject.isEphemeral()) return false;
@@ -20745,7 +20759,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 //                } else {
                 currentSelectedBackgroundAlpha = 0;
                 currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                ogDrawBubble(canvas, (int) (255 * alphaInternal)); // OtherGram: bubble in the sender's style
 //                }
                 if (currentBackgroundShadowDrawable != null && currentPosition == null) {
                     currentBackgroundShadowDrawable.setAlpha((int) (255 * alphaInternal));
@@ -20754,7 +20768,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             } else {
                 if (isHighlightedAnimated) {
                     currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                    ogDrawBubble(canvas, (int) (255 * alphaInternal)); // OtherGram: bubble in the sender's style
                     currentSelectedBackgroundAlpha = getHighlightAlpha();
                     if (currentPosition == null) {
                         currentBackgroundSelectedDrawable.setAlpha((int) (alphaInternal * currentSelectedBackgroundAlpha * 255));
@@ -20762,7 +20776,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     }
                 } else if (selectedBackgroundProgress != 0 && (currentMessageObject == null || !currentMessageObject.preview) && !(currentMessagesGroup != null && currentMessagesGroup.isDocuments)) {
                     currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                    currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                    ogDrawBubble(canvas, (int) (255 * alphaInternal)); // OtherGram: bubble in the sender's style
                     currentSelectedBackgroundAlpha = selectedBackgroundProgress;
                     currentBackgroundSelectedDrawable.setAlpha((int) (currentSelectedBackgroundAlpha * alphaInternal * 255));
                     currentBackgroundSelectedDrawable.drawCached(canvas, backgroundCacheParams);
@@ -20784,7 +20798,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     } else {
                         currentSelectedBackgroundAlpha = 0;
                         currentBackgroundDrawable.setAlpha((int) (255 * alphaInternal));
-                        currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
+                        ogDrawBubble(canvas, (int) (255 * alphaInternal)); // OtherGram: bubble in the sender's style
                     }
                 }
                 if (currentBackgroundShadowDrawable != null && currentPosition == null) {

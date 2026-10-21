@@ -3442,9 +3442,8 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     }
                 }
                 if (!continueUpdate && (mask & MessagesController.UPDATE_MASK_NAME) != 0) {
-                    if (chat == null) {
-                        continueUpdate = true;
-                    }
+                    // OtherGram: also for chats, so channel/group badges arriving from the server get drawn
+                    continueUpdate = true;
                 }
                 if (!continueUpdate && (mask & MessagesController.UPDATE_MASK_CHAT_AVATAR) != 0) {
                     if (user == null) {

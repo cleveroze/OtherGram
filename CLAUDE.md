@@ -377,6 +377,22 @@ Telegram API не умеет хранить произвольные данны�
 
 ## Следующие задачи
 
+**Версия 1.1.0 (заказ владельца 2026-10-21; не ломать существующее, только добавлять и аккуратно чинить):**
+- [x] Вкладка «Чаты» (`OtherGramChatsActivity`, `othergram.chats`):
+  - [x] размер сообщений (SharedConfig.fontSize, как в ThemeActivity);
+  - [x] стиль пузырей «жидкое стекло» (`OtherGramBubbles`, хук `ChatMessageCell.ogDrawBubble`);
+  - [x] анимация отправки (`ChatListItemAnimator.animateAddImpl`, заменяет полёт пузыря, если включена);
+  - [x] время с секундами (`OtherGramChats.formatMessageTime` в `measureTime`);
+  - [x] точные числа (`LocaleController.formatShortNumber`), с пометкой об экспериментальности;
+  - [x] от Claude: скрыть «изменено», скрыть кнопку «Поделиться» у постов каналов;
+  - [x] цвет, прозрачность и стиль своих пузырей — **публикуются** (`profiles.bubble_*`), цвет подстраивается под читаемость:
+        другие пользователи OtherGram видят твои пузыри в твоём стиле.
+- [x] Бейджи: повтор запроса после ошибки, обновление каждые 10 мин, перерисовка по UPDATE_MASK_NAME в DialogCell/UserCell, бейджи и цвет ника в `UserCell` (участники, контакты, поиск).
+- [x] Градиент ника (`profiles.name_color2`, `OtherGramProfiles.GradientNameSpan`).
+- [x] Настоящая аватарка в предпросмотре кастомизации профиля.
+- [x] Цветовой круг (`OtherGramColorWheel`) в `OtherGramColorPicker`.
+- [ ] Идея на потом: кнопка «Сообщить об ошибке» с автоматическим шаблоном.
+
 **Ближайшее (2026-10-18): свой `api_id`.** Владелец получает ключи на my.telegram.org и сохраняет их в
 переменных окружения пользователя Windows `OTHERGRAM_API_ID` и `OTHERGRAM_API_HASH` (не в чат, не в код).
 Когда скажет «ключи готовы»:

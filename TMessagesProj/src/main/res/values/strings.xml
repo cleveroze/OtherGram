@@ -11695,4 +11695,22 @@
     <string name="OG_GhostNoStoryViews">Watch stories unseen</string>
     <string name="OG_UserIdCopied">User ID %1$d copied</string>
     <string name="OG_UserIdCopiedAge">ID %1$d copied · account created around %2$d</string>
+    <string name="OG_NameColor2">Second name color (gradient)</string>
+    <string name="OG_MessageSize">Message size</string>
+    <string name="OG_MessageSizeInfo">Text size in messages. Open chats update after reopening them.</string>
+    <string name="OG_MyBubbles">My bubbles</string>
+    <string name="OG_BubbleStyle">Bubble style</string>
+    <string name="OG_BubbleTelegram">As in the theme</string>
+    <string name="OG_BubbleSolid">Solid color</string>
+    <string name="OG_BubbleGlass">Liquid glass</string>
+    <string name="OG_BubbleColor">Bubble color</string>
+    <string name="OG_MyBubblesInfo">Your messages get this style and transparency. With OtherGram connected, other OtherGram users see your messages in this style too. If text would be hard to read on your color, the color is adjusted for the person reading.</string>
+    <string name="OG_BubbleLocalOnly">Applied on this phone. Connect OtherGram so others see it too.</string>
+    <string name="OG_ChatTweaks">Extra</string>
+    <string name="OG_SendAnimation">Animation when sending a message</string>
+    <string name="OG_TimeSeconds">Show time with seconds</string>
+    <string name="OG_NoRounding">Exact numbers instead of 1.2K</string>
+    <string name="OG_HideEdited">Hide the \"edited\" mark</string>
+    <string name="OG_HideShare">Hide the share button next to channel posts</string>
+    <string name="OG_ChatTweaksInfo">Exact numbers is an experimental option: some counters may look wrong or overlap. Changes apply to chats as they redraw.</string>
 </resources>

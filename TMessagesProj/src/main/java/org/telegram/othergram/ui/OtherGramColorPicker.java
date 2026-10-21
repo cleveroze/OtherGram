@@ -75,6 +75,14 @@ public class OtherGramColorPicker {
         hex.setCursorWidth(1.5f);
 
         final Runnable updatePreview = () -> previewBg.setColor(selected[0]);
+        final OtherGramColorWheel wheel = new OtherGramColorWheel(context);
+        final boolean[] fromWheel = {false};
+        wheel.setColor(selected[0]);
+        wheel.setListener(color -> {
+            fromWheel[0] = true;
+            hex.setText(toHex(color));
+            fromWheel[0] = false;
+        });
         hex.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -84,9 +92,13 @@ public class OtherGramColorPicker {
                 if (parsed != null) {
                     selected[0] = parsed;
                     updatePreview.run();
+                    if (!fromWheel[0]) {
+                        wheel.setColor(parsed);
+                    }
                 }
             }
         });
+        layout.addView(wheel, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 8));
 
         for (int row = 0; row < PALETTE.length / COLUMNS; row++) {
             final LinearLayout line = new LinearLayout(context);
@@ -111,9 +123,11 @@ public class OtherGramColorPicker {
         hex.setText(toHex(selected[0]));
         updatePreview.run();
 
+        final android.widget.ScrollView scroll = new android.widget.ScrollView(context);
+        scroll.addView(layout);
         final AlertDialog.Builder builder = new AlertDialog.Builder(context, rp)
                 .setTitle(title)
-                .setView(layout)
+                .setView(scroll)
                 .setPositiveButton(getString(R.string.OG_Apply), (dialog, which) -> onPick.onColor(selected[0]))
                 .setNegativeButton(getString(R.string.Cancel), null);
         if (onReset != null) {

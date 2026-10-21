@@ -40,6 +40,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.messenger.utils.DrawableUtils;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -510,6 +511,15 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
         }
     }
 
+    // OtherGram: badge holder shown in this cell (users positive, groups/channels negative), not for yourself
+    private long ogPeerId() {
+        if (currentObject instanceof TLRPC.User) {
+            final TLRPC.User user = (TLRPC.User) currentObject;
+            return UserObject.isUserSelf(user) ? 0 : user.id;
+        }
+        return currentObject instanceof TLRPC.Chat ? -((TLRPC.Chat) currentObject).id : 0;
+    }
+
     public void update(int mask) {
         TLRPC.FileLocation photo = null;
         String newName = null;
@@ -557,6 +567,9 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
                 if (!newName.equals(lastName)) {
                     continueUpdate = true;
                 }
+            }
+            if (!continueUpdate && (mask & MessagesController.UPDATE_MASK_NAME) != 0 && ogPeerId() != 0) {
+                continueUpdate = true; // OtherGram: badges/name colors arrived from the server, redraw the name
             }
             if (!continueUpdate) {
                 return;
@@ -637,7 +650,7 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
                     name = Emoji.replaceEmoji(name, nameTextView.getPaint().getFontMetricsInt(), false);
                 } catch (Exception ignore) {}
             }
-            nameTextView.setText(name);
+            nameTextView.setText(OtherGramBadges.decorateCompact(name, ogPeerId())); // OtherGram: badges and name color
         } else {
             if (currentUser != null) {
                 lastName = newName == null ? UserObject.getUserName(currentUser) : AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(newName));
@@ -655,7 +668,7 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
                     name = Emoji.replaceEmoji(name, nameTextView.getPaint().getFontMetricsInt(), false);
                 } catch (Exception ignore) {}
             }
-            nameTextView.setText(name);
+            nameTextView.setText(OtherGramBadges.decorateCompact(name, ogPeerId())); // OtherGram: badges and name color
         }
         long botVerificationIcon = 0;
         if (currentUser != null) {

@@ -2856,6 +2856,12 @@ public class LocaleController {
     }
 
     public static String formatShortNumber(int number, int[] rounded) {
+        if (org.telegram.othergram.chats.OtherGramChats.noNumberRounding()) { // OtherGram: exact counters
+            if (rounded != null) {
+                rounded[0] = number;
+            }
+            return String.format(Locale.US, "%d", number);
+        }
         StringBuilder K = new StringBuilder();
         int lastDec = 0;
         int KCount = 0;
