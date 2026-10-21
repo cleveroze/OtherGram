@@ -11,6 +11,7 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.MessageObject;
 import org.telegram.othergram.OtherGramConfig;
+import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.ui.ActionBar.MessageDrawable;
 
@@ -70,7 +71,13 @@ public class OtherGramBubbles {
             opacity = myAlpha();
         } else {
             final long fromId = message.getFromChatId();
-            final OtherGramProfiles.Profile profile = fromId > 0 ? OtherGramProfiles.getProfile(fromId) : null;
+            if (fromId <= 0) {
+                return false;
+            }
+            // Asks for the sender's published data if it is not cached yet (e.g. group members whose
+            // names Telegram draws itself); the bubble gets the style on the next redraw
+            OtherGramBadges.get(fromId);
+            final OtherGramProfiles.Profile profile = OtherGramProfiles.getProfile(fromId);
             if (profile == null) {
                 return false;
             }
