@@ -88,7 +88,8 @@ public class OtherGramColorWheel extends View {
             canvas.drawCircle(cx, cy, radius, knobFill);
         }
 
-        final double angle = Math.toRadians(-hsv[0]);
+        // SweepGradient goes clockwise on screen (y points down), so the hue angle is clockwise too
+        final double angle = Math.toRadians(hsv[0]);
         final float kx = (float) (cx + Math.cos(angle) * hsv[1] * radius);
         final float ky = (float) (cy + Math.sin(angle) * hsv[1] * radius);
         knobFill.setColor(getColor());
@@ -123,7 +124,7 @@ public class OtherGramColorWheel extends View {
                 if (touchTarget == 1) {
                     final double dx = x - cx;
                     final double dy = y - cy;
-                    float hue = (float) Math.toDegrees(Math.atan2(-dy, dx));
+                    float hue = (float) Math.toDegrees(Math.atan2(dy, dx)); // clockwise, like the drawn wheel
                     if (hue < 0) {
                         hue += 360f;
                     }
