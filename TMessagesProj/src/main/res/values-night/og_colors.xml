@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- OtherGram: launch screen background in the dark system theme -->
+    <color name="og_splash_background">#17110D</color>
+</resources>

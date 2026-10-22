@@ -20,7 +20,11 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Shader;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -155,9 +159,8 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     public View createView(Context context) {
         logoDrawable = context.getResources().getDrawable(R.drawable.telegram_logo).mutate();
         logoDrawable.setBounds(0, dp(8.666f), dp(115), dp(35));
-        SpannableStringBuilder ssb = new SpannableStringBuilder(LocaleController.getString(R.string.Page1Title));
-        ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        titles[0] = ssb;
+        // OtherGram: plain "OtherGram" title instead of Telegram's wordmark image
+        titles[0] = "OtherGram";
 
 
         actionBar.setAddToContainer(false);
@@ -790,13 +793,23 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             loadTexture(R.drawable.intro_powerful_star, 18);
             loadTexture(R.drawable.intro_private_door, 19);
             loadTexture(R.drawable.intro_private_screw, 20);
-            loadTexture(R.drawable.intro_tg_plane, 21);
+            // OtherGram: the intro shows the OtherGram logo in place of Telegram's blue sphere; the plane layer is empty
+            loadTexture(v -> Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888), 21);
             loadTexture(v -> {
-                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paint.setColor(ThemeColors.TELEGRAM_COLOR); // It's logo color, it should not be colored by the theme
-                int size = dp(ICON_HEIGHT_DP);
+                final int size = dp(ICON_HEIGHT_DP);
+                final Bitmap logo = BitmapFactory.decodeResource(ApplicationLoader.applicationContext.getResources(), R.drawable.og_logo);
                 Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                 Canvas c = new Canvas(bm);
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+                if (logo != null) {
+                    final BitmapShader shader = new BitmapShader(logo, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                    final Matrix matrix = new Matrix();
+                    matrix.setScale(size / (float) logo.getWidth(), size / (float) logo.getHeight());
+                    shader.setLocalMatrix(matrix);
+                    paint.setShader(shader);
+                } else {
+                    paint.setColor(0xFFA68770);
+                }
                 c.drawCircle(size / 2f, size / 2f, size / 2f, paint);
                 return bm;
             }, 22);

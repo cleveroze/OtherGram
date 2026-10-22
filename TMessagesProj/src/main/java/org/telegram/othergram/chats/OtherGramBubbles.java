@@ -59,6 +59,16 @@ public class OtherGramBubbles {
      * Telegram should draw its own bubble.
      */
     public static boolean draw(Canvas canvas, MessageDrawable drawable, MessageObject message, int alpha, int textColor) {
+        try {
+            return drawInternal(canvas, drawable, message, alpha, textColor);
+        } catch (Throwable e) {
+            // Never crash a chat because of a custom bubble: fall back to Telegram's own bubble
+            org.telegram.messenger.FileLog.e(e);
+            return false;
+        }
+    }
+
+    private static boolean drawInternal(Canvas canvas, MessageDrawable drawable, MessageObject message, int alpha, int textColor) {
         if (drawable == null || message == null) {
             return false;
         }
@@ -118,6 +128,11 @@ public class OtherGramBubbles {
             drawable.draw(canvas, fillPaint);
         }
         return true;
+    }
+
+    /** Whether text in this color stays readable on this bubble (used to refuse unreadable picks). */
+    public static boolean isReadable(int bubble, int textColor) {
+        return ColorUtils.calculateContrast(textColor | 0xFF000000, bubble | 0xFF000000) >= MIN_TEXT_CONTRAST;
     }
 
     /** Moves the bubble color towards black or white until the viewer's text stays readable on it. */

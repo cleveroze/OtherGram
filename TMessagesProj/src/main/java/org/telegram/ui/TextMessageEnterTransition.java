@@ -41,6 +41,7 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.othergram.chats.OtherGramBubbles;
 import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -518,7 +519,10 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
             drawable.setAlpha((int) (255 * alphaProgress));
             drawable.setBounds((int) drawableX, (int) drawableTop, drawableRight, (int) drawableBottom);
             drawable.setDrawFullBubble(true);
-            drawable.draw(canvas);
+            // OtherGram: the flying bubble already has the user's bubble style, so it does not flash the theme color
+            if (!OtherGramBubbles.draw(canvas, drawable, currentMessageObject, (int) (255 * alphaProgress), getThemedColor(Theme.key_chat_messageTextOut))) {
+                drawable.draw(canvas);
+            }
             drawable.setDrawFullBubble(false);
             drawable.setAlpha(255);
         }

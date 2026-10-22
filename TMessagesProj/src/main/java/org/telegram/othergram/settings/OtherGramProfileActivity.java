@@ -131,9 +131,13 @@ public class OtherGramProfileActivity extends BaseFragment {
             items.add(UItem.asIntSlideView(1, 0, Math.round(bannerOffset * 100), 100,
                     val -> String.format(Locale.US, "%d%%", val),
                     val -> {
+                        // Only the preview follows the finger; one save goes out after the slider settles.
+                        // Rebuilding the list or applying server echoes here made the slider jump back.
                         bannerOffset = val / 100f;
+                        offsetDirty = true;
                         preview.invalidate();
-                        saveProfile();
+                        AndroidUtilities.cancelRunOnUIThread(saveOffsetRunnable);
+                        AndroidUtilities.runOnUIThread(saveOffsetRunnable, 700);
                     }));
         }
         if (bannerKind != null) {
@@ -302,7 +306,20 @@ public class OtherGramProfileActivity extends BaseFragment {
         refresh();
     }
 
+    private boolean offsetDirty;
+    private final Runnable saveOffsetRunnable = () -> {
+        offsetDirty = false;
+        saveProfile(false);
+    };
+    /** Increases with every save; responses of older saves are ignored so they cannot undo newer edits. */
+    private int saveSeq;
+
     private void saveProfile() {
+        saveProfile(true);
+    }
+
+    private void saveProfile(boolean refreshList) {
+        final int seq = ++saveSeq;
         final JSONObject body = new JSONObject();
         try {
             body.put("banner_kind", bannerKind == null ? JSONObject.NULL : bannerKind);
@@ -317,8 +334,21 @@ public class OtherGramProfileActivity extends BaseFragment {
             body.put("ring_color2", ringColor2);
         } catch (Exception ignore) {
         }
-        refresh();
-        OtherGramApi.sendJson("PUT", "/v1/me/profile", body, this::applyMe);
+        if (refreshList) {
+            refresh();
+        }
+        OtherGramApi.sendJson("PUT", "/v1/me/profile", body, (status, response) -> {
+            if (seq != saveSeq) {
+                return; // a newer edit is on its way
+            }
+            if (refreshList) {
+                applyMe(status, response);
+            } else if (status < 200 || status >= 300) {
+                showError(status, response);
+            } else {
+                OtherGramProfiles.applyMe(response); // keep caches fresh without touching the slider
+            }
+        });
     }
 
     private void showError(int status, JSONObject response) {
@@ -350,6 +380,16 @@ public class OtherGramProfileActivity extends BaseFragment {
         } catch (Exception e) {
             FileLog.e(e);
         }
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        // A pending banner position is saved right away instead of being lost
+        AndroidUtilities.cancelRunOnUIThread(saveOffsetRunnable);
+        if (offsetDirty && OtherGramApi.isLoggedIn()) {
+            saveOffsetRunnable.run();
+        }
+        super.onFragmentDestroy();
     }
 
     @Override

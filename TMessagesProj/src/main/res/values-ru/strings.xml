@@ -215,7 +215,7 @@
     <string name="Page4Title">Безопасный</string>
     <string name="Page5Title">Мощный</string>
     <string name="Page6Title">Облачный</string>
-    <string name="Page1Message">Самый **быстрый** мессенджер в мире.\n**Бесплатный** и **безопасный**.</string>
+    <string name="Page1Message">Telegram, который можно **сделать своим**.\nЦвета, шрифты, бейджи и многое другое.</string>
     <string name="Page2Message">**Telegram** доставляет сообщения быстрее\nлюбого другого приложения.</string>
     <string name="Page3Message">**Telegram** предоставляет бесплатное безлимитное облачное хранилище для чатов и медиа.\n</string>
     <string name="Page4Message">**Telegram** защищает Вашу переписку от злоумышленников.</string>
@@ -441,4 +441,18 @@
     <string name="OG_HideEdited">Скрывать пометку «изменено»</string>
     <string name="OG_HideShare">Скрывать кнопку «Поделиться» у постов каналов</string>
     <string name="OG_ChatTweaksInfo">Точные числа — экспериментальная настройка: некоторые счётчики могут отображаться неправильно или наезжать друг на друга. Изменения применяются по мере перерисовки чатов.</string>
+    <string name="OG_UnreadableColorTitle">Текст будет нечитаемым</string>
+    <string name="OG_UnreadableColorDark">На телефоне включена тёмная тема, поэтому текст сообщений светлый. На таком светлом пузыре его не будет видно. Выберите цвет темнее.</string>
+    <string name="OG_UnreadableColorLight">На телефоне включена светлая тема, поэтому текст сообщений тёмный. На таком тёмном пузыре его не будет видно. Выберите цвет светлее.</string>
+    <string name="OG_AnimTelegram">Telegram (стандартная)</string>
+    <string name="OG_AnimSpring">Пружина</string>
+    <string name="OG_AnimBounce">Отскок</string>
+    <string name="OG_AnimJelly">Желе</string>
+    <string name="OG_AnimSlide">Выезд сбоку</string>
+    <string name="OG_AnimFade">Проявление</string>
+    <string name="OG_InterfaceStyle">Стиль интерфейса</string>
+    <string name="OG_IslandHeader">Шапка чата «островком» (как в iOS)</string>
+    <string name="OG_TabBounce">Пружинящие вкладки внизу</string>
+    <string name="OG_TabHaptics">Вибрация при переключении вкладок</string>
+    <string name="OG_InterfaceStyleInfo">Шапка «островком»: кнопка «назад», имя и аватарка парят над чатом отдельными стеклянными элементами. Применяется к чатам, открытым после изменения.</string>
 </resources>

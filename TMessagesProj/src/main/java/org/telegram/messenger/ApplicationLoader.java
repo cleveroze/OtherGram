@@ -323,6 +323,8 @@ public class ApplicationLoader extends Application {
             applicationContext = getApplicationContext();
         }
 
+        org.telegram.othergram.theme.OtherGramFonts.applyGlobalTypeface(); // OtherGram: chosen font for all text
+
         NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
 
         try {

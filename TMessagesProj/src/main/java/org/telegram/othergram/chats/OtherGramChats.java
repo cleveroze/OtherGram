@@ -36,8 +36,25 @@ public class OtherGramChats {
         return OtherGramConfig.getBoolean(KEY_NO_ROUNDING, false);
     }
 
+    public static final String KEY_SEND_ANIMATION_STYLE = "chats_send_animation_style";
+    public static final int ANIM_TELEGRAM = 0;
+    public static final int ANIM_SPRING = 1;
+    public static final int ANIM_BOUNCE = 2;
+    public static final int ANIM_JELLY = 3;
+    public static final int ANIM_SLIDE = 4;
+    public static final int ANIM_FADE = 5;
+    public static final int[] ANIM_STYLES = {ANIM_TELEGRAM, ANIM_SPRING, ANIM_BOUNCE, ANIM_JELLY, ANIM_SLIDE, ANIM_FADE};
+
+    /** Chosen send animation; 1.1.x stored only an on/off switch, which maps to the spring. */
+    public static int sendAnimationStyle() {
+        if (OtherGramConfig.contains(KEY_SEND_ANIMATION_STYLE)) {
+            return OtherGramConfig.getInt(KEY_SEND_ANIMATION_STYLE, ANIM_TELEGRAM);
+        }
+        return OtherGramConfig.getBoolean(KEY_SEND_ANIMATION, false) ? ANIM_SPRING : ANIM_TELEGRAM;
+    }
+
     public static boolean sendAnimation() {
-        return OtherGramConfig.getBoolean(KEY_SEND_ANIMATION, false);
+        return sendAnimationStyle() != ANIM_TELEGRAM;
     }
 
     public static boolean hideEdited() {
@@ -70,27 +87,81 @@ public class OtherGramChats {
      * overshoot. Runs on its own animator so it never interferes with the list's move animation.
      */
     public static void playSendAnimation(View view, boolean out) {
+        final int style = sendAnimationStyle();
+        if (style == ANIM_TELEGRAM) {
+            return;
+        }
+        final float density = view.getResources().getDisplayMetrics().density;
         view.setPivotX(out ? view.getWidth() : 0);
         view.setPivotY(view.getHeight());
-        view.setScaleX(0.86f);
-        view.setScaleY(0.86f);
-        view.setAlpha(0.35f);
         final ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
-        animator.setDuration(360);
-        animator.setInterpolator(new OvershootInterpolator(1.4f));
+        switch (style) {
+            case ANIM_BOUNCE:
+                // Drops in from below and bounces a couple of times before settling
+                animator.setDuration(620);
+                animator.setInterpolator(new android.view.animation.BounceInterpolator());
+                break;
+            case ANIM_JELLY:
+                animator.setDuration(560);
+                animator.setInterpolator(new android.view.animation.LinearInterpolator());
+                break;
+            case ANIM_SLIDE:
+                animator.setDuration(380);
+                animator.setInterpolator(new android.view.animation.DecelerateInterpolator(2f));
+                break;
+            case ANIM_FADE:
+                animator.setDuration(320);
+                animator.setInterpolator(new android.view.animation.DecelerateInterpolator());
+                break;
+            default: // ANIM_SPRING
+                animator.setDuration(360);
+                animator.setInterpolator(new OvershootInterpolator(1.4f));
+                break;
+        }
         animator.addUpdateListener(a -> {
             final float t = (float) a.getAnimatedValue();
-            final float scale = 0.86f + 0.14f * t;
-            view.setScaleX(scale);
-            view.setScaleY(scale);
-            view.setAlpha(Math.min(1f, 0.35f + 0.65f * t * 1.4f));
+            final float fraction = a.getAnimatedFraction();
+            switch (style) {
+                case ANIM_BOUNCE: {
+                    // Grows from the bottom corner and bounces in place (translationY is owned by the list)
+                    final float scale = 0.7f + 0.3f * t;
+                    view.setScaleX(scale);
+                    view.setScaleY(scale);
+                    view.setAlpha(Math.min(1f, fraction * 3f));
+                    break;
+                }
+                case ANIM_JELLY: {
+                    // Squash and stretch that decays: wide-and-short, then tall-and-narrow, then rest
+                    final double wave = Math.sin(fraction * Math.PI * 3) * (1f - fraction);
+                    view.setScaleX((float) (1 + 0.12 * wave));
+                    view.setScaleY((float) (1 - 0.12 * wave));
+                    view.setAlpha(Math.min(1f, fraction * 4f));
+                    break;
+                }
+                case ANIM_SLIDE:
+                    view.setTranslationX((1f - t) * (out ? 1 : -1) * 48 * density);
+                    view.setAlpha(t);
+                    break;
+                case ANIM_FADE:
+                    view.setAlpha(t);
+                    break;
+                default: {
+                    final float scale = 0.86f + 0.14f * t;
+                    view.setScaleX(scale);
+                    view.setScaleY(scale);
+                    view.setAlpha(Math.min(1f, 0.35f + 0.65f * t * 1.4f));
+                    break;
+                }
+            }
         });
         animator.addListener(new android.animation.AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(android.animation.Animator animation) {
                 view.setScaleX(1f);
                 view.setScaleY(1f);
+                view.setTranslationX(0f);
                 view.setAlpha(1f);
+                // translationY belongs to the list's own move animation, so it is left alone here
             }
         });
         animator.start();

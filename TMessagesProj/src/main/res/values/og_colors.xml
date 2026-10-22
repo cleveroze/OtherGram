@@ -2,4 +2,6 @@
 <resources>
     <!-- OtherGram: adaptive launcher icon background, sampled from Tools/othergram/icon-source.png -->
     <color name="og_ic_launcher_background">#E5CFB5</color>
+    <!-- OtherGram: launch screen background (light system theme; values-night has the dark one) -->
+    <color name="og_splash_background">#F1E1CC</color>
 </resources>

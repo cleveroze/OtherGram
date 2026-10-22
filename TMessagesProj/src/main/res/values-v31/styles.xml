@@ -28,9 +28,10 @@
         <item name="android:navigationBarColor">#000000</item>
         <item name="android:textViewStyle">@style/MyTextViewStyle</item>
         <item name="android:forceDarkAllowed">false</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/tg_splash_320</item>
+        <!-- OtherGram: own launch screen instead of Telegram's plane -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/og_splash</item>
         <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
-        <item name="android:windowSplashScreenBackground">?android:windowBackground</item>
+        <item name="android:windowSplashScreenBackground">@color/og_splash_background</item>
     </style>
 
     <style name="Theme.TMessages" parent="Theme.AppCompat.Light">

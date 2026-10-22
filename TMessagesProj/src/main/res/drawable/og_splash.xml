@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- OtherGram: launch splash icon (Android 12+). The system masks the icon to a circle about two
+     thirds of its size, so the logo is inset to fill exactly that circle. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/og_logo"
+    android:inset="16.6%" />

@@ -103,6 +103,65 @@ public class OtherGramFonts {
         return load(font, heading);
     }
 
+    /**
+     * Makes the interface font the default font of the whole app, including plain Android text views
+     * that Telegram never assigns a typeface to. Android has no public API for this, so the defaults
+     * held by Typeface are replaced through reflection; on devices where that is blocked nothing
+     * changes and the font still applies to the places hooked directly (names, messages, lists).
+     */
+    public static void applyGlobalTypeface() {
+        try {
+            final Typeface regular = regular();
+            if (regular == null) {
+                return;
+            }
+            final Typeface bold = headings() != null ? headings() : Typeface.create(regular, Typeface.BOLD);
+            replaceStatic("DEFAULT", regular);
+            replaceStatic("SANS_SERIF", regular);
+            replaceStatic("DEFAULT_BOLD", bold);
+            try {
+                final java.lang.reflect.Field defaults = Typeface.class.getDeclaredField("sDefaults");
+                defaults.setAccessible(true);
+                final Typeface[] array = (Typeface[]) defaults.get(null);
+                if (array != null && array.length >= 2) {
+                    array[Typeface.NORMAL] = regular;
+                    array[Typeface.BOLD] = bold;
+                }
+            } catch (Throwable ignore) {
+            }
+            try {
+                final java.lang.reflect.Field map = Typeface.class.getDeclaredField("sSystemFontMap");
+                map.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                final java.util.Map<String, Typeface> fonts = (java.util.Map<String, Typeface>) map.get(null);
+                if (fonts != null) {
+                    try {
+                        // Newer Android keeps a mutable map in a final field: change it in place
+                        fonts.put("sans-serif", regular);
+                        fonts.put("sans-serif-medium", bold);
+                    } catch (UnsupportedOperationException e) {
+                        final java.util.Map<String, Typeface> copy = new java.util.HashMap<>(fonts);
+                        copy.put("sans-serif", regular);
+                        copy.put("sans-serif-medium", bold);
+                        map.set(null, copy);
+                    }
+                }
+            } catch (Throwable ignore) {
+            }
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
+    }
+
+    private static void replaceStatic(String name, Typeface value) {
+        try {
+            final java.lang.reflect.Field field = Typeface.class.getDeclaredField(name);
+            field.setAccessible(true);
+            field.set(null, value);
+        } catch (Throwable ignore) {
+        }
+    }
+
     private static File customDir() {
         final File dir = new File(ApplicationLoader.applicationContext.getFilesDir(), "othergram_fonts");
         if (!dir.exists()) {

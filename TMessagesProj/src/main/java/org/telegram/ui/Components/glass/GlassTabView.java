@@ -46,6 +46,7 @@ import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.ScaleStateListAnimator;
+import org.telegram.othergram.ui.OtherGramInterface;
 import org.telegram.ui.MainTabsLayout;
 
 import me.vkryl.android.AnimatorUtils;
@@ -157,7 +158,8 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
             paintCounterBackground.setColor(Theme.multAlpha(colorSelected, 0.09f * alpha));
             tmpRectF.set(0, 0, viewWidth, getHeight());
             final float r = Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
-            final float s = lerp(0.6f, 1, selectedFactor) * MathUtils.clamp(attachScale, 0, 1);
+            final float s = lerp(0.6f, 1, selectedFactor) * MathUtils.clamp(attachScale, 0, 1)
+                    * (ogBounce < 1f ? 0.9f + 0.1f * OtherGramInterface.spring(ogBounce) : 1f); // OtherGram: pill bounces too
             canvas.save();
             canvas.scale(s, s, tmpRectF.centerX(), tmpRectF.centerY());
             canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
@@ -230,7 +232,56 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
         usePremiumCounter = usePremiumBadge;
     }
 
+    // OtherGram: the icon of a newly selected tab jumps with a spring, plus a light haptic tick
+    private android.animation.ValueAnimator ogBounceAnimator;
+    private float ogBounce = 1f;
+
+    private void ogPlayBounce() {
+        if (!OtherGramInterface.tabBounce()) {
+            return;
+        }
+        OtherGramInterface.tick(this);
+        if (ogBounceAnimator != null) {
+            ogBounceAnimator.cancel();
+        }
+        ogBounceAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
+        ogBounceAnimator.setDuration(650);
+        ogBounceAnimator.setInterpolator(new android.view.animation.LinearInterpolator());
+        ogBounceAnimator.addUpdateListener(a -> {
+            ogBounce = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        ogBounceAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                ogBounce = 1f;
+                invalidate();
+            }
+        });
+        ogBounceAnimator.start();
+    }
+
+    @Override
+    protected boolean drawChild(@NonNull Canvas canvas, android.view.View child, long drawingTime) {
+        if (ogBounce < 1f && (child == imageView || child == backupImageView)) {
+            final float scale = 0.72f + 0.28f * OtherGramInterface.spring(ogBounce);
+            final float hop = -dp(4) * (float) Math.sin(Math.PI * Math.min(1f, ogBounce * 1.6f)) * (1f - ogBounce);
+            final float cx = child.getX() + child.getWidth() / 2f;
+            final float cy = child.getY() + child.getHeight() / 2f;
+            canvas.save();
+            canvas.translate(0, hop);
+            canvas.scale(scale, scale, cx, cy);
+            final boolean result = super.drawChild(canvas, child, drawingTime);
+            canvas.restore();
+            return result;
+        }
+        return super.drawChild(canvas, child, drawingTime);
+    }
+
     public void setSelected(boolean selected, boolean animated) {
+        if (animated && selected && !isSelectedAnimator.getValue()) {
+            ogPlayBounce();
+        }
         isSelectedAnimator.setValue(selected, animated);
         checkPlayAnimation(animated);
 

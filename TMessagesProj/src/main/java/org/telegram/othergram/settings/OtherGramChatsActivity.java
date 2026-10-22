@@ -49,6 +49,9 @@ public class OtherGramChatsActivity extends BaseFragment {
 
     private static final String[] BUBBLE_STYLES = {null, OtherGramBubbles.STYLE_SOLID, OtherGramBubbles.STYLE_GLASS};
     private static final int[] BUBBLE_STYLE_TITLES = {R.string.OG_BubbleTelegram, R.string.OG_BubbleSolid, R.string.OG_BubbleGlass};
+    // Indexed by OtherGramChats.ANIM_* (values 0..5 in this order)
+    private static final int[] ANIM_TITLES = {R.string.OG_AnimTelegram, R.string.OG_AnimSpring, R.string.OG_AnimBounce,
+            R.string.OG_AnimJelly, R.string.OG_AnimSlide, R.string.OG_AnimFade};
 
     private UniversalRecyclerView listView;
 
@@ -99,7 +102,7 @@ public class OtherGramChatsActivity extends BaseFragment {
         items.add(UItem.asShadow(getString(R.string.OG_MyBubblesInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_ChatTweaks)));
-        items.add(UItem.asCheck(ID_SEND_ANIMATION, getString(R.string.OG_SendAnimation)).setChecked(OtherGramChats.sendAnimation()));
+        items.add(UItem.asButton(ID_SEND_ANIMATION, R.drawable.msg_msgbubble3, getString(R.string.OG_SendAnimation), getString(ANIM_TITLES[OtherGramChats.sendAnimationStyle()])));
         items.add(UItem.asCheck(ID_SECONDS, getString(R.string.OG_TimeSeconds)).setChecked(OtherGramChats.showSeconds()));
         items.add(UItem.asCheck(ID_NO_ROUNDING, getString(R.string.OG_NoRounding)).setChecked(OtherGramChats.noNumberRounding()));
         items.add(UItem.asCheck(ID_HIDE_EDITED, getString(R.string.OG_HideEdited)).setChecked(OtherGramChats.hideEdited()));
@@ -145,14 +148,31 @@ public class OtherGramChatsActivity extends BaseFragment {
             }
             case ID_BUBBLE_COLOR:
                 OtherGramColorPicker.show(this, getString(R.string.OG_BubbleColor), OtherGramBubbles.myColor(), color -> {
+                    // Refuse colors the message text would disappear on (white bubbles in a dark theme etc.)
+                    if (!OtherGramBubbles.isReadable(color, Theme.getColor(Theme.key_chat_messageTextOut, resourceProvider))) {
+                        showUnreadableColorAlert();
+                        return;
+                    }
                     OtherGramConfig.putInt(OtherGramBubbles.KEY_COLOR, color);
                     listView.adapter.update(true);
                     publishBubble();
                 }, null);
                 break;
-            case ID_SEND_ANIMATION:
-                toggle(OtherGramChats.KEY_SEND_ANIMATION);
+            case ID_SEND_ANIMATION: {
+                final CharSequence[] names = new CharSequence[ANIM_TITLES.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = getString(ANIM_TITLES[i]);
+                }
+                new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                        .setTitle(getString(R.string.OG_SendAnimation))
+                        .setItems(names, (dialog, which) -> {
+                            OtherGramConfig.putInt(OtherGramChats.KEY_SEND_ANIMATION_STYLE, OtherGramChats.ANIM_STYLES[which]);
+                            listView.adapter.update(true);
+                        })
+                        .setNegativeButton(getString(R.string.Cancel), null)
+                        .show();
                 break;
+            }
             case ID_SECONDS:
                 toggle(OtherGramChats.KEY_SECONDS);
                 break;
@@ -166,6 +186,14 @@ public class OtherGramChatsActivity extends BaseFragment {
                 toggle(OtherGramChats.KEY_HIDE_SHARE);
                 break;
         }
+    }
+
+    private void showUnreadableColorAlert() {
+        new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                .setTitle(getString(R.string.OG_UnreadableColorTitle))
+                .setMessage(getString(Theme.isCurrentThemeDark() ? R.string.OG_UnreadableColorDark : R.string.OG_UnreadableColorLight))
+                .setPositiveButton(getString(R.string.OK), null)
+                .show();
     }
 
     /** Same steps as Telegram's own text size setting. */
