@@ -54,7 +54,7 @@ public class OtherGramChats {
     }
 
     public static boolean sendAnimation() {
-        return sendAnimationStyle() != ANIM_TELEGRAM;
+        return sendAnimationStyle() != ANIM_TELEGRAM || org.telegram.othergram.theme.OtherGramMaterial.motion();
     }
 
     public static boolean hideEdited() {
@@ -87,6 +87,10 @@ public class OtherGramChats {
      * overshoot. Runs on its own animator so it never interferes with the list's move animation.
      */
     public static void playSendAnimation(View view, boolean out) {
+        if (org.telegram.othergram.theme.OtherGramMaterial.motion()) {
+            playMaterialAnimation(view, out);
+            return;
+        }
         final int style = sendAnimationStyle();
         if (style == ANIM_TELEGRAM) {
             return;
@@ -162,6 +166,31 @@ public class OtherGramChats {
                 view.setTranslationX(0f);
                 view.setAlpha(1f);
                 // translationY belongs to the list's own move animation, so it is left alone here
+            }
+        });
+        animator.start();
+    }
+
+    /** Material "fade through": the message fades in while growing a little, with emphasized easing. */
+    private static void playMaterialAnimation(View view, boolean out) {
+        view.setPivotX(out ? view.getWidth() : 0);
+        view.setPivotY(view.getHeight());
+        final ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(300);
+        animator.setInterpolator(new android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1f));
+        animator.addUpdateListener(a -> {
+            final float t = (float) a.getAnimatedValue();
+            final float scale = 0.92f + 0.08f * t;
+            view.setScaleX(scale);
+            view.setScaleY(scale);
+            view.setAlpha(Math.min(1f, t * 1.5f));
+        });
+        animator.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                view.setScaleX(1f);
+                view.setScaleY(1f);
+                view.setAlpha(1f);
             }
         });
         animator.start();

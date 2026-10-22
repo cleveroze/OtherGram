@@ -159,7 +159,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
             tmpRectF.set(0, 0, viewWidth, getHeight());
             final float r = Math.min(tmpRectF.width(), tmpRectF.height()) / 2f;
             final float s = lerp(0.6f, 1, selectedFactor) * MathUtils.clamp(attachScale, 0, 1)
-                    * (ogBounce < 1f ? 0.9f + 0.1f * OtherGramInterface.spring(ogBounce) : 1f); // OtherGram: pill bounces too
+                    * (ogBounce < 1f ? (ogMaterialMotion ? 0.9f + 0.1f * ogBounce : 0.9f + 0.1f * OtherGramInterface.spring(ogBounce)) : 1f); // OtherGram: pill bounces too
             canvas.save();
             canvas.scale(s, s, tmpRectF.centerX(), tmpRectF.centerY());
             canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
@@ -235,18 +235,27 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     // OtherGram: the icon of a newly selected tab jumps with a spring, plus a light haptic tick
     private android.animation.ValueAnimator ogBounceAnimator;
     private float ogBounce = 1f;
+    private boolean ogMaterialMotion;
+
+    /** Icon scale for the current frame: a spring, or a calm Material grow without overshoot. */
+    private float ogIconScale() {
+        return ogMaterialMotion ? 0.82f + 0.18f * ogBounce : 0.72f + 0.28f * OtherGramInterface.spring(ogBounce);
+    }
 
     private void ogPlayBounce() {
-        if (!OtherGramInterface.tabBounce()) {
+        if (!OtherGramInterface.tabBounce() && !org.telegram.othergram.theme.OtherGramMaterial.motion()) {
             return;
         }
         OtherGramInterface.tick(this);
         if (ogBounceAnimator != null) {
             ogBounceAnimator.cancel();
         }
+        ogMaterialMotion = org.telegram.othergram.theme.OtherGramMaterial.motion();
         ogBounceAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
-        ogBounceAnimator.setDuration(650);
-        ogBounceAnimator.setInterpolator(new android.view.animation.LinearInterpolator());
+        ogBounceAnimator.setDuration(ogMaterialMotion ? 350 : 650);
+        ogBounceAnimator.setInterpolator(ogMaterialMotion
+                ? new android.view.animation.PathInterpolator(0.05f, 0.7f, 0.1f, 1f) // Material emphasized decelerate
+                : new android.view.animation.LinearInterpolator());
         ogBounceAnimator.addUpdateListener(a -> {
             ogBounce = (float) a.getAnimatedValue();
             invalidate();
@@ -264,8 +273,8 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     @Override
     protected boolean drawChild(@NonNull Canvas canvas, android.view.View child, long drawingTime) {
         if (ogBounce < 1f && (child == imageView || child == backupImageView)) {
-            final float scale = 0.72f + 0.28f * OtherGramInterface.spring(ogBounce);
-            final float hop = -dp(4) * (float) Math.sin(Math.PI * Math.min(1f, ogBounce * 1.6f)) * (1f - ogBounce);
+            final float scale = ogIconScale();
+            final float hop = ogMaterialMotion ? 0f : -dp(4) * (float) Math.sin(Math.PI * Math.min(1f, ogBounce * 1.6f)) * (1f - ogBounce);
             final float cx = child.getX() + child.getWidth() / 2f;
             final float cy = child.getY() + child.getHeight() / 2f;
             canvas.save();

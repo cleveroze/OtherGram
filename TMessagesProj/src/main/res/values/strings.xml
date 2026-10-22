@@ -11727,4 +11727,21 @@
     <string name="OG_TabBounce">Bouncy bottom tabs</string>
     <string name="OG_TabHaptics">Vibration when switching tabs</string>
     <string name="OG_InterfaceStyleInfo">Island header: the back button, the name and the avatar float over the chat as separate glass elements. It applies to chats opened after the change.</string>
+    <string name="OG_On">On</string>
+    <string name="OG_Off">Off</string>
+    <string name="OG_MaterialYou">Material You</string>
+    <string name="OG_MaterialEnable">Material You design</string>
+    <string name="OG_MaterialInfo">Repaints the whole interface in a minimal Material 3 style: screens, lists, menus, dialogs, buttons, switches and tabs. Your chat bubbles stay as you set them.</string>
+    <string name="OG_MaterialPalette">Palette</string>
+    <string name="OG_MaterialDynamic">From wallpaper</string>
+    <string name="OG_MaterialVanilla">Vanilla beige</string>
+    <string name="OG_MaterialBlue">Blue</string>
+    <string name="OG_MaterialPurple">Dark purple</string>
+    <string name="OG_MaterialGreen">Sage green</string>
+    <string name="OG_MaterialDynamicUnavailable">Android 12+</string>
+    <string name="OG_MaterialPaletteInfo">\"From wallpaper\" takes colors from your phone\'s wallpaper, like Android itself. Light and dark shades are picked for the current theme automatically.</string>
+    <string name="OG_MaterialStyle">Style and motion</string>
+    <string name="OG_MaterialMinimal">Minimalism: no dividers and shadows</string>
+    <string name="OG_MaterialMotion">Material animations</string>
+    <string name="OG_MaterialStyleInfo">Material animations replace springs and bounces with calm Material motion: for bottom tabs and for sending messages.</string>
 </resources>

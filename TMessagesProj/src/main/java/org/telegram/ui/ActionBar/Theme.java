@@ -6106,6 +6106,7 @@ public class Theme {
         applyCalculatedTableColors(currentColorsNoAccent, currentColors, currentTheme.isDark());
         applyCalculatedArticleCodeColors(currentColorsNoAccent, currentColors, currentTheme.isDark());
         OtherGramColors.apply(currentColors, currentTheme.isDark()); // OtherGram: user color overrides
+        org.telegram.othergram.theme.OtherGramMaterial.apply(currentColors, currentTheme.isDark()); // OtherGram: Material You mode
         if (!messages) {
             boolean async = !(LaunchActivity.getLastFragment() instanceof ChatActivity);
             reloadWallpaper(async);

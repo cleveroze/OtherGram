@@ -455,4 +455,21 @@
     <string name="OG_TabBounce">Пружинящие вкладки внизу</string>
     <string name="OG_TabHaptics">Вибрация при переключении вкладок</string>
     <string name="OG_InterfaceStyleInfo">Шапка «островком»: кнопка «назад», имя и аватарка парят над чатом отдельными стеклянными элементами. Применяется к чатам, открытым после изменения.</string>
+    <string name="OG_On">Вкл.</string>
+    <string name="OG_Off">Выкл.</string>
+    <string name="OG_MaterialYou">Material You</string>
+    <string name="OG_MaterialEnable">Дизайн Material You</string>
+    <string name="OG_MaterialInfo">Перекрашивает весь интерфейс в минималистичном стиле Material 3: экраны, списки, меню, окна, кнопки, переключатели и вкладки. Ваши пузыри сообщений остаются такими, как вы их настроили.</string>
+    <string name="OG_MaterialPalette">Палитра</string>
+    <string name="OG_MaterialDynamic">Из обоев</string>
+    <string name="OG_MaterialVanilla">Ванильно-бежевая</string>
+    <string name="OG_MaterialBlue">Синяя</string>
+    <string name="OG_MaterialPurple">Тёмно-фиолетовая</string>
+    <string name="OG_MaterialGreen">Шалфейная</string>
+    <string name="OG_MaterialDynamicUnavailable">Android 12+</string>
+    <string name="OG_MaterialPaletteInfo">«Из обоев» берёт цвета с обоев телефона, как сам Android. Светлые и тёмные оттенки подбираются под текущую тему автоматически.</string>
+    <string name="OG_MaterialStyle">Стиль и анимации</string>
+    <string name="OG_MaterialMinimal">Минимализм: без разделителей и теней</string>
+    <string name="OG_MaterialMotion">Анимации Material</string>
+    <string name="OG_MaterialStyleInfo">Анимации Material заменяют пружины и отскоки спокойными плавными движениями Material: для вкладок внизу и для отправки сообщений.</string>
 </resources>
