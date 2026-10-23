@@ -14,10 +14,6 @@ $root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $res = Join-Path $root 'TMessagesProj\src\main\res'
 $source = [System.Drawing.Image]::FromFile((Join-Path $PSScriptRoot 'icon-source.png'))
 
-$probe = New-Object System.Drawing.Bitmap $source
-$fullBleed = $probe.GetPixel(0, 0).A -eq 255
-$probe.Dispose()
-
 $densities = [ordered]@{ mdpi = 1.0; hdpi = 1.5; xhdpi = 2.0; xxhdpi = 3.0; xxxhdpi = 4.0 }
 
 function New-Canvas([int]$size) {
@@ -67,10 +63,8 @@ foreach ($d in $densities.Keys) {
     $scale = $densities[$d]
     $dir = "mipmap-$d"
 
-    # adaptive foreground: 108dp layer. Artwork with transparent corners sits in the central 72dp;
-    # full-bleed square artwork fills the whole layer and the launcher's mask crops it
+    # adaptive foreground: 108dp layer, artwork in the central 72dp (the part launchers show)
     $layer = [int](108 * $scale); $inner = [int](72 * $scale); $off = [int](($layer - $inner) / 2)
-    if ($fullBleed) { $inner = $layer; $off = 0 }
     $c = New-Canvas $layer; $bmp = $c[0]; $g = $c[1]
     $g.DrawImage($source, $off, $off, $inner, $inner)
     $g.Dispose(); Save-Png $bmp $dir 'og_ic_launcher_foreground.png'; $bmp.Dispose()
