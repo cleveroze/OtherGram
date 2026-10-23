@@ -4211,6 +4211,7 @@ public class ChatActivity extends BaseFragment implements
             }
         };
         avatarContainer.setGlassMode();
+        org.telegram.othergram.badges.OtherGramRainbow.track(avatarContainer.getTitleTextView()); // OtherGram: animated rainbow badges
         avatarContainer.allowShorterStatus = true;
         avatarContainer.premiumIconHiddable = true;
         avatarContainer.allowDrawStories = dialog_id < 0 && !isTopic;

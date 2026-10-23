@@ -198,7 +198,7 @@ public class OtherGramBadges {
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
 
-            row.addView(new BadgeView(context, badge.color), LayoutHelper.createLinear(44, 44, 0, 0, 14, 0));
+            row.addView(new BadgeView(context, badge), LayoutHelper.createLinear(44, 44, 0, 0, 14, 0));
 
             final LinearLayout texts = new LinearLayout(context);
             texts.setOrientation(LinearLayout.VERTICAL);
@@ -235,9 +235,14 @@ public class OtherGramBadges {
     private static class BadgeView extends View {
         private final OtherGramBadgeDrawable drawable;
 
-        BadgeView(Context context, int color) {
+        BadgeView(Context context, OtherGramBadge badge) {
             super(context);
-            drawable = new OtherGramBadgeDrawable(color);
+            drawable = new OtherGramBadgeDrawable(badge.color);
+            drawable.setCross(badge.isCross());
+            drawable.setRainbow(badge.isRainbow());
+            if (badge.isRainbow()) {
+                OtherGramRainbow.track(this);
+            }
         }
 
         @Override

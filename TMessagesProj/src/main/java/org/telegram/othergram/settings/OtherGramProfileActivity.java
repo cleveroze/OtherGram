@@ -68,6 +68,29 @@ public class OtherGramProfileActivity extends BaseFragment {
     private static final int ID_RING_COLOR = 10;
     private static final int ID_RING_COLOR2 = 11;
     private static final int ID_NAME_COLOR2 = 12;
+    private static final int ID_PICK_BACKGROUND = 13;
+    private static final int ID_REMOVE_BACKGROUND = 14;
+
+    // 2.0: profile background — a picture behind the whole profile header, darkened so the name stays readable
+    private static final int BACKGROUND_WIDTH = 1080;
+    private static final int MAX_BACKGROUND_BYTES = 2_300_000;
+    private boolean hasBackground;
+    private int backgroundDim = 45;
+    private boolean pickingBackground;
+    private final Runnable saveDimRunnable = () -> {
+        final JSONObject body = new JSONObject();
+        try {
+            body.put("dim", backgroundDim);
+        } catch (Exception ignore) {
+        }
+        OtherGramApi.sendJson("PUT", "/v1/me/background/dim", body, (status, response) -> {
+            if (status >= 200 && status < 300) {
+                OtherGramProfiles.applyMe(response);
+            } else {
+                showError(status, response);
+            }
+        });
+    };
 
     private static final String[] RING_STYLES = {null, "solid", "gradient", "dashed", "double"};
     private static final int[] RING_STYLE_TITLES = {R.string.OG_RingNone, R.string.OG_RingSolid, R.string.OG_RingGradient, R.string.OG_RingDashed, R.string.OG_RingDouble};
@@ -145,6 +168,20 @@ public class OtherGramProfileActivity extends BaseFragment {
         }
         items.add(UItem.asShadow(getString("image".equals(bannerKind) ? R.string.OG_BannerPositionInfo : R.string.OG_BannerInfo)));
 
+        items.add(UItem.asHeader(getString(R.string.OG_ProfileBackground)));
+        items.add(UItem.asButton(ID_PICK_BACKGROUND, R.drawable.msg_photos, getString(R.string.OG_ProfileBackgroundPick)).setEnabled(!busy));
+        if (hasBackground) {
+            items.add(UItem.asIntSlideView(1, 0, backgroundDim, 80,
+                    val -> String.format(Locale.US, "%d%%", val),
+                    val -> {
+                        backgroundDim = val;
+                        AndroidUtilities.cancelRunOnUIThread(saveDimRunnable);
+                        AndroidUtilities.runOnUIThread(saveDimRunnable, 700);
+                    }));
+            items.add(UItem.asButton(ID_REMOVE_BACKGROUND, R.drawable.msg_delete, getString(R.string.OG_ProfileBackgroundRemove)).red());
+        }
+        items.add(UItem.asShadow(getString(hasBackground ? R.string.OG_ProfileBackgroundDimInfo : R.string.OG_ProfileBackgroundInfo)));
+
         items.add(UItem.asHeader(getString(R.string.OG_AvatarRing)));
         items.add(UItem.asButton(ID_RING_STYLE, R.drawable.msg_contacts, getString(R.string.OG_RingStyle), getString(RING_STYLE_TITLES[ringStyleIndex()])));
         if (ringStyle != null) {
@@ -180,7 +217,15 @@ public class OtherGramProfileActivity extends BaseFragment {
                 finishFragment();
                 break;
             case ID_PICK_IMAGE:
+                pickingBackground = false;
                 pickImage();
+                break;
+            case ID_PICK_BACKGROUND:
+                pickingBackground = true;
+                pickImage();
+                break;
+            case ID_REMOVE_BACKGROUND:
+                OtherGramApi.sendJson("DELETE", "/v1/me/background", null, this::applyMe);
                 break;
             case ID_BANNER_COLOR:
                 OtherGramColorPicker.show(this, getString(R.string.OG_BannerColor), bannerColor, color -> {
@@ -297,6 +342,11 @@ public class OtherGramProfileActivity extends BaseFragment {
         nameColor2 = profile != null && !profile.isNull("name_color2") ? profile.optInt("name_color2") : null;
         bioColor = profile != null && !profile.isNull("bio_color") ? profile.optInt("bio_color") : null;
         accentColor = profile != null && !profile.isNull("accent_color") ? profile.optInt("accent_color") : null;
+        final JSONObject background = profile != null ? profile.optJSONObject("background") : null;
+        hasBackground = background != null;
+        if (background != null) {
+            backgroundDim = background.optInt("dim", backgroundDim);
+        }
         final JSONObject ring = profile != null ? profile.optJSONObject("ring") : null;
         ringStyle = ring != null ? ring.optString("style", null) : null;
         if (ring != null) {
@@ -404,6 +454,10 @@ public class OtherGramProfileActivity extends BaseFragment {
         }
         busy = true;
         refresh();
+        if (pickingBackground) {
+            uploadBackground(context, uri);
+            return;
+        }
         imageQueue.postRunnable(() -> {
             // Re-encode on the device: scales the image down and drops EXIF/metadata before upload
             Bitmap scaled = null;
@@ -456,6 +510,55 @@ public class OtherGramProfileActivity extends BaseFragment {
                     if (status == 200) {
                         saveProfile();
                     }
+                });
+            });
+        });
+    }
+
+    /** Same on-device re-encoding as the banner (drops EXIF), sized for a full profile header. */
+    private void uploadBackground(Context context, Uri uri) {
+        imageQueue.postRunnable(() -> {
+            byte[] jpeg = null;
+            try {
+                final BitmapFactory.Options bounds = new BitmapFactory.Options();
+                bounds.inJustDecodeBounds = true;
+                try (InputStream in = context.getContentResolver().openInputStream(uri)) {
+                    BitmapFactory.decodeStream(in, null, bounds);
+                }
+                final BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inSampleSize = 1;
+                while (bounds.outWidth / (opts.inSampleSize * 2) >= BACKGROUND_WIDTH) {
+                    opts.inSampleSize *= 2;
+                }
+                Bitmap decoded;
+                try (InputStream in = context.getContentResolver().openInputStream(uri)) {
+                    decoded = BitmapFactory.decodeStream(in, null, opts);
+                }
+                if (decoded != null) {
+                    final float k = Math.min(1f, BACKGROUND_WIDTH / (float) decoded.getWidth());
+                    final Bitmap scaled = k < 1f ? Bitmap.createScaledBitmap(decoded, Math.round(decoded.getWidth() * k), Math.round(decoded.getHeight() * k), true) : decoded;
+                    int quality = 88;
+                    do {
+                        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        scaled.compress(Bitmap.CompressFormat.JPEG, quality, out);
+                        jpeg = out.toByteArray();
+                        quality -= 8;
+                    } while (jpeg.length > MAX_BACKGROUND_BYTES && quality > 40);
+                }
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
+            final byte[] finalJpeg = jpeg;
+            AndroidUtilities.runOnUIThread(() -> {
+                if (finalJpeg == null || finalJpeg.length > MAX_BACKGROUND_BYTES) {
+                    busy = false;
+                    refresh();
+                    BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_BannerFailed)).show();
+                    return;
+                }
+                OtherGramApi.sendBytes("PUT", "/v1/me/background", finalJpeg, "image/jpeg", (status, response) -> {
+                    busy = false;
+                    applyMe(status, response);
                 });
             });
         });

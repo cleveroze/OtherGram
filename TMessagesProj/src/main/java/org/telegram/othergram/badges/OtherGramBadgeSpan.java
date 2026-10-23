@@ -99,18 +99,30 @@ public class OtherGramBadgeSpan extends ReplacementSpan {
         for (int i = 0; i < captions.size(); i++) {
             final float w = pillWidth(i, h);
             rect.set(left, centerY - h / 2f, left + w, centerY + h / 2f);
+            final OtherGramBadge badge = badges.get(i);
             // Slightly deepened badge color keeps the light caption readable on beige badges
-            fillPaint.setColor(ColorUtils.blendARGB(badges.get(i).color | 0xFF000000, 0xFF000000, 0.12f));
+            fillPaint.setColor(ColorUtils.blendARGB(badge.color | 0xFF000000, 0xFF000000, 0.12f));
+            fillPaint.setShader(badge.isRainbow() ? OtherGramRainbow.shader(left, h) : null);
             fillPaint.setAlpha(alpha);
             canvas.drawRoundRect(rect, h / 2f, h / 2f, fillPaint);
+            fillPaint.setShader(null);
 
             final float pad = h * 0.42f;
             final float cs = h * 0.5f;
             final float cx = left + pad;
             checkPath.reset();
-            checkPath.moveTo(cx, centerY + cs * 0.02f);
-            checkPath.lineTo(cx + cs * 0.36f, centerY + cs * 0.36f);
-            checkPath.lineTo(cx + cs, centerY - cs * 0.34f);
+            if (badge.isCross()) {
+                final float c = cs * 0.38f;
+                final float mx = cx + cs / 2f;
+                checkPath.moveTo(mx - c, centerY - c);
+                checkPath.lineTo(mx + c, centerY + c);
+                checkPath.moveTo(mx + c, centerY - c);
+                checkPath.lineTo(mx - c, centerY + c);
+            } else {
+                checkPath.moveTo(cx, centerY + cs * 0.02f);
+                checkPath.lineTo(cx + cs * 0.36f, centerY + cs * 0.36f);
+                checkPath.lineTo(cx + cs, centerY - cs * 0.34f);
+            }
             checkPaint.setStrokeWidth(Math.max(1.5f, h * 0.11f));
             checkPaint.setAlpha(alpha);
             canvas.drawPath(checkPath, checkPaint);

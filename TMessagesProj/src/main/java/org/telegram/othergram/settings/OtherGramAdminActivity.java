@@ -209,7 +209,7 @@ public class OtherGramAdminActivity extends BaseFragment {
         });
     }
 
-    private void saveBadgeType(String id, boolean isNew, String title, String description, int color) {
+    private void saveBadgeType(String id, boolean isNew, String title, String description, int color, boolean rainbow, boolean cross) {
         final JSONObject body = new JSONObject();
         try {
             if (isNew) {
@@ -218,6 +218,8 @@ public class OtherGramAdminActivity extends BaseFragment {
             body.put("title", title);
             body.put("description", description);
             body.put("color", color);
+            body.put("style", rainbow ? "rainbow" : "normal");
+            body.put("icon", cross ? "cross" : "check");
         } catch (Exception ignore) {
         }
         OtherGramApi.sendJson(isNew ? "POST" : "PUT", isNew ? "/v1/admin/badge-types" : "/v1/admin/badge-types/" + id, body, this::applyBadgeTypes);
@@ -419,6 +421,15 @@ public class OtherGramAdminActivity extends BaseFragment {
         for (View v : new View[]{id, title, description, color}) {
             layout.addView(v, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 36, 24, 6, 24, 6));
         }
+        // 2.0: animated rainbow fill and a cross instead of the check
+        final org.telegram.ui.Cells.TextCheckCell rainbow = new org.telegram.ui.Cells.TextCheckCell(context, 23, true, resourceProvider);
+        rainbow.setTextAndCheck(getString(R.string.OG_AdminTypeRainbow), !isNew && "rainbow".equals(type.optString("style")), false);
+        rainbow.setOnClickListener(v -> rainbow.setChecked(!rainbow.isChecked()));
+        final org.telegram.ui.Cells.TextCheckCell cross = new org.telegram.ui.Cells.TextCheckCell(context, 23, true, resourceProvider);
+        cross.setTextAndCheck(getString(R.string.OG_AdminTypeCross), !isNew && "cross".equals(type.optString("icon")), false);
+        cross.setOnClickListener(v -> cross.setChecked(!cross.isChecked()));
+        layout.addView(rainbow, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 50, 0, 6, 0, 0));
+        layout.addView(cross, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 50));
         new AlertDialog.Builder(context, resourceProvider)
                 .setTitle(getString(isNew ? R.string.OG_AdminCreateType : R.string.OG_AdminEditType))
                 .setView(layout)
@@ -430,7 +441,8 @@ public class OtherGramAdminActivity extends BaseFragment {
                         BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_AdminBadColor)).show();
                         return;
                     }
-                    saveBadgeType(id.getText().toString().trim(), isNew, title.getText().toString().trim(), description.getText().toString().trim(), parsedColor);
+                    saveBadgeType(id.getText().toString().trim(), isNew, title.getText().toString().trim(), description.getText().toString().trim(), parsedColor,
+                            rainbow.isChecked(), cross.isChecked());
                 })
                 .setNegativeButton(getString(R.string.Cancel), null)
                 .show();

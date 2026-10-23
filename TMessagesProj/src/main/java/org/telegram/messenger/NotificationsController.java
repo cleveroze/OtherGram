@@ -1077,6 +1077,7 @@ public class NotificationsController extends BaseController implements Notificat
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("NotificationsController: processNewMessages msgs.size()=" + (messageObjects == null ? "null" : messageObjects.size()) + " isLast=" + isLast + " isFcm=" + isFcm + ")");
         }
+        org.telegram.othergram.chats.OtherGramAutoReply.onNewMessages(currentAccount, messageObjects); // OtherGram: auto-reply
 
         if (messageObjects != null) {
             for (int i = 0; i < messageObjects.size(); ++i) {

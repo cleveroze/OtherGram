@@ -46,7 +46,29 @@ android {
         localeFilters += ["zz"]
     }
 
+    // OtherGram: own signing key, read from local.properties (never committed)
+    def ogProps = new Properties()
+    def ogPropsFile = rootProject.file('local.properties')
+    if (ogPropsFile.exists()) {
+        ogPropsFile.withInputStream { ogProps.load(it) }
+    }
+    def ogHasKey = ogProps.getProperty('OG_STORE_FILE') != null && file(ogProps.getProperty('OG_STORE_FILE')).exists()
+
     signingConfigs {
+        othergram {
+            if (ogHasKey) {
+                storeFile file(ogProps.getProperty('OG_STORE_FILE'))
+                storePassword ogProps.getProperty('OG_STORE_PASSWORD')
+                keyAlias ogProps.getProperty('OG_KEY_ALIAS')
+                keyPassword ogProps.getProperty('OG_KEY_PASSWORD')
+            } else {
+                storeFile file("../TMessagesProj/config/release.keystore")
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
+
         debug {
             storeFile file("../TMessagesProj/config/release.keystore")
             storePassword RELEASE_STORE_PASSWORD
@@ -69,11 +91,12 @@ android {
     }
 
     buildTypes {
+        // OtherGram: this is the build users install. Not debuggable (app data cannot be pulled over USB),
+        // signed with the OtherGram key, own package without a suffix. Native code is built as before.
         debug {
-            debuggable true
+            debuggable false
             jniDebuggable true
-            signingConfig signingConfigs.debug
-            applicationIdSuffix ".beta"
+            signingConfig signingConfigs.othergram
             minifyEnabled false
             shrinkResources false
             multiDexEnabled true

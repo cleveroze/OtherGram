@@ -5,6 +5,7 @@ import static org.telegram.messenger.LocaleController.getString;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,6 +16,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.othergram.OtherGramConfig;
+import org.telegram.othergram.chats.OtherGramAutoReply;
 import org.telegram.othergram.chats.OtherGramBubbles;
 import org.telegram.othergram.chats.OtherGramChats;
 import org.telegram.othergram.network.OtherGramApi;
@@ -46,6 +48,12 @@ public class OtherGramChatsActivity extends BaseFragment {
     private static final int ID_NO_ROUNDING = 5;
     private static final int ID_HIDE_EDITED = 6;
     private static final int ID_HIDE_SHARE = 7;
+    private static final int ID_AR_ENABLED = 8;
+    private static final int ID_AR_TEXT = 9;
+    private static final int ID_AR_STRANGERS = 10;
+    private static final int ID_AR_SCHEDULE = 11;
+    private static final int ID_AR_COOLDOWN = 12;
+    private static final int ID_AR_BATTERY = 13;
 
     private static final String[] BUBBLE_STYLES = {null, OtherGramBubbles.STYLE_SOLID, OtherGramBubbles.STYLE_GLASS};
     private static final int[] BUBBLE_STYLE_TITLES = {R.string.OG_BubbleTelegram, R.string.OG_BubbleSolid, R.string.OG_BubbleGlass};
@@ -108,6 +116,52 @@ public class OtherGramChatsActivity extends BaseFragment {
         items.add(UItem.asCheck(ID_HIDE_EDITED, getString(R.string.OG_HideEdited)).setChecked(OtherGramChats.hideEdited()));
         items.add(UItem.asCheck(ID_HIDE_SHARE, getString(R.string.OG_HideShare)).setChecked(OtherGramChats.hideShareButton()));
         items.add(UItem.asShadow(getString(R.string.OG_ChatTweaksInfo)));
+
+        // 2.0: auto-reply in private chats
+        items.add(UItem.asHeader(getString(R.string.OG_AutoReply)));
+        items.add(UItem.asCheck(ID_AR_ENABLED, getString(R.string.OG_AutoReplyEnable)).setChecked(OtherGramConfig.getBoolean(OtherGramAutoReply.KEY_ENABLED, false)));
+        final String arText = OtherGramAutoReply.text();
+        items.add(UItem.asButton(ID_AR_TEXT, R.drawable.msg_edit, getString(R.string.OG_AutoReplyText),
+                TextUtils.isEmpty(arText) ? getString(R.string.OG_AutoReplyNoText) : (arText.length() > 24 ? arText.substring(0, 23) + "…" : arText)));
+        items.add(UItem.asCheck(ID_AR_STRANGERS, getString(R.string.OG_AutoReplyStrangers)).setChecked(OtherGramAutoReply.onlyStrangers()));
+        items.add(UItem.asButton(ID_AR_SCHEDULE, R.drawable.msg_autodelete, getString(R.string.OG_AutoReplySchedule), scheduleTitle(OtherGramAutoReply.schedule())));
+        items.add(UItem.asButton(ID_AR_COOLDOWN, R.drawable.msg_recent, getString(R.string.OG_AutoReplyCooldown),
+                LocaleController.formatString(R.string.OG_AutoReplyHours, OtherGramAutoReply.cooldownHours())));
+        items.add(UItem.asButton(ID_AR_BATTERY, R.drawable.msg2_battery, getString(R.string.OG_AutoReplyBattery)));
+        items.add(UItem.asShadow(getString(R.string.OG_AutoReplyInfo)));
+    }
+
+    private String scheduleTitle(int index) {
+        final int[] w = OtherGramAutoReply.SCHEDULES[index];
+        return w[0] < 0 ? getString(R.string.OG_AutoReplyAlways)
+                : String.format(Locale.US, "%02d:00–%02d:00", w[0], w[1]);
+    }
+
+    private void editAutoReplyText() {
+        final Context context = getParentActivity();
+        if (context == null) {
+            return;
+        }
+        final org.telegram.ui.Components.EditTextBoldCursor input = new org.telegram.ui.Components.EditTextBoldCursor(context);
+        input.setText(OtherGramAutoReply.text());
+        input.setHint(getString(R.string.OG_AutoReplyHint));
+        input.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourceProvider));
+        input.setHintTextColor(Theme.getColor(Theme.key_dialogTextGray3, resourceProvider));
+        input.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
+        input.setMaxLines(6);
+        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(1000)});
+        input.setBackground(null);
+        final FrameLayout container = new FrameLayout(context);
+        container.addView(input, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 24, 8, 24, 8));
+        new AlertDialog.Builder(context, resourceProvider)
+                .setTitle(getString(R.string.OG_AutoReplyText))
+                .setView(container)
+                .setPositiveButton(getString(R.string.Save), (d, w) -> {
+                    OtherGramConfig.putString(OtherGramAutoReply.KEY_TEXT, input.getText().toString().trim());
+                    listView.adapter.update(true);
+                })
+                .setNegativeButton(getString(R.string.Cancel), null)
+                .show();
     }
 
     private static int styleIndex(String style) {
@@ -184,6 +238,58 @@ public class OtherGramChatsActivity extends BaseFragment {
                 break;
             case ID_HIDE_SHARE:
                 toggle(OtherGramChats.KEY_HIDE_SHARE);
+                break;
+            case ID_AR_ENABLED:
+                if (!OtherGramConfig.getBoolean(OtherGramAutoReply.KEY_ENABLED, false) && TextUtils.isEmpty(OtherGramAutoReply.text())) {
+                    OtherGramConfig.putBoolean(OtherGramAutoReply.KEY_ENABLED, true);
+                    editAutoReplyText();
+                    listView.adapter.update(true);
+                } else {
+                    toggle(OtherGramAutoReply.KEY_ENABLED);
+                }
+                break;
+            case ID_AR_TEXT:
+                editAutoReplyText();
+                break;
+            case ID_AR_STRANGERS:
+                toggle(OtherGramAutoReply.KEY_ONLY_STRANGERS);
+                break;
+            case ID_AR_SCHEDULE: {
+                final CharSequence[] names = new CharSequence[OtherGramAutoReply.SCHEDULES.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = scheduleTitle(i);
+                }
+                new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                        .setTitle(getString(R.string.OG_AutoReplySchedule))
+                        .setItems(names, (dialog, which) -> {
+                            OtherGramConfig.putInt(OtherGramAutoReply.KEY_SCHEDULE, which);
+                            listView.adapter.update(true);
+                        })
+                        .setNegativeButton(getString(R.string.Cancel), null)
+                        .show();
+                break;
+            }
+            case ID_AR_COOLDOWN: {
+                final CharSequence[] names = new CharSequence[OtherGramAutoReply.COOLDOWNS.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = LocaleController.formatString(R.string.OG_AutoReplyHours, OtherGramAutoReply.COOLDOWNS[i]);
+                }
+                new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                        .setTitle(getString(R.string.OG_AutoReplyCooldown))
+                        .setItems(names, (dialog, which) -> {
+                            OtherGramConfig.putInt(OtherGramAutoReply.KEY_COOLDOWN_HOURS, OtherGramAutoReply.COOLDOWNS[which]);
+                            listView.adapter.update(true);
+                        })
+                        .setNegativeButton(getString(R.string.Cancel), null)
+                        .show();
+                break;
+            }
+            case ID_AR_BATTERY:
+                try {
+                    getParentActivity().startActivity(new android.content.Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+                } catch (Exception e) {
+                    BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_AutoReplyBatteryFailed)).show();
+                }
                 break;
         }
     }

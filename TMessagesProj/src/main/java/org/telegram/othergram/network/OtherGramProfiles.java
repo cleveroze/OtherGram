@@ -30,6 +30,9 @@ public class OtherGramProfiles {
 
         public String bannerKind;
         public String bannerUrl;
+        /** 2.0: picture behind the whole profile header, or null; darkened by backgroundDim percent. */
+        public String backgroundUrl;
+        public int backgroundDim = 45;
         public float bannerOffset = 0.5f;
         public int bannerColor;
         public Integer nameColor;
@@ -57,6 +60,12 @@ public class OtherGramProfiles {
     }
 
     /** Decoration of the user, or null when the user published none or it is not loaded yet. */
+    /** Whether this user published a profile background (2.0). */
+    public static boolean hasBackground(long userId) {
+        final Profile p = userId > 0 ? getProfile(userId) : null;
+        return p != null && p.backgroundUrl != null;
+    }
+
     public static Profile getProfile(long userId) {
         return profiles.get(userId);
     }
@@ -211,7 +220,7 @@ public class OtherGramProfiles {
         for (int i = 0; i < array.length(); i++) {
             final JSONObject b = array.optJSONObject(i);
             if (b != null) {
-                list.add(new OtherGramBadge(b.optString("id"), b.optString("title"), b.optString("label"), b.optString("description"), b.optInt("color"), b.optString("icon", OtherGramBadge.ICON_CHECK)));
+                list.add(new OtherGramBadge(b.optString("id"), b.optString("title"), b.optString("label"), b.optString("description"), b.optInt("color"), b.optString("icon", OtherGramBadge.ICON_CHECK), b.optString("style", OtherGramBadge.STYLE_NORMAL)));
             }
         }
         return list;
@@ -241,6 +250,11 @@ public class OtherGramProfiles {
             p.bubbleStyle = bubble.optString("style", null);
             p.bubbleColor = bubble.optInt("color", 0xFFA68770);
             p.bubbleAlpha = bubble.optInt("alpha", 100);
+        }
+        final JSONObject background = json.optJSONObject("background");
+        if (background != null) {
+            p.backgroundUrl = OtherGramApi.BASE_URL + background.optString("url");
+            p.backgroundDim = Math.max(0, Math.min(80, background.optInt("dim", 45)));
         }
         final JSONObject ring = json.optJSONObject("ring");
         if (ring != null) {

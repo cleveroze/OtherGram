@@ -11320,6 +11320,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 final MessagesController.PeerColors peerColors = MessagesController.getInstance(currentAccount).profilePeerColors;
                 peerColor = peerColors == null ? null : peerColors.getColor(colorId);
             }
+            if (org.telegram.othergram.network.OtherGramProfiles.hasBackground(user.id)) {
+                peerColor = MessagesController.PeerColor.ogBackground(); // OtherGram: profile background → light header text
+            }
             if (wasPeerColor != peerColor) {
                 updatedPeerColor();
             }
@@ -11416,6 +11419,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } catch (Exception ignore) {
             }
             newString = OtherGramBadges.appendBadges(OtherGramProfiles.colorName(newString, user.id), user.id); // OtherGram: name color/gradient and badges
+            org.telegram.othergram.badges.OtherGramRainbow.track(nameTextView[1]); // OtherGram: animated rainbow badges
             final long ogBadgesUserId = user.id;
             if (copyFromChatActivity) {
                 ChatActivity chatActivity = (ChatActivity) prevFragment;
@@ -11795,6 +11799,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     }
                     final long ogChatPeerId = -chat.id;
                     title = OtherGramBadges.appendBadges(title, ogChatPeerId); // OtherGram: channel/group badges
+                    org.telegram.othergram.badges.OtherGramRainbow.track(nameTextView[a]);
                     if (nameTextView[a].setText(title)) {
                         changed = true;
                     }

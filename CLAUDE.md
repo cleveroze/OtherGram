@@ -438,6 +438,25 @@ Material You (`OtherGramMaterial`, `OtherGramMaterialActivity`, хук в `Theme
 - **Никогда не класть в файл** токен сервера OtherGram, сессию Telegram, номер телефона, сообщения.
 - Импортированные TTF/OTF-шрифты — по желанию владельца (файл станет большим); удалённые сообщения не экспортировать.
 
+**Статус 2.0.0 (2026-10-23): собрана для владельца, публично не выпущена.**
+- Код — только в локальной ветке `othergram-2.0` (на GitHub не отправлять до команды владельца). APK — черновик
+  релиза на GitHub (draft, виден только владельцам репозитория).
+- Пакет `app.othergram.messenger`, тип аккаунта такой же (`auth.xml`, `sync_contacts.xml`, `ContactsController.OG_ACCOUNT_TYPE`),
+  клиент в `google-services.json`. Сборка `afatDebug` теперь не отладочная (`debuggable false`), без суффикса,
+  подписана ключом OtherGram (`signingConfigs.othergram`). Нативная часть собирается как раньше.
+- **Ключ подписи:** `C:\Users\FunkyUser\OtherGram-Keys\othergram-release.jks` (пароль в `README-KEY.txt` рядом и в
+  `local.properties`: `OG_STORE_FILE`, `OG_STORE_PASSWORD`, `OG_KEY_ALIAS`, `OG_KEY_PASSWORD`). Никогда не коммитить.
+  SHA-256 сертификата: BE:8E:09:56:8A:D5:13:8E:26:FB:8A:56:7F:08:C3:F9:CB:20:96:1B:5A:D1:A1:5D:B2:82:79:2F:AE:E4:85:41.
+- Сделано: новый логотип (`icon-source.png`, генератор иконок умеет full-bleed), радужные бейджи и крестик
+  (`OtherGramRainbow`, `badge_types.style`/`icon`, переключатели в админке), фоны профилей (`profiles.bg_version/bg_dim`,
+  `/v1/me/background`, `OtherGramBannerDrawer`, `PeerColor.ogBackground()` для белого текста), автоответчик
+  (`OtherGramAutoReply`, хук в `NotificationsController.processNewMessages`), чат OtherGram (сервер одобряет заявки
+  тем, у кого есть сессия; ссылка из `CHAT_INVITE` в `/v1/config`), проверка обновлений (`OtherGramUpdates`, GitHub
+  releases/latest), «Сообщить об ошибке», понятный текст кода от бота, вкладка «Плагины» (`OtherGramPlugins`:
+  импорт `.plugin`, список, вкл/выкл, удаление, обязательное согласие с рисками, открытие из чата).
+- Не сделано: **выполнение кода плагинов** (нужен встроенный Python, отдельный большой шаг); ссылка на чат OtherGram —
+  ждёт владельца (группа с заявками, @othergrambot админом с правом приглашать, потом `CHAT_INVITE` в wrangler vars).
+
 **Версия 2.0.0 (владелец, 2026-10-22; вместо 1.3.0, срок ~неделя; самая большая версия).**
 Идея: OtherGram — самостоятельное приложение. Номер 2.0.0, потому что поверх старой версии не встанет.
 

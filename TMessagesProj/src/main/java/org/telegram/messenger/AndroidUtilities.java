@@ -4287,6 +4287,11 @@ public class AndroidUtilities {
                 && org.telegram.othergram.OtherGramBackup.openFromChat(activity, f)) {
             return true;
         }
+        // OtherGram: a plugin file opens the plugin install dialog
+        if (fileName != null && fileName.toLowerCase(java.util.Locale.US).endsWith(org.telegram.othergram.plugins.OtherGramPlugins.EXTENSION)
+                && org.telegram.othergram.plugins.OtherGramPlugins.openFromChat(activity, f)) {
+            return true;
+        }
         if (f != null && f.exists()) {
             String realMimeType = null;
             Intent intent = new Intent(Intent.ACTION_VIEW);

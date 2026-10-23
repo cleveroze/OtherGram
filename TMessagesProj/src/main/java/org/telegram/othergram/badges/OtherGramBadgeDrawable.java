@@ -34,6 +34,22 @@ public class OtherGramBadgeDrawable extends Drawable {
         checkPaint.setStrokeJoin(Paint.Join.ROUND);
     }
 
+    private boolean cross;
+    private boolean rainbow;
+
+    /** Cross instead of the check (an admin option for a badge type). */
+    public void setCross(boolean cross) {
+        this.cross = cross;
+        updateMark(getBounds());
+        invalidateSelf();
+    }
+
+    /** Shimmering rainbow fill; the host view must be tracked by OtherGramRainbow to animate. */
+    public void setRainbow(boolean rainbow) {
+        this.rainbow = rainbow;
+        invalidateSelf();
+    }
+
     public void setColor(int color) {
         sealPaint.setColor(color);
         invalidateSelf();
@@ -61,20 +77,37 @@ public class OtherGramBadgeDrawable extends Drawable {
         }
         sealPath.close();
 
-        checkPath.reset();
-        checkPath.moveTo(cx - r * 0.30f, cy + r * 0.02f);
-        checkPath.lineTo(cx - r * 0.08f, cy + r * 0.24f);
-        checkPath.lineTo(cx + r * 0.32f, cy - r * 0.20f);
+        updateMark(bounds);
 
         ringPaint.setStrokeWidth(Math.max(1f, size * 0.035f));
         checkPaint.setStrokeWidth(size * 0.085f);
+    }
+
+    private void updateMark(Rect bounds) {
+        final float r = Math.min(bounds.width(), bounds.height()) / 2f;
+        final float cx = bounds.exactCenterX();
+        final float cy = bounds.exactCenterY();
+        checkPath.reset();
+        if (cross) {
+            final float c = r * 0.24f;
+            checkPath.moveTo(cx - c, cy - c);
+            checkPath.lineTo(cx + c, cy + c);
+            checkPath.moveTo(cx + c, cy - c);
+            checkPath.lineTo(cx - c, cy + c);
+        } else {
+            checkPath.moveTo(cx - r * 0.30f, cy + r * 0.02f);
+            checkPath.lineTo(cx - r * 0.08f, cy + r * 0.24f);
+            checkPath.lineTo(cx + r * 0.32f, cy - r * 0.20f);
+        }
     }
 
     @Override
     public void draw(Canvas canvas) {
         final Rect b = getBounds();
         final float r = Math.min(b.width(), b.height()) / 2f;
+        sealPaint.setShader(rainbow ? OtherGramRainbow.shader(b.left, b.height() / 4f) : null);
         canvas.drawPath(sealPath, sealPaint);
+        sealPaint.setShader(null);
         canvas.drawCircle(b.exactCenterX(), b.exactCenterY(), r * 0.70f, ringPaint);
         canvas.drawPath(checkPath, checkPaint);
     }
