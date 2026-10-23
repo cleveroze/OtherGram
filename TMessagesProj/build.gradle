@@ -1,6 +1,7 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.chaquo.python' // OtherGram: Python runtime for .plugin files
 apply plugin: 'org.telegram.build-plugin'
 apply plugin: 'idea'
 
@@ -135,7 +136,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 36
 
         // OtherGram: own api_id/api_hash from env vars or local.properties (git-ignored), never committed
@@ -147,6 +148,11 @@ android {
         vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
 
         multiDexEnabled true
+
+        // OtherGram: Chaquopy needs the ABI list (same as the app's flavors; builds still pick one ABI)
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
 
         externalNativeBuild {
             cmake {
@@ -274,3 +280,16 @@ task checkVisibility {
 }
 
 preBuild.dependsOn checkVisibility
+
+// OtherGram: embedded Python 3.11 for exteraGram-style .plugin files. Sources in src/main/python.
+// No pip packages and no bytecode compilation, so the build machine needs no Python installed.
+chaquopy {
+    defaultConfig {
+        version "3.11"
+        pyc {
+            src false
+            pip false
+            stdlib false
+        }
+    }
+}

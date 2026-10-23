@@ -11765,7 +11765,11 @@
     <string name="OG_PluginsInstallInfo">Files in the exteraGram .plugin format. A new plugin is installed switched off.</string>
     <string name="OG_PluginsInstalled">Installed plugins</string>
     <string name="OG_PluginsEmpty">No plugins yet</string>
-    <string name="OG_PluginsEngineInfo">Running plugin code is still in development: installed plugins are kept and will start working in an update. Plugins never change your OtherGram appearance settings.</string>
+    <string name="OG_PluginsEngineInfo">Plugins run in the built-in Python 3.11. Supported: settings, send-message hooks, message menu items, bulletins and dialogs, Telegram requests. Plugins that hook app methods (hook_method) are not supported and will show an error. Plugins never change your OtherGram appearance settings.</string>
+    <string name="OG_PluginNoSettings">This plugin has no settings.</string>
+    <string name="OG_PluginEnabled">Plugin enabled</string>
+    <string name="OG_PluginError">Plugin error</string>
+    <string name="OG_PluginDelete">Delete plugin</string>
     <string name="OG_PluginAuthor">Author: %1$s</string>
     <string name="OG_PluginVersion">Version: %1$s</string>
     <string name="OG_PluginEnable">Turn on</string>

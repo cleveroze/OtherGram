@@ -36,7 +36,30 @@ import java.util.List;
  * Plugins tab: installed ".plugin" files (exteraGram format), importing them from the phone, and
  * switching them on or off. Using it requires agreeing that plugins may be harmful or break OtherGram.
  */
-public class OtherGramPluginsActivity extends BaseFragment {
+public class OtherGramPluginsActivity extends BaseFragment implements org.telegram.othergram.plugins.OtherGramPluginRuntime.Listener {
+
+    @Override
+    public boolean onFragmentCreate() {
+        org.telegram.othergram.plugins.OtherGramPluginRuntime.addListener(this);
+        return super.onFragmentCreate();
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        org.telegram.othergram.plugins.OtherGramPluginRuntime.removeListener(this);
+        super.onFragmentDestroy();
+    }
+
+    @Override
+    public void onPluginsChanged() {
+        reload();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        reload();
+    }
 
     private static final int ID_INSTALL = 1;
     private static final int ID_PLUGIN_BASE = 1000;
@@ -114,7 +137,7 @@ public class OtherGramPluginsActivity extends BaseFragment {
         for (int i = 0; i < plugins.size(); i++) {
             final OtherGramPlugins.Plugin p = plugins.get(i);
             items.add(UItem.asButton(ID_PLUGIN_BASE + i, R.drawable.msg_bots, p.name,
-                    getString(p.enabled ? R.string.OG_On : R.string.OG_Off)));
+                    getString(!p.enabled ? R.string.OG_Off : org.telegram.othergram.plugins.OtherGramPluginRuntime.error(p.id) != null ? R.string.OG_PluginError : R.string.OG_On)));
         }
         items.add(UItem.asShadow(getString(R.string.OG_PluginsEngineInfo)));
     }
@@ -127,7 +150,8 @@ public class OtherGramPluginsActivity extends BaseFragment {
                 openPicker();
             }
         } else if (item.id >= ID_PLUGIN_BASE && item.id < ID_PLUGIN_BASE + plugins.size()) {
-            showPlugin(plugins.get(item.id - ID_PLUGIN_BASE));
+            final OtherGramPlugins.Plugin p = plugins.get(item.id - ID_PLUGIN_BASE);
+            presentFragment(new OtherGramPluginSettingsActivity(p.id, p.name));
         }
     }
 

@@ -324,6 +324,7 @@ public class ApplicationLoader extends Application {
         }
 
         org.telegram.othergram.theme.OtherGramFonts.applyGlobalTypeface(); // OtherGram: chosen font for all text
+        org.telegram.othergram.plugins.OtherGramPluginRuntime.startIfNeeded(); // OtherGram: enabled plugins (in the background)
 
         NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
 

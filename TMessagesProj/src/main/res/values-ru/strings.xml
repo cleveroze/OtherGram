@@ -493,7 +493,11 @@
     <string name="OG_PluginsInstallInfo">Файлы в формате .plugin от exteraGram. Новый плагин устанавливается выключенным.</string>
     <string name="OG_PluginsInstalled">Установленные плагины</string>
     <string name="OG_PluginsEmpty">Плагинов пока нет</string>
-    <string name="OG_PluginsEngineInfo">Запуск кода плагинов ещё в разработке: установленные плагины сохраняются и заработают в одном из обновлений. Плагины не меняют ваши настройки оформления OtherGram.</string>
+    <string name="OG_PluginsEngineInfo">Плагины работают во встроенном Python 3.11. Поддерживаются: настройки, хуки отправки сообщений, пункты в меню сообщения, уведомления и окна, запросы к Telegram. Плагины, которые перехватывают методы приложения (hook_method), не поддерживаются и покажут ошибку. Плагины не меняют ваши настройки оформления OtherGram.</string>
+    <string name="OG_PluginNoSettings">У этого плагина нет настроек.</string>
+    <string name="OG_PluginEnabled">Плагин включён</string>
+    <string name="OG_PluginError">Ошибка плагина</string>
+    <string name="OG_PluginDelete">Удалить плагин</string>
     <string name="OG_PluginAuthor">Автор: %1$s</string>
     <string name="OG_PluginVersion">Версия: %1$s</string>
     <string name="OG_PluginEnable">Включить</string>

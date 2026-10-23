@@ -454,8 +454,14 @@ Material You (`OtherGramMaterial`, `OtherGramMaterialActivity`, хук в `Theme
   тем, у кого есть сессия; ссылка из `CHAT_INVITE` в `/v1/config`), проверка обновлений (`OtherGramUpdates`, GitHub
   releases/latest), «Сообщить об ошибке», понятный текст кода от бота, вкладка «Плагины» (`OtherGramPlugins`:
   импорт `.plugin`, список, вкл/выкл, удаление, обязательное согласие с рисками, открытие из чата).
-- Не сделано: **выполнение кода плагинов** (нужен встроенный Python, отдельный большой шаг); ссылка на чат OtherGram —
-  ждёт владельца (группа с заявками, @othergrambot админом с правом приглашать, потом `CHAT_INVITE` в wrangler vars).
+- Плагины работают (2026-10-23): Chaquopy 17.1.0, Python 3.11, модуль `TMessagesProj` (`apply plugin: 'com.chaquo.python'`,
+  блок `chaquopy` без pyc и pip — Python на компе не нужен). **minSdk поднят до 24 (Android 7.0+)** — требование Chaquopy.
+  Python-API в `TMessagesProj/src/main/python` (`base_plugin`, `client_utils`, `android_utils`, `hook_utils`, `ui.settings`,
+  `ui.bulletin`, `ui.alert`, хост `og_plugin_host`), Java: `OtherGramPluginRuntime`, `OtherGramPluginBridge`,
+  `OtherGramPluginSettingsActivity`. Работает: жизненный цикл, настройки, хук отправки (`SendMessagesHelper.sendMessage`),
+  пункты меню сообщения (`ChatActivity.fillMessageMenu`/`processSelectedOption`), bulletins, alert, send_request.
+  Не работает: hook_method (Xposed), request/update-хуки. Тестовый плагин: `Tools/othergram/plugins/othergram_example.plugin`.
+- Чат OtherGram: ссылка https://t.me/+dku_7wOc8bczNzgy в `CHAT_INVITE` (wrangler.toml).
 
 **Версия 2.0.0 (владелец, 2026-10-22; вместо 1.3.0, срок ~неделя; самая большая версия).**
 Идея: OtherGram — самостоятельное приложение. Номер 2.0.0, потому что поверх старой версии не встанет.

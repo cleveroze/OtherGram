@@ -33426,6 +33426,17 @@ public class ChatActivity extends BaseFragment implements
         if (selectedObject == null || getParentActivity() == null) {
             return;
         }
+        // OtherGram: a plugin's message menu item
+        if (option >= OG_PLUGIN_OPTION_BASE && ogPluginMenuItems != null && option - OG_PLUGIN_OPTION_BASE < ogPluginMenuItems.length()) {
+            final org.json.JSONObject item = ogPluginMenuItems.optJSONObject(option - OG_PLUGIN_OPTION_BASE);
+            final MessageObject message = selectedObject;
+            closeMenu();
+            if (item != null) {
+                org.telegram.othergram.plugins.OtherGramPluginRuntime.menuClick(item.optString("plugin"), item.optString("item"),
+                        currentAccount, this, dialog_id, message);
+            }
+            return;
+        }
         boolean preserveDim = false;
         switch (option) {
             case OPTION_RETRY: {
@@ -46527,7 +46538,21 @@ public class ChatActivity extends BaseFragment implements
             options.add(OPTION_WELCOME_REVERT);
             icons.add(R.drawable.outline_revert_24);
         }
+
+        // OtherGram: menu items added by plugins (MESSAGE_CONTEXT_MENU)
+        ogPluginMenuItems = org.telegram.othergram.plugins.OtherGramPluginRuntime.menuItems("MESSAGE_CONTEXT_MENU");
+        for (int i = 0; i < ogPluginMenuItems.length() && i < 50; i++) {
+            final org.json.JSONObject item = ogPluginMenuItems.optJSONObject(i);
+            if (item != null) {
+                items.add(item.optString("text"));
+                options.add(OG_PLUGIN_OPTION_BASE + i);
+                icons.add(R.drawable.msg_bots);
+            }
+        }
     }
+
+    private static final int OG_PLUGIN_OPTION_BASE = 9000;
+    private org.json.JSONArray ogPluginMenuItems;
 
     private boolean showWelcomeMessageRevertOption(MessageObject messageObject) {
         return chatMode == MODE_DEFAULT && messageObject != null && messageObject.isWelcomeAnchored();

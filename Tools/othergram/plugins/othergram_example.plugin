@@ -1,0 +1,58 @@
+__id__ = "othergram_example"
+__name__ = "OtherGram Example"
+__description__ = "Тестовый плагин: команды в сообщениях (.shrug, .upper текст), пункт «Скопировать ID сообщения» в меню сообщения и настройки."
+__author__ = "OtherGram"
+__version__ = "1.0"
+__min_version__ = "12.0.0"
+
+from base_plugin import BasePlugin, HookResult, HookStrategy, MenuItemData, MenuItemType
+from ui.settings import Header, Switch, Input, Divider, Text
+from ui.bulletin import BulletinHelper
+from android_utils import copy_to_clipboard
+
+
+class ExamplePlugin(BasePlugin):
+    def on_plugin_load(self):
+        self.add_on_send_message_hook()
+        self.add_menu_item(MenuItemData(
+            menu_type=MenuItemType.MESSAGE_CONTEXT_MENU,
+            text="Скопировать ID сообщения",
+            on_click=self.copy_message_id,
+        ))
+
+    def create_settings(self):
+        return [
+            Header(text="Команды"),
+            Switch(key="shrug", text="Заменять .shrug на ¯\\_(ツ)_/¯", default=True),
+            Switch(key="upper", text="Команда .upper текст → ТЕКСТ", default=True),
+            Input(key="signature", text="Подпись к сообщениям (пусто — без подписи)", default=""),
+            Divider(text="Подпись добавляется в конец каждого отправленного текста."),
+            Text(text="Показать проверочное уведомление", accent=True, on_click=lambda view: BulletinHelper.show_success("Плагин работает!")),
+        ]
+
+    def on_send_message_hook(self, account, params):
+        text = params.message
+        if not isinstance(text, str) or not text:
+            return HookResult()
+        changed = False
+        if self.get_setting("shrug", True) and text.strip() == ".shrug":
+            text = "¯\\_(ツ)_/¯"
+            changed = True
+        elif self.get_setting("upper", True) and text.startswith(".upper "):
+            text = text[len(".upper "):].upper()
+            changed = True
+        signature = self.get_setting("signature", "")
+        if signature:
+            text = text + "\n\n" + signature
+            changed = True
+        if not changed:
+            return HookResult()
+        params.message = text
+        return HookResult(strategy=HookStrategy.MODIFY, params=params)
+
+    def copy_message_id(self, context):
+        message = context.get("message")
+        if message is None:
+            return
+        copy_to_clipboard(str(message.getId()))
+        BulletinHelper.show_success("ID сообщения скопирован")
