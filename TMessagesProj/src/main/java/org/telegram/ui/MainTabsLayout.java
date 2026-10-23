@@ -256,11 +256,183 @@ public class MainTabsLayout extends AnimatedLinearLayout {
 
 
     public void setTabSelected(View tab, boolean animated) {
+        final boolean lens = ogLensEnabled();
         for (int a = 0, N = getChildCount(); a < N; a++) {
             final View child = getChildAt(a);
             if (child instanceof GlassTabView) {
                 ((GlassTabView) child).setSelected(child == tab, animated);
+                ((GlassTabView) child).setSkipDrawSelector(lens || drawCustomSelector);
             }
+        }
+        if (lens) {
+            ogMoveLens(tab, animated);
+        }
+    }
+
+    // ------------------------------------------------------------ OtherGram: glass lens selector
+
+    /** Set by the main screen; other screens that reuse this layout keep Telegram's selector. */
+    public boolean ogLensAllowed;
+
+    private float ogLensX = -1;
+    private float ogLensFromX, ogLensToX;
+    private float ogLensW, ogLensFromW, ogLensToW;
+    private float ogLensLift;
+    private android.animation.ValueAnimator ogLiftAnimator;
+    private final Paint ogLensFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint ogLensRim = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint ogBarStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final android.graphics.Path ogLensPath = new android.graphics.Path();
+    private final android.graphics.RectF ogLensRect = new android.graphics.RectF();
+
+    private final SpringAnimation ogLensSpring = new SpringAnimation(this, new FloatPropertyCompat<MainTabsLayout>("ogLensX") {
+        @Override
+        public float getValue(MainTabsLayout object) {
+            return object.ogLensX;
+        }
+
+        @Override
+        public void setValue(MainTabsLayout object, float value) {
+            object.ogLensX = value;
+            final float span = object.ogLensToX - object.ogLensFromX;
+            final float progress = span == 0 ? 1f : Math.max(0f, Math.min(1f, (value - object.ogLensFromX) / span));
+            object.ogLensW = lerp(object.ogLensFromW, object.ogLensToW, progress);
+            object.invalidate();
+        }
+    });
+
+    {
+        ogLensSpring.setSpring(new SpringForce(0).setStiffness(420f).setDampingRatio(0.68f));
+        ogLensSpring.addEndListener((animation, canceled, value, velocity) -> ogAnimateLift(0f, 280));
+        ogLensRim.setStyle(Paint.Style.STROKE);
+        ogBarStroke.setStyle(Paint.Style.STROKE);
+    }
+
+    private boolean ogLensEnabled() {
+        return ogLensAllowed && org.telegram.othergram.ui.OtherGramInterface.tabLens();
+    }
+
+    private void ogAnimateLift(float to, long duration) {
+        if (ogLiftAnimator != null) {
+            ogLiftAnimator.cancel();
+        }
+        ogLiftAnimator = android.animation.ValueAnimator.ofFloat(ogLensLift, to);
+        ogLiftAnimator.setDuration(duration);
+        ogLiftAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+        ogLiftAnimator.addUpdateListener(a -> {
+            ogLensLift = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        ogLiftAnimator.start();
+    }
+
+    private void ogMoveLens(View tab, boolean animated) {
+        if (tab == null) {
+            return;
+        }
+        if (tab.getWidth() == 0) {
+            post(() -> ogMoveLens(tab, false));
+            return;
+        }
+        final float targetX = tab.getX() + tab.getWidth() / 2f;
+        final float targetW = tab.getWidth();
+        if (!animated || ogLensX < 0) {
+            ogLensSpring.cancel();
+            ogLensX = ogLensFromX = ogLensToX = targetX;
+            ogLensW = ogLensFromW = ogLensToW = targetW;
+            invalidate();
+            return;
+        }
+        if (Math.abs(targetX - ogLensX) < 1f && !ogLensSpring.isRunning()) {
+            ogLensW = targetW;
+            return;
+        }
+        ogLensFromX = ogLensX;
+        ogLensToX = targetX;
+        ogLensFromW = ogLensW;
+        ogLensToW = targetW;
+        if (ogLensLift < 1f) {
+            ogAnimateLift(1f, 140);
+        }
+        ogLensSpring.animateToFinalPosition(targetX);
+    }
+
+    /** Draws the bar outline, the lens and the tabs (magnified under the lens). */
+    private void ogDrawWithLens(Canvas canvas) {
+        final float tabsHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+        final float cy = getPaddingTop() + tabsHeight / 2f;
+        final int selected = Theme.getColor(Theme.key_glass_tabSelected, resourcesProvider);
+        final int unselected = Theme.getColor(Theme.key_glass_tabUnselected, resourcesProvider);
+
+        // Thin outline around the whole bar
+        final float barInset = dp(DialogsActivity.MAIN_TABS_MARGIN - 0.334f);
+        ogBarStroke.setStrokeWidth(dp(1));
+        ogBarStroke.setColor(Theme.multAlpha(unselected, 0.22f));
+        final float barRadius = (getHeight() - barInset * 2) / 2f;
+        canvas.drawRoundRect(barInset + dp(0.5f), barInset + dp(0.5f), getWidth() - barInset - dp(0.5f), getHeight() - barInset - dp(0.5f),
+                barRadius, barRadius, ogBarStroke);
+
+        float x = ogLensX;
+        float w = ogLensW;
+        float lift = ogLensLift;
+        if (isInLongPress && drawCustomSelector) {
+            // The lens follows the finger while dragging along the bar
+            x = animatedLongSelectedViewCenterX + animatedLongSelectedViewOffsetX;
+            w = getInterpolatedWidthByX(x, this);
+            ogLensX = ogLensFromX = ogLensToX = x;
+            ogLensW = ogLensFromW = ogLensToW = w;
+            if (ogLensLift < 1f && (ogLiftAnimator == null || !ogLiftAnimator.isRunning())) {
+                ogAnimateLift(1f, 140);
+            }
+        }
+        if (x < 0 || w <= 0) {
+            // Just switched on: put the lens under the selected tab and hide the tabs' own highlight
+            final View selectedTab = findSelectedTab();
+            if (selectedTab != null && selectedTab.getWidth() > 0) {
+                for (int a = 0, N = getChildCount(); a < N; a++) {
+                    if (getChildAt(a) instanceof GlassTabView) {
+                        ((GlassTabView) getChildAt(a)).setSkipDrawSelector(true);
+                    }
+                }
+                ogMoveLens(selectedTab, false);
+            }
+            super.dispatchDraw(canvas);
+            return;
+        }
+
+        final float lensW = w * (1f + 0.14f * lift);
+        final float lensH = tabsHeight * (1f + 0.34f * lift);
+        ogLensRect.set(x - lensW / 2f, cy - lensH / 2f, x + lensW / 2f, cy + lensH / 2f);
+        final float r = Math.min(lensW, lensH) / 2f;
+        ogLensPath.reset();
+        ogLensPath.addRoundRect(ogLensRect, r, r, android.graphics.Path.Direction.CW);
+
+        // Resting highlight: a round tinted spot; lifted: a lighter, clearer glass drop
+        ogLensFill.setColor(Theme.multAlpha(selected, 0.14f * (1f - lift) + 0.07f * lift));
+        canvas.drawPath(ogLensPath, ogLensFill);
+
+        if (lift > 0.02f) {
+            canvas.save();
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                canvas.clipOutPath(ogLensPath);
+            } else {
+                canvas.clipPath(ogLensPath, android.graphics.Region.Op.DIFFERENCE);
+            }
+            super.dispatchDraw(canvas);
+            canvas.restore();
+
+            canvas.save();
+            canvas.clipPath(ogLensPath);
+            final float magnify = 1f + 0.16f * lift;
+            canvas.scale(magnify, magnify, x, cy);
+            super.dispatchDraw(canvas);
+            canvas.restore();
+
+            ogLensRim.setStrokeWidth(dp(1.2f));
+            ogLensRim.setColor(Theme.multAlpha(androidx.core.graphics.ColorUtils.blendARGB(0xFFFFFFFF, selected, 0.25f), 0.6f * lift));
+            canvas.drawPath(ogLensPath, ogLensRim);
+        } else {
+            super.dispatchDraw(canvas);
         }
     }
 
@@ -295,7 +467,7 @@ public class MainTabsLayout extends AnimatedLinearLayout {
             }
 
             if (child instanceof GlassTabView) {
-                ((GlassTabView) child).setSkipDrawSelector(skipDrawSelector);
+                ((GlassTabView) child).setSkipDrawSelector(skipDrawSelector || ogLensEnabled());
             }
         }
         invalidate();
@@ -309,6 +481,10 @@ public class MainTabsLayout extends AnimatedLinearLayout {
 
     @Override
     protected void dispatchDraw(@NonNull Canvas canvas) {
+        if (ogLensEnabled()) {
+            ogDrawWithLens(canvas); // OtherGram: glass lens selector instead of Telegram's
+            return;
+        }
         if (drawCustomSelector) {
             final float x = animatedLongSelectedViewCenterX + animatedLongSelectedViewOffsetX;
             final float sWidth = getInterpolatedWidthByX(x, this);

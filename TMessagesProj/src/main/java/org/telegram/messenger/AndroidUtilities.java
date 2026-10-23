@@ -4282,6 +4282,11 @@ public class AndroidUtilities {
     }
 
     public static boolean openForView(File f, String fileName, String mimeType, final Activity activity, Theme.ResourcesProvider resourcesProvider, boolean restrict) {
+        // OtherGram: a settings or style file sent in a chat opens the import dialog
+        if (fileName != null && fileName.toLowerCase(java.util.Locale.US).endsWith(org.telegram.othergram.OtherGramBackup.EXTENSION)
+                && org.telegram.othergram.OtherGramBackup.openFromChat(activity, f)) {
+            return true;
+        }
         if (f != null && f.exists()) {
             String realMimeType = null;
             Intent intent = new Intent(Intent.ACTION_VIEW);

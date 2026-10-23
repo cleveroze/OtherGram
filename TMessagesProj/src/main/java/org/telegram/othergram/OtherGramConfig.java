@@ -22,6 +22,9 @@ public class OtherGramConfig {
         void onOtherGramConfigChanged(String key);
     }
 
+    /** OtherGram version shown in the settings banner and written into exported settings. */
+    public static final String VERSION = "1.3.0";
+
     private static final String PREFS_NAME = "othergram_config";
     private static final String SUFFIX_LIGHT = "_light";
     private static final String SUFFIX_DARK = "_dark";
@@ -112,6 +115,38 @@ public class OtherGramConfig {
     public static void removeThemed(String key, boolean dark) {
         prefs().edit().remove(themedKey(key, dark)).apply();
         notifyChanged(key);
+    }
+
+    /** Every stored setting (for exporting). */
+    public static java.util.Map<String, ?> getAll() {
+        return prefs().getAll();
+    }
+
+    /**
+     * Replaces settings in one step (for importing): removes {@code toRemove}, then writes {@code values}
+     * (Boolean, Integer, Long, Float or String). Listeners get a single "everything changed" call.
+     */
+    public static void replace(java.util.Collection<String> toRemove, java.util.Map<String, Object> values) {
+        final SharedPreferences.Editor editor = prefs().edit();
+        for (String key : toRemove) {
+            editor.remove(key);
+        }
+        for (java.util.Map.Entry<String, Object> e : values.entrySet()) {
+            final Object v = e.getValue();
+            if (v instanceof Boolean) {
+                editor.putBoolean(e.getKey(), (Boolean) v);
+            } else if (v instanceof Integer) {
+                editor.putInt(e.getKey(), (Integer) v);
+            } else if (v instanceof Long) {
+                editor.putLong(e.getKey(), (Long) v);
+            } else if (v instanceof Float) {
+                editor.putFloat(e.getKey(), (Float) v);
+            } else if (v instanceof String) {
+                editor.putString(e.getKey(), (String) v);
+            }
+        }
+        editor.commit();
+        notifyChanged(null);
     }
 
     /** Restores the default OtherGram design by dropping every stored OtherGram setting. */

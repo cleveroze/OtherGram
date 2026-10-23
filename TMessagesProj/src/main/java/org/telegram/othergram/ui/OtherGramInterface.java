@@ -6,14 +6,14 @@ import android.view.View;
 import org.telegram.othergram.OtherGramConfig;
 
 /**
- * Interface touches in the iOS 18 spirit: bouncy bottom tabs with a light haptic tick, the floating
- * "island" chat header and softer dialogs. Everything can be switched off in Appearance.
+ * Interface touches in the iOS 18 spirit: bouncy bottom tabs with a light haptic tick and the glass
+ * "lens" tab selector. Everything can be switched off in Appearance.
  */
 public class OtherGramInterface {
 
     public static final String KEY_TAB_BOUNCE = "ui_tab_bounce";
     public static final String KEY_TAB_HAPTICS = "ui_tab_haptics";
-    public static final String KEY_ISLAND_HEADER = "ui_island_header";
+    public static final String KEY_TAB_LENS = "ui_tab_lens";
 
     /** Bottom tab icons jump with a spring when selected (on by default). */
     public static boolean tabBounce() {
@@ -25,9 +25,12 @@ public class OtherGramInterface {
         return OtherGramConfig.getBoolean(KEY_TAB_HAPTICS, true);
     }
 
-    /** Chat header drawn as floating round buttons and a name pill, like Telegram for iOS (off by default). */
-    public static boolean islandHeader() {
-        return OtherGramConfig.getBoolean(KEY_ISLAND_HEADER, false);
+    /**
+     * Bottom tabs with a glass "lens" that slides between tabs, magnifies the icon under it and settles
+     * into a round highlight, like iOS 26 (off by default). Colors come from the current theme.
+     */
+    public static boolean tabLens() {
+        return OtherGramConfig.getBoolean(KEY_TAB_LENS, false);
     }
 
     /**

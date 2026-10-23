@@ -94,9 +94,6 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
     private BlurredBackgroundDrawable glassDrawable;
     private BlurredBackgroundDrawable glassDrawableBack;
     private BlurredBackgroundDrawable glassDrawableMenu;
-    private BlurredBackgroundDrawable ogGlassDrawableAvatar;
-    private final android.graphics.Rect ogIslandAvatarBounds = new android.graphics.Rect();
-    private boolean ogIslandAvatarPressed;
     private INavigationLayout.BackButtonState backButtonState = INavigationLayout.BackButtonState.BACK;
     public ImageView backButtonImageView;
     private BackupImageView avatarSearchImageView;
@@ -238,12 +235,6 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
             .setPadding(dp(6));
 
         glassDrawableMenu = factory.create(this)
-            .setColorProvider(colorProvider)
-            .setRadius(dp(23))
-            .setPadding(dp(6));
-
-        // OtherGram: separate circle for the avatar in the iOS-style island header
-        ogGlassDrawableAvatar = factory.create(this)
             .setColorProvider(colorProvider)
             .setRadius(dp(23))
             .setPadding(dp(6));
@@ -1871,24 +1862,6 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        // OtherGram: taps on the island avatar circle (the avatar is drawn outside its container's bounds)
-        if (chatAvatarContainer != null && glassMode && !ogIslandAvatarBounds.isEmpty() && chatAvatarContainer.ogIsIsland()) {
-            final int action = ev.getActionMasked();
-            final boolean inside = ogIslandAvatarBounds.contains((int) ev.getX(), (int) ev.getY());
-            if (action == MotionEvent.ACTION_DOWN && inside) {
-                ogIslandAvatarPressed = true;
-                return true;
-            }
-            if (ogIslandAvatarPressed) {
-                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                    ogIslandAvatarPressed = false;
-                    if (action == MotionEvent.ACTION_UP && inside) {
-                        chatAvatarContainer.ogClickIslandAvatar();
-                    }
-                }
-                return true;
-            }
-        }
         if (chatAvatarContainer != null && glassMode) {
             if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                 final int x = (int) ev.getX();
@@ -2182,8 +2155,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
             //visualWidth = Math.max(visualWidth, dp(168));
         }
 
-        // OtherGram: the island avatar circle takes another button's width
-        final int width = Math.min(getMeasuredWidth() - dp(6 + 46 + 6 + 6 + 46 + 6) - (chatAvatarContainer.ogIsIsland() ? dp(46 + 6) : 0), visualWidth);
+        final int width = Math.min(getMeasuredWidth() - dp(6 + 46 + 6 + 6 + 46 + 6), visualWidth);
         if (animated) {
             if (animatorAvatarContainerWidth.getToFactor() != width) {
                 animatorAvatarContainerWidth.animateTo(width);
@@ -2268,23 +2240,9 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         final int t = getHeight() - (getCurrentActionBarHeight() + s) / 2 - p;
         final int b = t + s + p * 2;
 
-        ogIslandAvatarBounds.setEmpty();
         if (glassDrawable != null && !glassOnlyBack && drawGlassTitle) {
             final int menuWidthWithPadding = menuWidth + ((hasForcedMenuWidth || hasForcedMenuMinWidth) ? (menuWidth > 0 ? p : 0) : (int) (p * animatorHasMenuItems.getFloatValue()));
-            int rightOffset = lerp(menuWidthWithPadding, Math.max(menuWidthWithPadding, p + s), chatAvatarContainer == null ? 0f : 1f - animatorAvatarContainerHasAvatar.getFloatValue());
-            // OtherGram: island header — the avatar gets its own circle left of the menu, the pill shrinks
-            final boolean ogIsland = chatAvatarContainer != null && ogGlassDrawableAvatar != null
-                && chatAvatarContainer.ogIsIsland() && Math.max(searchFactor, actionModeFactor) < 1f;
-            if (ogIsland) {
-                final float ogVisible = 1f - Math.max(searchFactor, actionModeFactor);
-                final int avatarRight = menuWidth > 0 ? getWidth() - Math.max(s, menuWidth) - p * 2 + p : getWidth();
-                final int avatarLeft = avatarRight - s - p * 2;
-                ogIslandAvatarBounds.set(avatarLeft, t, avatarRight, b);
-                ogGlassDrawableAvatar.setBounds(ogIslandAvatarBounds);
-                ogGlassDrawableAvatar.setAlpha((int) (255 * ogVisible));
-                ogGlassDrawableAvatar.draw(canvas);
-                rightOffset = lerp(rightOffset, getWidth() - avatarLeft - p, ogVisible);
-            }
+            final int rightOffset = lerp(menuWidthWithPadding, Math.max(menuWidthWithPadding, p + s), chatAvatarContainer == null ? 0f : 1f - animatorAvatarContainerHasAvatar.getFloatValue());
 
             final int leftDefault = lerp(hasBackButton ? s + p : 0, s + p, chatAvatarContainer == null? 0f : 1f - animatorAvatarContainerHasAvatar.getFloatValue());
             final int rightDefault = getWidth() - rightOffset;
@@ -2301,12 +2259,6 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
                     + p + dp(3);
                 chatAvatarContainer.setTranslationX(translationX);
                 chatAvatarContainer.setPivotX((chatAvatarContainer.getMeasuredWidth()) / 2f - translationX );
-                if (ogIsland) {
-                    final float containerX = chatAvatarContainer.getLeft() + translationX;
-                    chatAvatarContainer.ogSetIslandAvatarOffset(ogIslandAvatarBounds.exactCenterX() - containerX - chatAvatarContainer.ogAvatarCenterX());
-                } else if (chatAvatarContainer.getAvatarImageView() != null && chatAvatarContainer.getAvatarImageView().getTranslationX() != 0) {
-                    chatAvatarContainer.ogSetIslandAvatarOffset(0);
-                }
             } else {
                 left = leftDefault;
                 right = rightDefault;
@@ -2387,9 +2339,6 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         }
         if (glassDrawableBack != null) {
             glassDrawableBack.updateColors();
-        }
-        if (ogGlassDrawableAvatar != null) {
-            ogGlassDrawableAvatar.updateColors();
         }
         if (additionalSubTitleOverlayContainer != null) {
             additionalSubTitleOverlayContainer.updateColors();

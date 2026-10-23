@@ -307,6 +307,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         tabletLayout = false;
 
         tabsView = new MainTabsLayout(context, resourceProvider);
+        tabsView.ogLensAllowed = true; // OtherGram: optional glass lens selector on the main tabs
         tabsView.setClipChildren(false);
         tabsView.setPadding(dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4), dp(DialogsActivity.MAIN_TABS_MARGIN + 4));
         tabsView.setMaxWidth(dp(328 + DialogsActivity.MAIN_TABS_MARGIN * 2));

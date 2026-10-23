@@ -40,7 +40,6 @@ public class OtherGramSettingsActivity extends BaseFragment {
     private static final int ID_ACCOUNT = 9;
     private static final int ID_ADMIN = 10;
     private static final int ID_PRIVACY = 11;
-    private static final int ID_MATERIAL = 12;
 
     private UniversalRecyclerView listView;
     private boolean connecting;
@@ -80,7 +79,13 @@ public class OtherGramSettingsActivity extends BaseFragment {
         return fragmentView = contentView;
     }
 
+    private OtherGramBannerHeader bannerHeader;
+
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
+        if (bannerHeader == null) {
+            bannerHeader = new OtherGramBannerHeader(getContext());
+        }
+        items.add(UItem.asCustomShadow(bannerHeader));
         items.add(UItem.asHeader(getString(R.string.OG_SectionAccount)));
         if (!OtherGramApi.isConfigured()) {
             items.add(UItem.asButton(ID_ACCOUNT, R.drawable.msg_openprofile, getString(R.string.OG_AccountNoServer)).setEnabled(false));
@@ -98,8 +103,6 @@ public class OtherGramSettingsActivity extends BaseFragment {
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionCustomization)));
         items.add(UItem.asButton(ID_APPEARANCE, R.drawable.msg_palette, getString(R.string.OG_Appearance)));
-        items.add(UItem.asButton(ID_MATERIAL, R.drawable.msg_theme, getString(R.string.OG_MaterialYou),
-                getString(org.telegram.othergram.theme.OtherGramMaterial.enabled() ? R.string.OG_On : R.string.OG_Off)));
         items.add(UItem.asButton(ID_AVATARS, R.drawable.msg_contacts, getString(R.string.OG_Avatars)));
         items.add(UItem.asButton(ID_TYPOGRAPHY, R.drawable.msg_text_outlined, getString(R.string.OG_Typography)));
         items.add(UItem.asButton(ID_CHATS, R.drawable.msg_msgbubble3, getString(R.string.OG_Chats)));
@@ -115,7 +118,7 @@ public class OtherGramSettingsActivity extends BaseFragment {
         items.add(UItem.asShadow(null));
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionData)));
-        items.add(section(ID_EXPORT_IMPORT, R.drawable.msg_share, R.string.OG_ExportImport));
+        items.add(UItem.asButton(ID_EXPORT_IMPORT, R.drawable.msg_share, getString(R.string.OG_ExportImport)));
         items.add(section(ID_RESET, R.drawable.msg_reset, R.string.OG_ResetAll));
         items.add(UItem.asShadow(getString(R.string.OG_InDevelopmentInfo)));
     }
@@ -148,8 +151,6 @@ public class OtherGramSettingsActivity extends BaseFragment {
             presentFragment(new OtherGramAdminActivity());
         } else if (item.id == ID_APPEARANCE) {
             presentFragment(new OtherGramAppearanceActivity());
-        } else if (item.id == ID_MATERIAL) {
-            presentFragment(new OtherGramMaterialActivity());
         } else if (item.id == ID_AVATARS) {
             presentFragment(new OtherGramAvatarsActivity());
         } else if (item.id == ID_PROFILE) {
@@ -160,6 +161,8 @@ public class OtherGramSettingsActivity extends BaseFragment {
             presentFragment(new OtherGramPrivacyActivity());
         } else if (item.id == ID_CHATS) {
             presentFragment(new OtherGramChatsActivity());
+        } else if (item.id == ID_EXPORT_IMPORT) {
+            presentFragment(new OtherGramBackupActivity());
         }
         // Customization sections open their screens here as they are implemented.
     }

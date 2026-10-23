@@ -162,6 +162,55 @@ public class OtherGramFonts {
         }
     }
 
+    /** File of an imported font ("file:name.ttf"), or null for built-in fonts and missing files. */
+    public static File customFontFile(String font) {
+        if (font == null || !font.startsWith(FILE_PREFIX)) {
+            return null;
+        }
+        final File file = new File(customDir(), font.substring(FILE_PREFIX.length()));
+        return file.exists() ? file : null;
+    }
+
+    /**
+     * Installs a font that came inside an exported settings file. Returns false when the name is
+     * unsafe or Android cannot load the data as a font.
+     */
+    public static boolean installFont(String name, byte[] data) {
+        if (name == null || data == null || data.length == 0 || data.length > MAX_FONT_BYTES
+                || !name.matches("[A-Za-z0-9._ -]+") || name.startsWith(".")) {
+            return false;
+        }
+        final File target = new File(customDir(), name);
+        final File tmp = new File(customDir(), name + ".tmp");
+        try (OutputStream out = new FileOutputStream(tmp)) {
+            out.write(data);
+        } catch (Exception e) {
+            tmp.delete();
+            return false;
+        }
+        try {
+            if (Typeface.createFromFile(tmp) == null) {
+                tmp.delete();
+                return false;
+            }
+        } catch (Exception e) {
+            tmp.delete();
+            return false;
+        }
+        if (target.exists()) {
+            target.delete();
+        }
+        if (!tmp.renameTo(target)) {
+            tmp.delete();
+            return false;
+        }
+        synchronized (OtherGramFonts.class) {
+            cache.remove(FILE_PREFIX + name + ":h");
+            cache.remove(FILE_PREFIX + name + ":r");
+        }
+        return true;
+    }
+
     private static File customDir() {
         final File dir = new File(ApplicationLoader.applicationContext.getFilesDir(), "othergram_fonts");
         if (!dir.exists()) {

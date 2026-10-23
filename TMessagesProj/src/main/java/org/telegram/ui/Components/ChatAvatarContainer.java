@@ -743,7 +743,7 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
             if (subtitleTextLargerCopyView2 != null) {
                 removeView(subtitleTextLargerCopyView2);
                 this.subtitleTextLargerCopyView.set(null);
-                if (!allowDrawStories && !ogIsland) { // OtherGram: the island avatar is drawn outside this view
+                if (!allowDrawStories) {
                     setClipChildren(true);
                 }
             }
@@ -751,48 +751,6 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         addView(subtitleTextLargerCopyView);
 
         setClipChildren(false);
-    }
-
-    // OtherGram: iOS-style "island" header — the name pill holds only the texts, the avatar sits in its own
-    // glass circle to the right (ActionBar places it through ogSetIslandAvatarOffset)
-    private boolean ogIsland;
-
-    public void ogSetIsland(boolean island) {
-        if (ogIsland != island) {
-            ogIsland = island;
-            if (island) {
-                setClipChildren(false);
-            } else {
-                ogSetIslandAvatarOffset(0);
-            }
-            requestLayout();
-        }
-    }
-
-    public boolean ogIsIsland() {
-        return ogIsland && glassMode && hasVisibleAvatar();
-    }
-
-    /** Moves the avatar (and the small items drawn on it) horizontally into the island circle. */
-    public void ogSetIslandAvatarOffset(float offset) {
-        avatarImageView.setTranslationX(offset);
-        if (timeItem != null) timeItem.setTranslationX(offset);
-        if (communityItem != null) communityItem.setTranslationX(offset);
-        if (starBgItem != null) starBgItem.setTranslationX(offset);
-        if (starFgItem != null) starFgItem.setTranslationX(offset);
-    }
-
-    /** Center of the avatar in this view's coordinates, without the island offset. */
-    public float ogAvatarCenterX() {
-        return avatarImageView.getLeft() + avatarImageView.getMeasuredWidth() / 2f;
-    }
-
-    public void ogClickIslandAvatar() {
-        if (avatarImageView.hasOnClickListeners()) {
-            avatarImageView.performClick();
-        } else {
-            openProfile(false);
-        }
     }
 
     private boolean glassMode;
@@ -813,20 +771,10 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         final int subtitleTop = viewTop + dp(glassMode ? 23.66f : 24);
 
         avatarImageView.layout(1 + leftPadding, 1 + viewTop, 1 + leftPadding + avatarImageView.getMeasuredWidth(), 1 + viewTop + avatarImageView.getMeasuredHeight());
-        int l = leftPadding + (avatarImageView.getVisibility() == VISIBLE && !ogIsIsland() ? dp(glassMode ? 49.66f : 55) : dp(glassMode ? 13 : 1)) + rightAvatarPadding;
-        // OtherGram: in the island the title and the status are centered over each other
-        int titleL = l;
-        int subtitleL = l;
-        if (ogIsIsland() && subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-            final int titleW = (int) titleTextView.getExactWidthIncludeDrawables();
-            final int subtitleW = (int) subtitleTextView.getExactWidthIncludeDrawables();
-            final int w = Math.max(titleW, subtitleW);
-            titleL = l + Math.max(0, (w - titleW) / 2);
-            subtitleL = l + Math.max(0, (w - subtitleW) / 2);
-        }
+        int l = leftPadding + (avatarImageView.getVisibility() == VISIBLE ? dp(glassMode ? 49.66f : 55) : dp(glassMode ? 13 : 1)) + rightAvatarPadding;
         SimpleTextView titleTextLargerCopyView = this.titleTextLargerCopyView.get();
         if (getSubtitleTextView().getVisibility() != GONE) {
-            titleTextView.layout(titleL, viewTop + dp(1.66f) - titleTextView.getPaddingTop(), titleL + titleTextView.getMeasuredWidth(), viewTop + titleTextView.getTextHeight() + dp(1.66f) - titleTextView.getPaddingTop() + titleTextView.getPaddingBottom());
+            titleTextView.layout(l, viewTop + dp(1.66f) - titleTextView.getPaddingTop(), l + titleTextView.getMeasuredWidth(), viewTop + titleTextView.getTextHeight() + dp(1.66f) - titleTextView.getPaddingTop() + titleTextView.getPaddingBottom());
             if (titleTextLargerCopyView != null) {
                 titleTextLargerCopyView.layout(l, viewTop + dp(1.66f), l + titleTextLargerCopyView.getMeasuredWidth(), viewTop + titleTextLargerCopyView.getTextHeight() + dp(1.66f));
             }
@@ -858,7 +806,7 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
             starFgItem.layout(leftPadding + dp(28), viewTop + dp(24), leftPadding + dp(28) + starFgItem.getMeasuredWidth(), viewTop + dp(24) + starFgItem.getMeasuredHeight());
         }
         if (subtitleTextView != null) {
-            subtitleTextView.layout(subtitleL, subtitleTop, subtitleL + subtitleTextView.getMeasuredWidth(), subtitleTop + subtitleTextView.getTextHeight());
+            subtitleTextView.layout(l, subtitleTop, l + subtitleTextView.getMeasuredWidth(), subtitleTop + subtitleTextView.getTextHeight());
         } else if (animatedSubtitleTextView != null) {
             animatedSubtitleTextView.layout(l, subtitleTop, l + animatedSubtitleTextView.getMeasuredWidth(), subtitleTop + animatedSubtitleTextView.getTextHeight());
         }
@@ -1776,7 +1724,7 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
         if (subtitleTextView != null) {
             width = Math.max(width, subtitleTextView.getExactWidthIncludeDrawables());
         }
-        if (hasVisibleAvatar() && !ogIsIsland()) {
+        if (hasVisibleAvatar()) {
             width += dp(52 + 18);
         } else {
             width += dp(34);

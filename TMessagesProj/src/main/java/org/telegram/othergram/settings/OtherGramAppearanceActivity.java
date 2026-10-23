@@ -32,7 +32,7 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
 
     private static final int ID_PRESET_DEFAULT = 1;
     private static final int ID_RESET_ALL = 2;
-    private static final int ID_ISLAND_HEADER = 3;
+    private static final int ID_TAB_LENS = 3;
     private static final int ID_TAB_BOUNCE = 4;
     private static final int ID_TAB_HAPTICS = 5;
     private static final int ID_PRESET_BASE = 100;
@@ -90,7 +90,7 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         final boolean dark = isDark();
         items.add(UItem.asHeader(getString(R.string.OG_InterfaceStyle)));
-        items.add(UItem.asCheck(ID_ISLAND_HEADER, getString(R.string.OG_IslandHeader)).setChecked(OtherGramInterface.islandHeader()));
+        items.add(UItem.asCheck(ID_TAB_LENS, getString(R.string.OG_TabLens)).setChecked(OtherGramInterface.tabLens()));
         items.add(UItem.asCheck(ID_TAB_BOUNCE, getString(R.string.OG_TabBounce)).setChecked(OtherGramInterface.tabBounce()));
         items.add(UItem.asCheck(ID_TAB_HAPTICS, getString(R.string.OG_TabHaptics)).setChecked(OtherGramInterface.tabHaptics()));
         items.add(UItem.asShadow(getString(R.string.OG_InterfaceStyleInfo)));
@@ -119,10 +119,10 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
 
     private void onItemClick(UItem item, View view, int position, float x, float y) {
         final boolean dark = isDark();
-        if (item.id == ID_ISLAND_HEADER || item.id == ID_TAB_BOUNCE || item.id == ID_TAB_HAPTICS) {
-            final String key = item.id == ID_ISLAND_HEADER ? OtherGramInterface.KEY_ISLAND_HEADER
+        if (item.id == ID_TAB_LENS || item.id == ID_TAB_BOUNCE || item.id == ID_TAB_HAPTICS) {
+            final String key = item.id == ID_TAB_LENS ? OtherGramInterface.KEY_TAB_LENS
                     : item.id == ID_TAB_BOUNCE ? OtherGramInterface.KEY_TAB_BOUNCE : OtherGramInterface.KEY_TAB_HAPTICS;
-            final boolean current = item.id == ID_ISLAND_HEADER ? OtherGramInterface.islandHeader()
+            final boolean current = item.id == ID_TAB_LENS ? OtherGramInterface.tabLens()
                     : item.id == ID_TAB_BOUNCE ? OtherGramInterface.tabBounce() : OtherGramInterface.tabHaptics();
             OtherGramConfig.putBoolean(key, !current);
             listView.adapter.update(true);

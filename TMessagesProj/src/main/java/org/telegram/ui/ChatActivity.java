@@ -4211,8 +4211,6 @@ public class ChatActivity extends BaseFragment implements
             }
         };
         avatarContainer.setGlassMode();
-        // OtherGram: optional iOS-style island header (avatar in its own circle on the right)
-        avatarContainer.ogSetIsland(!inPreviewMode && !inBubbleMode && org.telegram.othergram.ui.OtherGramInterface.islandHeader());
         avatarContainer.allowShorterStatus = true;
         avatarContainer.premiumIconHiddable = true;
         avatarContainer.allowDrawStories = dialog_id < 0 && !isTopic;

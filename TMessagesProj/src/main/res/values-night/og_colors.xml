@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- OtherGram: launch screen background in the dark system theme -->
-    <color name="og_splash_background">#2E4869</color>
+    <!-- OtherGram: launch screen is the same in both themes; the app itself then opens in the dark theme -->
+    <color name="og_splash_background">#F1E1CC</color>
 </resources>
