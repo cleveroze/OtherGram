@@ -55,6 +55,10 @@ public class OtherGramPluginBridge {
         AndroidUtilities.runOnUIThread(() -> OtherGramPluginRuntime.notifySettingsChanged(pluginId));
     }
 
+    public static void setRequestHooks(String json) {
+        OtherGramPluginRuntime.setRequestHooks(json);
+    }
+
     public static void log(String tag, String message) {
         FileLog.d("OtherGram plugin " + tag + ": " + message);
     }

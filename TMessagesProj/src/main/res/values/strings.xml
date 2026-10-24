@@ -11732,8 +11732,8 @@
     <string name="OG_ProfileBackground">Profile background</string>
     <string name="OG_ProfileBackgroundPick">Choose a background picture</string>
     <string name="OG_ProfileBackgroundRemove">Remove the background</string>
-    <string name="OG_ProfileBackgroundInfo">A picture behind your whole profile header. It is darkened so your name and status stay readable. Other OtherGram users see it too.</string>
-    <string name="OG_ProfileBackgroundDimInfo">Darkening of the background. With a background, the name and buttons in your profile are shown in white.</string>
+    <string name="OG_ProfileBackgroundInfo">A picture under your profile info: from the phone number down to the posts. It is tinted with the theme color (darker in the dark theme, lighter in the light one) so all texts stay readable. Other OtherGram users see it too.</string>
+    <string name="OG_ProfileBackgroundDimInfo">How strongly the picture is tinted. Higher values make texts easier to read.</string>
     <string name="OG_AutoReply">Auto-reply</string>
     <string name="OG_AutoReplyEnable">Auto-reply in private chats</string>
     <string name="OG_AutoReplyText">Reply text</string>
@@ -11765,7 +11765,8 @@
     <string name="OG_PluginsInstallInfo">Files in the exteraGram .plugin format. A new plugin is installed switched off.</string>
     <string name="OG_PluginsInstalled">Installed plugins</string>
     <string name="OG_PluginsEmpty">No plugins yet</string>
-    <string name="OG_PluginsEngineInfo">Plugins run in the built-in Python 3.11. Supported: settings, send-message hooks, message menu items, bulletins and dialogs, Telegram requests. Plugins that hook app methods (hook_method) are not supported and will show an error. Plugins never change your OtherGram appearance settings.</string>
+    <string name="OG_PluginsEngineInfo">Plugins run in the built-in Python 3.11. Supported: settings, send-message hooks, request hooks (add_hook), message menu items, bulletins and dialogs, Telegram requests, files. Method hooks (hook_method) are not available: such plugins still load, only that part does nothing. Plugins never change your OtherGram appearance settings.</string>
+    <string name="OG_PluginUnsupported">This plugin uses features OtherGram does not have (%1$s). Part of it may not work.</string>
     <string name="OG_PluginNoSettings">This plugin has no settings.</string>
     <string name="OG_PluginEnabled">Plugin enabled</string>
     <string name="OG_PluginError">Plugin error</string>

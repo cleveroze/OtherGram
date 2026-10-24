@@ -2,9 +2,10 @@
 OtherGram plugin API, compatible with exteraGram's `base_plugin` module.
 
 A plugin is a .plugin file (Python) with metadata (__id__, __name__, __version__, ...) and a class
-derived from BasePlugin. Supported: lifecycle, settings, send-message hooks, menu items (chat menu
-and message menu), app events. Not supported: Xposed-style method hooks (hook_method etc.) and
-request/update hooks — such plugins load, but those calls raise NotImplementedError.
+derived from BasePlugin. Supported: lifecycle, settings, send-message hooks, request hooks
+(add_hook + pre_request_hook / post_request_hook), message menu items, app events. Not supported:
+Xposed-style method hooks (hook_method etc.) and update hooks — those calls do nothing, but the
+plugin still loads and everything else in it works.
 """
 
 import json
@@ -59,6 +60,35 @@ class MenuItemData:
         self.condition = condition
 
 
+def _hooks_changed():
+    """Replaced by the plugin host: tells the app which request names plugins listen to."""
+    pass
+
+
+class _NoHook:
+    def unhook(self):
+        pass
+
+
+class MethodHook:
+    """Base class plugins use with hook_method (kept so such plugins load; the hook itself is not called)."""
+
+    def before_hooked_method(self, param):
+        pass
+
+    def after_hooked_method(self, param):
+        pass
+
+
+class MethodReplacement(MethodHook):
+    def replace_hooked_method(self, param):
+        return None
+
+
+class XposedHook(MethodHook):
+    pass
+
+
 class BasePlugin:
     def __init__(self):
         self.id = None
@@ -68,6 +98,7 @@ class BasePlugin:
         self._request_hooks = []
         self._menu_items = {}
         self._menu_counter = 0
+        self._unsupported = []
 
     # ---------------------------------------------------------------- lifecycle
 
@@ -121,11 +152,13 @@ class BasePlugin:
         return HookResult()
 
     def add_hook(self, name, match_substring=False, priority=0):
-        # Request hooks are recorded but not called in this OtherGram version
-        self._request_hooks.append((name, match_substring, priority))
+        """Calls pre_request_hook / post_request_hook for requests named like the TL class, e.g. "TL_messages_readHistory"."""
+        self._request_hooks.append((str(name), bool(match_substring), priority))
+        _hooks_changed()
 
     def remove_hook(self, name):
         self._request_hooks = [h for h in self._request_hooks if h[0] != name]
+        _hooks_changed()
 
     def pre_request_hook(self, request_name, account, request):
         return HookResult()
@@ -139,14 +172,20 @@ class BasePlugin:
     def on_updates_hook(self, container_name, account, updates):
         return HookResult()
 
+    # Method hooks (Xposed style) are not available in OtherGram. They do not crash the plugin:
+    # the call returns a handle that does nothing, so the rest of the plugin keeps working.
+
     def hook_method(self, *args, **kwargs):
-        raise NotImplementedError("Method hooks are not supported in OtherGram")
+        self._unsupported.append("hook_method")
+        return _NoHook()
 
     def hook_all_methods(self, *args, **kwargs):
-        raise NotImplementedError("Method hooks are not supported in OtherGram")
+        self._unsupported.append("hook_all_methods")
+        return [_NoHook()]
 
     def hook_all_constructors(self, *args, **kwargs):
-        raise NotImplementedError("Method hooks are not supported in OtherGram")
+        self._unsupported.append("hook_all_constructors")
+        return [_NoHook()]
 
     def unhook_method(self, *args, **kwargs):
         pass

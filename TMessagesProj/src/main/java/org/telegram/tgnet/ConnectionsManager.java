@@ -390,7 +390,13 @@ public class ConnectionsManager extends BaseController {
     public int sendRequest(final TLObject object, final RequestDelegate onComplete, final RequestDelegateTimestamp onCompleteTimestamp, final QuickAckDelegate onQuickAck, final WriteToSocketDelegate onWriteToSocket, final int flags, final int datacenterId, final int connectionType, final boolean immediate) {
         final int requestToken = lastRequestToken.getAndIncrement();
         Utilities.stageQueue.postRunnable(() -> {
-            sendRequestInternal(object, onComplete, onCompleteTimestamp, onQuickAck, onWriteToSocket, flags, datacenterId, connectionType, immediate, requestToken);
+            // OtherGram: plugin request hooks (pre_request_hook can change or cancel, post_request_hook can change the answer)
+            final TLObject request = org.telegram.othergram.plugins.OtherGramPluginRuntime.preRequest(currentAccount, object);
+            if (request == null) {
+                return;
+            }
+            final RequestDelegate complete = org.telegram.othergram.plugins.OtherGramPluginRuntime.wrapComplete(currentAccount, request, onComplete);
+            sendRequestInternal(request, complete, onCompleteTimestamp, onQuickAck, onWriteToSocket, flags, datacenterId, connectionType, immediate, requestToken);
         });
         return requestToken;
     }

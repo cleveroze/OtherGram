@@ -460,8 +460,8 @@
     <string name="OG_ProfileBackground">Фон профиля</string>
     <string name="OG_ProfileBackgroundPick">Выбрать картинку для фона</string>
     <string name="OG_ProfileBackgroundRemove">Убрать фон</string>
-    <string name="OG_ProfileBackgroundInfo">Картинка на всю шапку вашего профиля. Она затемняется, чтобы имя и статус были хорошо видны. Её видят и другие пользователи OtherGram.</string>
-    <string name="OG_ProfileBackgroundDimInfo">Сила затемнения фона. С фоном имя и кнопки в профиле показываются белым.</string>
+    <string name="OG_ProfileBackgroundInfo">Картинка под информацией профиля: от номера телефона до публикаций. Она тонируется цветом темы (в тёмной теме темнее, в светлой светлее), чтобы весь текст был хорошо виден. Её видят и другие пользователи OtherGram.</string>
+    <string name="OG_ProfileBackgroundDimInfo">Сила тонирования картинки. Чем больше, тем легче читать текст.</string>
     <string name="OG_AutoReply">Автоответчик</string>
     <string name="OG_AutoReplyEnable">Автоответчик в личных сообщениях</string>
     <string name="OG_AutoReplyText">Текст ответа</string>
@@ -493,7 +493,8 @@
     <string name="OG_PluginsInstallInfo">Файлы в формате .plugin от exteraGram. Новый плагин устанавливается выключенным.</string>
     <string name="OG_PluginsInstalled">Установленные плагины</string>
     <string name="OG_PluginsEmpty">Плагинов пока нет</string>
-    <string name="OG_PluginsEngineInfo">Плагины работают во встроенном Python 3.11. Поддерживаются: настройки, хуки отправки сообщений, пункты в меню сообщения, уведомления и окна, запросы к Telegram. Плагины, которые перехватывают методы приложения (hook_method), не поддерживаются и покажут ошибку. Плагины не меняют ваши настройки оформления OtherGram.</string>
+    <string name="OG_PluginsEngineInfo">Плагины работают во встроенном Python 3.11. Поддерживаются: настройки, хуки отправки сообщений, хуки запросов (add_hook), пункты в меню сообщения, уведомления и окна, запросы к Telegram, файлы. Перехват методов (hook_method) недоступен: такие плагины всё равно загрузятся, просто эта часть не будет работать. Плагины не меняют ваши настройки оформления OtherGram.</string>
+    <string name="OG_PluginUnsupported">Плагин использует функции, которых нет в OtherGram (%1$s). Часть его возможностей может не работать.</string>
     <string name="OG_PluginNoSettings">У этого плагина нет настроек.</string>
     <string name="OG_PluginEnabled">Плагин включён</string>
     <string name="OG_PluginError">Ошибка плагина</string>

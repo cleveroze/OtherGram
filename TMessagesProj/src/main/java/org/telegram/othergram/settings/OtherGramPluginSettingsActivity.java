@@ -113,6 +113,10 @@ public class OtherGramPluginSettingsActivity extends BaseFragment implements Oth
         final StringBuilder about = new StringBuilder();
         if (p.description != null) about.append(p.description);
         if (p.author != null) about.append(about.length() > 0 ? "\n\n" : "").append(org.telegram.messenger.LocaleController.formatString(R.string.OG_PluginAuthor, p.author));
+        final String unsupported = p.enabled ? OtherGramPluginRuntime.unsupported(pluginId) : null;
+        if (unsupported != null) {
+            about.append(about.length() > 0 ? "\n\n" : "").append(org.telegram.messenger.LocaleController.formatString(R.string.OG_PluginUnsupported, unsupported));
+        }
         out.add(UItem.asShadow(about.length() > 0 ? about.toString() : null));
         if (p.enabled && items.length() == 0 && error == null) {
             out.add(UItem.asShadow(getString(R.string.OG_PluginNoSettings)));

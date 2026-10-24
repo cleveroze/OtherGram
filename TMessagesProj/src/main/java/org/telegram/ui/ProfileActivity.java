@@ -4230,6 +4230,28 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         };
         listView.setSections();
+        // OtherGram: profile background under the info rows (phone … media tabs); added after the sections so it covers the cards
+        listView.addItemDecoration(new org.telegram.othergram.banners.OtherGramProfileBackground(listView, new org.telegram.othergram.banners.OtherGramProfileBackground.Rows() {
+            @Override
+            public long userId() {
+                return userId;
+            }
+
+            @Override
+            public int startRow() {
+                return phoneRow >= 0 ? phoneRow : infoStartRow;
+            }
+
+            @Override
+            public int endRow() {
+                return infoEndRow;
+            }
+
+            @Override
+            public int mediaRow() {
+                return sharedMediaRow;
+            }
+        }));
         listView.applyPaddingToSections = false;
         listView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
         listView.setVerticalScrollBarEnabled(false);
@@ -11319,9 +11341,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 final int colorId = UserObject.getProfileColorId(user);
                 final MessagesController.PeerColors peerColors = MessagesController.getInstance(currentAccount).profilePeerColors;
                 peerColor = peerColors == null ? null : peerColors.getColor(colorId);
-            }
-            if (org.telegram.othergram.network.OtherGramProfiles.hasBackground(user.id)) {
-                peerColor = MessagesController.PeerColor.ogBackground(); // OtherGram: profile background → light header text
             }
             if (wasPeerColor != peerColor) {
                 updatedPeerColor();

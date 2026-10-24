@@ -446,7 +446,8 @@ Material You (`OtherGramMaterial`, `OtherGramMaterialActivity`, хук в `Theme
   подписана ключом OtherGram (`signingConfigs.othergram`). Нативная часть собирается как раньше.
 - **Ключ подписи:** `C:\Users\FunkyUser\OtherGram-Keys\othergram-release.jks` (пароль в `README-KEY.txt` рядом и в
   `local.properties`: `OG_STORE_FILE`, `OG_STORE_PASSWORD`, `OG_KEY_ALIAS`, `OG_KEY_PASSWORD`). Никогда не коммитить.
-  SHA-256 сертификата: BE:8E:09:56:8A:D5:13:8E:26:FB:8A:56:7F:08:C3:F9:CB:20:96:1B:5A:D1:A1:5D:B2:82:79:2F:AE:E4:85:41.
+  SHA-256 сертификата (новый ключ от 2026-10-24, создан после чистки ПК от вирусов): 16:14:EB:D8:C6:60:54:B8:A5:AC:90:81:E3:A3:2A:5C:5B:D2:38:18:3A:F0:26:40:3C:8A:E1:95:5C:F5:15:44.
+  Старый ключ (BE:8E:09…) лежал на заражённом ПК — в `OtherGram-KeysCOMPROMISED-old-key-do-not-use`, не использовать.
 - Сделано: новый логотип (`icon-source.png`, генератор иконок умеет full-bleed), радужные бейджи и крестик
   (`OtherGramRainbow`, `badge_types.style`/`icon`, переключатели в админке), фоны профилей (`profiles.bg_version/bg_dim`,
   `/v1/me/background`, `OtherGramBannerDrawer`, `PeerColor.ogBackground()` для белого текста), автоответчик
@@ -462,6 +463,9 @@ Material You (`OtherGramMaterial`, `OtherGramMaterialActivity`, хук в `Theme
   пункты меню сообщения (`ChatActivity.fillMessageMenu`/`processSelectedOption`), bulletins, alert, send_request.
   Не работает: hook_method (Xposed), request/update-хуки. Тестовый плагин: `Tools/othergram/plugins/othergram_example.plugin`.
 - Чат OtherGram: ссылка https://t.me/+dku_7wOc8bczNzgy в `CHAT_INVITE` (wrangler.toml).
+- Фон профиля (2026-10-24): не в шапке, а под строками информации — от номера телефона до вкладок медиа
+  (`OtherGramProfileBackground`, ItemDecoration в `ProfileActivity` после `setSections`), тонируется цветом темы
+  (`windowBackgroundWhite`), плавные края, картинка закреплена относительно экрана.
 
 **Версия 2.0.0 (владелец, 2026-10-22; вместо 1.3.0, срок ~неделя; самая большая версия).**
 Идея: OtherGram — самостоятельное приложение. Номер 2.0.0, потому что поверх старой версии не встанет.

@@ -31,32 +31,19 @@ public class OtherGramBannerDrawer {
     private int fadeColor;
     private float fadeHeight;
 
-    private final ImageReceiver backgroundReceiver;
-    private final AnimatedFloat backgroundAppear;
-    private final Paint dimPaint = new Paint();
-    private final Paint bottomShadePaint = new Paint();
-    private String loadedBackgroundUrl;
-    private int backgroundDim = 45;
-    private float bottomShadeHeight;
-
     public OtherGramBannerDrawer(View parent) {
         this.parent = parent;
         imageReceiver = new ImageReceiver(parent);
         imageReceiver.setCrossfadeDuration(APPEAR_MS);
         appear = new AnimatedFloat(parent, 0, APPEAR_MS, CubicBezierInterpolator.EASE_OUT_QUINT);
-        backgroundReceiver = new ImageReceiver(parent);
-        backgroundReceiver.setCrossfadeDuration(APPEAR_MS);
-        backgroundAppear = new AnimatedFloat(parent, 0, APPEAR_MS, CubicBezierInterpolator.EASE_OUT_QUINT);
     }
 
     public void onAttachedToWindow() {
         imageReceiver.onAttachedToWindow();
-        backgroundReceiver.onAttachedToWindow();
     }
 
     public void onDetachedFromWindow() {
         imageReceiver.onDetachedFromWindow();
-        backgroundReceiver.onDetachedFromWindow();
     }
 
     /**
@@ -65,22 +52,8 @@ public class OtherGramBannerDrawer {
      */
     public void draw(Canvas canvas, long userId, int width, float height, int fadeTo) {
         final OtherGramProfiles.Profile profile = userId > 0 ? OtherGramProfiles.getProfile(userId) : null;
-        // 2.0: a profile background covers the whole header and takes the place of the banner
-        final float bgAlpha = backgroundAppear.set(profile != null && profile.backgroundUrl != null);
-        if (bgAlpha > 0 && height > 0) {
-            if (profile != null && profile.backgroundUrl != null && !profile.backgroundUrl.equals(loadedBackgroundUrl)) {
-                loadedBackgroundUrl = profile.backgroundUrl;
-                backgroundDim = profile.backgroundDim;
-                backgroundReceiver.setImage(ImageLocation.getForPath(loadedBackgroundUrl), (String) null, (Drawable) null, (String) null, (Object) null, 1);
-            } else if (profile != null) {
-                backgroundDim = profile.backgroundDim;
-            }
-            drawBackground(canvas, width, height, bgAlpha);
-            if (bgAlpha >= 1f) {
-                return;
-            }
-        }
-        final String kind = profile != null && profile.backgroundUrl == null ? profile.bannerKind : null;
+        // The 2.0 profile background is drawn under the info rows (OtherGramProfileBackground), not here
+        final String kind = profile != null ? profile.bannerKind : null;
         final float alpha = appear.set(kind != null);
         if (alpha <= 0 || height <= 0) {
             return;
@@ -115,30 +88,6 @@ public class OtherGramBannerDrawer {
         imageReceiver.setAlpha(alpha);
         imageReceiver.draw(canvas);
         canvas.restore();
-    }
-
-    private void drawBackground(Canvas canvas, int width, float height, float alpha) {
-        if (backgroundReceiver.hasImageLoaded() && backgroundReceiver.getBitmapWidth() > 0) {
-            final float scale = Math.max(width / (float) backgroundReceiver.getBitmapWidth(), height / (float) backgroundReceiver.getBitmapHeight());
-            final float drawW = backgroundReceiver.getBitmapWidth() * scale;
-            final float drawH = backgroundReceiver.getBitmapHeight() * scale;
-            canvas.save();
-            canvas.clipRect(0, 0, width, height);
-            backgroundReceiver.setImageCoords((width - drawW) / 2f, (height - drawH) / 2f, drawW, drawH);
-            backgroundReceiver.setAlpha(alpha);
-            backgroundReceiver.draw(canvas);
-            canvas.restore();
-        }
-        // Even darkening chosen by the owner, plus a stronger shade at the bottom where the name is
-        dimPaint.setColor(0xFF000000);
-        dimPaint.setAlpha((int) (255 * alpha * backgroundDim / 100f));
-        canvas.drawRect(0, 0, width, height, dimPaint);
-        if (bottomShadeHeight != height) {
-            bottomShadeHeight = height;
-            bottomShadePaint.setShader(new LinearGradient(0, height * 0.4f, 0, height, 0x00000000, 0x8C000000, Shader.TileMode.CLAMP));
-        }
-        bottomShadePaint.setAlpha((int) (255 * alpha));
-        canvas.drawRect(0, height * 0.4f, width, height, bottomShadePaint);
     }
 
     private void drawFade(Canvas canvas, int width, float height, int fadeTo, float alpha) {

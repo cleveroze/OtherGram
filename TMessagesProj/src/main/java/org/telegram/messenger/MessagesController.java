@@ -5434,31 +5434,6 @@ public class MessagesController extends BaseController implements NotificationCe
             return peerColor;
         }
 
-        private static PeerColor ogBackground;
-
-        /**
-         * OtherGram: a dark neutral profile color used when the user has an OtherGram profile background,
-         * so the profile header switches to light text and buttons over the darkened picture.
-         */
-        public static PeerColor ogBackground() {
-            if (ogBackground == null) {
-                final PeerColor peerColor = new PeerColor();
-                peerColor.id = -2;
-                peerColor.hidden = true;
-                peerColor.colors[0] = 0xFF2B2420;
-                peerColor.colors[1] = 0xFF3D332C;
-                peerColor.colors[2] = 0xFF2B2420;
-                peerColor.colors[3] = 0xFF3D332C;
-                peerColor.colors[4] = 0xFFE8D8C6;
-                peerColor.colors[5] = 0xFFE8D8C6;
-                System.arraycopy(peerColor.colors, 0, peerColor.darkColors, 0, 6);
-                peerColor.patternColor = 0x33FFFFFF;
-                peerColor.textColor = 0xFFFFFFFF;
-                ogBackground = peerColor;
-            }
-            return ogBackground;
-        }
-
         public static PeerColor fromCollectible(TLRPC.EmojiStatus status) {
             if (!(status instanceof TLRPC.TL_emojiStatusCollectible)) return null;
             final TLRPC.TL_emojiStatusCollectible s = (TLRPC.TL_emojiStatusCollectible) status;

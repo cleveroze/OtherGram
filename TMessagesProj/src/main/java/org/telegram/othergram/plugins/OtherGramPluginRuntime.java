@@ -152,6 +152,19 @@ public class OtherGramPluginRuntime {
         return null;
     }
 
+    /** Features the plugin asked for that OtherGram does not have (for example hook_method), or null. */
+    public static String unsupported(String pluginId) {
+        if (host == null) {
+            return null;
+        }
+        try {
+            final String s = host.callAttr("unsupported", pluginId).toString();
+            return s.isEmpty() ? null : s;
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
     public static void appEvent(String name) {
         if (host == null) {
             return;
@@ -180,6 +193,89 @@ public class OtherGramPluginRuntime {
             FileLog.e(e);
             return false;
         }
+    }
+
+    // ------------------------------------------------------------ request hooks (add_hook / pre_request_hook / post_request_hook)
+
+    private static volatile java.util.Set<String> exactHooks = java.util.Collections.emptySet();
+    private static volatile java.util.List<String> substringHooks = java.util.Collections.emptyList();
+
+    /** Called from Python whenever plugins add or remove request hooks. JSON: {"exact":[...],"substring":[...]} */
+    static void setRequestHooks(String json) {
+        try {
+            final org.json.JSONObject o = new org.json.JSONObject(json);
+            final java.util.HashSet<String> exact = new java.util.HashSet<>();
+            final java.util.ArrayList<String> sub = new java.util.ArrayList<>();
+            final JSONArray e = o.optJSONArray("exact");
+            final JSONArray s = o.optJSONArray("substring");
+            for (int i = 0; e != null && i < e.length(); i++) exact.add(e.optString(i));
+            for (int i = 0; s != null && i < s.length(); i++) sub.add(s.optString(i));
+            exactHooks = exact;
+            substringHooks = sub;
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
+    }
+
+    private static boolean hooked(String name) {
+        if (exactHooks.contains(name)) {
+            return true;
+        }
+        for (String s : substringHooks) {
+            if (name.contains(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns the request to send (maybe changed by a plugin), or null when a plugin cancelled it. */
+    public static org.telegram.tgnet.TLObject preRequest(int account, org.telegram.tgnet.TLObject request) {
+        final PyObject h = host;
+        if (h == null || request == null || (exactHooks.isEmpty() && substringHooks.isEmpty())) {
+            return request;
+        }
+        final String name = request.getClass().getSimpleName();
+        if (!hooked(name)) {
+            return request;
+        }
+        try {
+            final PyObject result = h.callAttr("pre_request", account, name, request);
+            if (result == null) {
+                return null;
+            }
+            final Object java = result.toJava(Object.class);
+            return java instanceof org.telegram.tgnet.TLObject ? (org.telegram.tgnet.TLObject) java : request;
+        } catch (Throwable e) {
+            FileLog.e(e);
+            return request;
+        }
+    }
+
+    /** Wraps the answer callback so post_request_hook can see or change the server's answer. */
+    public static org.telegram.tgnet.RequestDelegate wrapComplete(int account, org.telegram.tgnet.TLObject request, org.telegram.tgnet.RequestDelegate onComplete) {
+        if (onComplete == null || host == null || request == null || (exactHooks.isEmpty() && substringHooks.isEmpty())) {
+            return onComplete;
+        }
+        final String name = request.getClass().getSimpleName();
+        if (!hooked(name)) {
+            return onComplete;
+        }
+        return (response, error) -> {
+            org.telegram.tgnet.TLObject finalResponse = response;
+            try {
+                final PyObject result = host.callAttr("post_request", account, name, response, error);
+                if (result != null) {
+                    final Object java = result.toJava(Object.class);
+                    if (java instanceof org.telegram.tgnet.TLObject) {
+                        finalResponse = (org.telegram.tgnet.TLObject) java;
+                    }
+                }
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
+            onComplete.run(finalResponse, error);
+        };
     }
 
     // ------------------------------------------------------------ settings and menus

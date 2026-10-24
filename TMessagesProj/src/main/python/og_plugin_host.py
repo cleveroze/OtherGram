@@ -8,9 +8,78 @@ import re
 import traceback
 import types
 
+import base_plugin
 from base_plugin import AppEvent, BasePlugin, HookStrategy, MenuItemType
+from java import jclass
 
+_Bridge = jclass("org.telegram.othergram.plugins.OtherGramPluginBridge")
 _plugins = {}
+
+
+# ---------------------------------------------------------------- request hooks
+
+def refresh_request_hooks():
+    exact, substring = set(), set()
+    for instance in _plugins.values():
+        for name, match_substring, _priority in instance._request_hooks:
+            (substring if match_substring else exact).add(name)
+    _Bridge.setRequestHooks(json.dumps({"exact": sorted(exact), "substring": sorted(substring)}))
+
+
+base_plugin._hooks_changed = refresh_request_hooks
+
+
+def _hooked_plugins(name):
+    result = []
+    for instance in _plugins.values():
+        best = None
+        for hook_name, match_substring, priority in instance._request_hooks:
+            if (match_substring and hook_name in name) or hook_name == name:
+                best = priority if best is None else max(best, priority)
+        if best is not None:
+            result.append((best, instance))
+    result.sort(key=lambda e: -e[0])
+    return [instance for _p, instance in result]
+
+
+def pre_request(account, name, request):
+    """Returns the request to send, or None when a plugin cancelled it."""
+    for instance in _hooked_plugins(name):
+        try:
+            result = instance.pre_request_hook(name, account, request)
+        except Exception:
+            instance.error_message = _error()
+            continue
+        if result is None:
+            continue
+        strategy = getattr(result, "strategy", HookStrategy.DEFAULT)
+        if strategy == HookStrategy.CANCEL:
+            return None
+        if strategy in (HookStrategy.MODIFY, HookStrategy.MODIFY_FINAL):
+            if getattr(result, "request", None) is not None:
+                request = result.request
+            if strategy == HookStrategy.MODIFY_FINAL:
+                break
+    return request
+
+
+def post_request(account, name, response, error):
+    """Returns the (maybe changed) server answer."""
+    for instance in _hooked_plugins(name):
+        try:
+            result = instance.post_request_hook(name, account, response, error)
+        except Exception:
+            instance.error_message = _error()
+            continue
+        if result is None:
+            continue
+        strategy = getattr(result, "strategy", HookStrategy.DEFAULT)
+        if strategy in (HookStrategy.MODIFY, HookStrategy.MODIFY_FINAL):
+            if getattr(result, "response", None) is not None:
+                response = result.response
+            if strategy == HookStrategy.MODIFY_FINAL:
+                break
+    return response
 
 
 def _error():
@@ -37,9 +106,11 @@ def load(plugin_id, path):
         instance.name = module.__dict__.get("__name__", plugin_id)
         _plugins[plugin_id] = instance
         instance.on_plugin_load()
+        refresh_request_hooks()
         return ""
     except Exception:
         _plugins.pop(plugin_id, None)
+        refresh_request_hooks()
         return _error()
 
 
@@ -50,6 +121,13 @@ def unload(plugin_id):
             instance.on_plugin_unload()
         except Exception:
             pass
+        refresh_request_hooks()
+
+
+def unsupported(plugin_id):
+    """Names of features the plugin asked for that OtherGram does not have (e.g. hook_method)."""
+    instance = _plugins.get(plugin_id)
+    return ",".join(sorted(set(instance._unsupported))) if instance else ""
 
 
 def loaded_ids():
