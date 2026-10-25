@@ -77,6 +77,11 @@ public class OtherGramProfileBackground extends RecyclerView.ItemDecoration {
         }
     }
 
+    /** How much theme color covers the picture: the owner's 0..80 setting maps to 30..80 % (the picture stays visible). */
+    public static float tintStrength(int dim) {
+        return Math.min(0.8f, 0.3f + Math.max(0, dim) / 160f);
+    }
+
     @Override
     public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         final OtherGramProfiles.Profile profile = rows.userId() > 0 ? OtherGramProfiles.getProfile(rows.userId()) : null;
@@ -141,7 +146,7 @@ public class OtherGramProfileBackground extends RecyclerView.ItemDecoration {
         }
         // Theme-colored tint: darkens in the dark theme, lightens in the light one, so texts stay readable
         final int bg = Theme.getColor(Theme.key_windowBackgroundWhite);
-        final float strength = Math.min(0.92f, 0.62f + profile.backgroundDim / 250f);
+        final float strength = tintStrength(profile.backgroundDim);
         tint.setColor(Theme.multAlpha(bg | 0xFF000000, strength));
         c.drawRect(rect, tint);
         // Soft edges: the picture fades in under the first row and out at the media tabs

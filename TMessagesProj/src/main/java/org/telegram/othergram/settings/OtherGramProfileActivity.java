@@ -70,6 +70,14 @@ public class OtherGramProfileActivity extends BaseFragment {
     private static final int ID_NAME_COLOR2 = 12;
     private static final int ID_PICK_BACKGROUND = 13;
     private static final int ID_REMOVE_BACKGROUND = 14;
+    private static final int ID_APPLY_PENDING = 15;
+    private static final int ID_CANCEL_PENDING = 16;
+
+    // A picked picture waiting for "Apply": shown in the preview, uploaded only when applied
+    private byte[] pendingJpeg;
+    private Bitmap pendingBitmap;
+    private boolean pendingIsBackground;
+    private Bitmap backgroundBitmap;
 
     // 2.0: profile background — a picture behind the whole profile header, darkened so the name stays readable
     private static final int BACKGROUND_WIDTH = 1080;
@@ -145,7 +153,14 @@ public class OtherGramProfileActivity extends BaseFragment {
             return;
         }
         items.add(UItem.asCustom(preview, 220));
-        items.add(UItem.asShadow(null));
+        if (pendingJpeg != null) {
+            // A picked picture is only shown in the preview until the user applies it
+            items.add(UItem.asButton(ID_APPLY_PENDING, R.drawable.msg_select, getString(pendingIsBackground ? R.string.OG_ApplyBackground : R.string.OG_ApplyBanner)).accent().setEnabled(!busy));
+            items.add(UItem.asButton(ID_CANCEL_PENDING, R.drawable.msg_cancel, getString(R.string.Cancel)).setEnabled(!busy));
+            items.add(UItem.asShadow(getString(R.string.OG_ApplyInfo)));
+        } else {
+            items.add(UItem.asShadow(null));
+        }
 
         items.add(UItem.asHeader(getString(R.string.OG_Banner)));
         items.add(UItem.asButton(ID_PICK_IMAGE, R.drawable.msg_photos, getString(R.string.OG_BannerPickImage)).setEnabled(!busy));
@@ -225,7 +240,22 @@ public class OtherGramProfileActivity extends BaseFragment {
                 pickImage();
                 break;
             case ID_REMOVE_BACKGROUND:
-                OtherGramApi.sendJson("DELETE", "/v1/me/background", null, this::applyMe);
+                OtherGramApi.sendJson("DELETE", "/v1/me/background", null, (status, response) -> {
+                    applyMe(status, response);
+                    if (status == 200) {
+                        backgroundBitmap = null;
+                        refresh();
+                        notifyProfileChanged();
+                    }
+                });
+                break;
+            case ID_APPLY_PENDING:
+                applyPending();
+                break;
+            case ID_CANCEL_PENDING:
+                pendingJpeg = null;
+                pendingBitmap = null;
+                refresh();
                 break;
             case ID_BANNER_COLOR:
                 OtherGramColorPicker.show(this, getString(R.string.OG_BannerColor), bannerColor, color -> {
@@ -346,6 +376,11 @@ public class OtherGramProfileActivity extends BaseFragment {
         hasBackground = background != null;
         if (background != null) {
             backgroundDim = background.optInt("dim", backgroundDim);
+            if (backgroundBitmap == null) {
+                loadBackgroundBitmap(OtherGramApi.BASE_URL + background.optString("url"));
+            }
+        } else {
+            backgroundBitmap = null;
         }
         final JSONObject ring = profile != null ? profile.optJSONObject("ring") : null;
         ringStyle = ring != null ? ring.optString("style", null) : null;
@@ -452,12 +487,11 @@ public class OtherGramProfileActivity extends BaseFragment {
         if (context == null) {
             return;
         }
+        final boolean isBackground = pickingBackground;
+        final int maxWidth = isBackground ? BACKGROUND_WIDTH : BANNER_WIDTH;
+        final int maxBytes = isBackground ? MAX_BACKGROUND_BYTES : MAX_BANNER_BYTES;
         busy = true;
         refresh();
-        if (pickingBackground) {
-            uploadBackground(context, uri);
-            return;
-        }
         imageQueue.postRunnable(() -> {
             // Re-encode on the device: scales the image down and drops EXIF/metadata before upload
             Bitmap scaled = null;
@@ -470,7 +504,7 @@ public class OtherGramProfileActivity extends BaseFragment {
                 }
                 final BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inSampleSize = 1;
-                while (bounds.outWidth / (opts.inSampleSize * 2) >= BANNER_WIDTH) {
+                while (bounds.outWidth / (opts.inSampleSize * 2) >= maxWidth) {
                     opts.inSampleSize *= 2;
                 }
                 Bitmap decoded;
@@ -478,7 +512,7 @@ public class OtherGramProfileActivity extends BaseFragment {
                     decoded = BitmapFactory.decodeStream(in, null, opts);
                 }
                 if (decoded != null) {
-                    final float k = Math.min(1f, BANNER_WIDTH / (float) decoded.getWidth());
+                    final float k = Math.min(1f, maxWidth / (float) decoded.getWidth());
                     scaled = k < 1f ? Bitmap.createScaledBitmap(decoded, Math.round(decoded.getWidth() * k), Math.round(decoded.getHeight() * k), true) : decoded;
                     int quality = 88;
                     do {
@@ -486,7 +520,7 @@ public class OtherGramProfileActivity extends BaseFragment {
                         scaled.compress(Bitmap.CompressFormat.JPEG, quality, out);
                         jpeg = out.toByteArray();
                         quality -= 8;
-                    } while (jpeg.length > MAX_BANNER_BYTES && quality > 40);
+                    } while (jpeg.length > maxBytes && quality > 40);
                 }
             } catch (Throwable e) {
                 FileLog.e(e);
@@ -494,72 +528,78 @@ public class OtherGramProfileActivity extends BaseFragment {
             final Bitmap finalBitmap = scaled;
             final byte[] finalJpeg = jpeg;
             AndroidUtilities.runOnUIThread(() -> {
-                if (finalJpeg == null || finalJpeg.length > MAX_BANNER_BYTES) {
-                    busy = false;
+                busy = false;
+                if (finalJpeg == null || finalJpeg.length > maxBytes) {
                     refresh();
                     BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_BannerFailed)).show();
                     return;
                 }
-                bannerBitmap = finalBitmap;
-                bannerKind = "image";
-                bannerOffset = 0.5f;
+                // Shown in the preview first; uploaded only after "Apply"
+                pendingJpeg = finalJpeg;
+                pendingBitmap = finalBitmap;
+                pendingIsBackground = isBackground;
                 refresh();
-                OtherGramApi.sendBytes("PUT", "/v1/me/banner", finalJpeg, "image/jpeg", (status, response) -> {
-                    busy = false;
-                    applyMe(status, response);
-                    if (status == 200) {
-                        saveProfile();
-                    }
-                });
             });
         });
     }
 
-    /** Same on-device re-encoding as the banner (drops EXIF), sized for a full profile header. */
-    private void uploadBackground(Context context, Uri uri) {
+    /** Uploads the picked picture and confirms it, then refreshes every open profile. */
+    private void applyPending() {
+        if (pendingJpeg == null || busy) {
+            return;
+        }
+        final byte[] jpeg = pendingJpeg;
+        final Bitmap bitmap = pendingBitmap;
+        final boolean isBackground = pendingIsBackground;
+        busy = true;
+        refresh();
+        OtherGramApi.sendBytes("PUT", isBackground ? "/v1/me/background" : "/v1/me/banner", jpeg, "image/jpeg", (status, response) -> {
+            busy = false;
+            if (status < 200 || status >= 300) {
+                refresh();
+                showError(status, response);
+                return;
+            }
+            pendingJpeg = null;
+            pendingBitmap = null;
+            if (isBackground) {
+                backgroundBitmap = bitmap;
+            } else {
+                bannerBitmap = bitmap;
+                bannerOffset = 0.5f;
+            }
+            applyMe(status, response);
+            if (!isBackground) {
+                saveProfile(false);
+            }
+            notifyProfileChanged();
+            BulletinFactory.of(this).createSimpleBulletin(R.raw.done, getString(isBackground ? R.string.OG_BackgroundApplied : R.string.OG_BannerApplied)).show();
+        });
+    }
+
+    /** Open profile screens and lists redraw with the new decoration right away. */
+    private void notifyProfileChanged() {
+        for (int a = 0; a < org.telegram.messenger.UserConfig.MAX_ACCOUNT_COUNT; a++) {
+            if (org.telegram.messenger.UserConfig.getInstance(a).isClientActivated()) {
+                org.telegram.messenger.NotificationCenter.getInstance(a).postNotificationName(org.telegram.messenger.NotificationCenter.updateInterfaces, org.telegram.messenger.MessagesController.UPDATE_MASK_NAME);
+            }
+        }
+    }
+
+    private void loadBackgroundBitmap(String url) {
         imageQueue.postRunnable(() -> {
-            byte[] jpeg = null;
-            try {
-                final BitmapFactory.Options bounds = new BitmapFactory.Options();
-                bounds.inJustDecodeBounds = true;
-                try (InputStream in = context.getContentResolver().openInputStream(uri)) {
-                    BitmapFactory.decodeStream(in, null, bounds);
-                }
-                final BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inSampleSize = 1;
-                while (bounds.outWidth / (opts.inSampleSize * 2) >= BACKGROUND_WIDTH) {
-                    opts.inSampleSize *= 2;
-                }
-                Bitmap decoded;
-                try (InputStream in = context.getContentResolver().openInputStream(uri)) {
-                    decoded = BitmapFactory.decodeStream(in, null, opts);
-                }
-                if (decoded != null) {
-                    final float k = Math.min(1f, BACKGROUND_WIDTH / (float) decoded.getWidth());
-                    final Bitmap scaled = k < 1f ? Bitmap.createScaledBitmap(decoded, Math.round(decoded.getWidth() * k), Math.round(decoded.getHeight() * k), true) : decoded;
-                    int quality = 88;
-                    do {
-                        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        scaled.compress(Bitmap.CompressFormat.JPEG, quality, out);
-                        jpeg = out.toByteArray();
-                        quality -= 8;
-                    } while (jpeg.length > MAX_BACKGROUND_BYTES && quality > 40);
-                }
+            Bitmap bitmap = null;
+            try (InputStream in = new java.net.URL(url).openStream()) {
+                bitmap = BitmapFactory.decodeStream(in);
             } catch (Throwable e) {
                 FileLog.e(e);
             }
-            final byte[] finalJpeg = jpeg;
+            final Bitmap result = bitmap;
             AndroidUtilities.runOnUIThread(() -> {
-                if (finalJpeg == null || finalJpeg.length > MAX_BACKGROUND_BYTES) {
-                    busy = false;
+                if (result != null && hasBackground) {
+                    backgroundBitmap = result;
                     refresh();
-                    BulletinFactory.of(this).createErrorBulletin(getString(R.string.OG_BannerFailed)).show();
-                    return;
                 }
-                OtherGramApi.sendBytes("PUT", "/v1/me/background", finalJpeg, "image/jpeg", (status, response) -> {
-                    busy = false;
-                    applyMe(status, response);
-                });
             });
         });
     }
@@ -629,15 +669,33 @@ public class OtherGramProfileActivity extends BaseFragment {
             canvas.drawColor(bg);
             final float bannerH = h * 0.62f;
 
-            if ("image".equals(bannerKind) && bannerBitmap != null) {
-                final float scale = Math.max(w / (float) bannerBitmap.getWidth(), bannerH / bannerBitmap.getHeight());
-                final float dw = bannerBitmap.getWidth() * scale;
-                final float dh = bannerBitmap.getHeight() * scale;
-                final float top = -(dh - bannerH) * bannerOffset;
+            // Profile background: below the header, tinted like in the real profile (a pending pick is shown first)
+            final Bitmap bgBitmap = pendingJpeg != null && pendingIsBackground ? pendingBitmap : (hasBackground ? backgroundBitmap : null);
+            if (bgBitmap != null) {
+                final float areaH = h - bannerH;
+                final float scale = Math.max(w / (float) bgBitmap.getWidth(), areaH / bgBitmap.getHeight());
+                final float dw = bgBitmap.getWidth() * scale;
+                final float dh = bgBitmap.getHeight() * scale;
+                canvas.save();
+                canvas.clipRect(0, bannerH, w, h);
+                rect.set((w - dw) / 2f, bannerH + (areaH - dh) / 2f, (w + dw) / 2f, bannerH + (areaH + dh) / 2f);
+                canvas.drawBitmap(bgBitmap, null, rect, bitmapPaint);
+                paint.setColor(Theme.multAlpha(bg | 0xFF000000, org.telegram.othergram.banners.OtherGramProfileBackground.tintStrength(backgroundDim)));
+                canvas.drawRect(0, bannerH, w, h, paint);
+                canvas.restore();
+            }
+
+            final Bitmap bannerImage = pendingJpeg != null && !pendingIsBackground ? pendingBitmap : bannerBitmap;
+            final boolean showBannerImage = (pendingJpeg != null && !pendingIsBackground) || "image".equals(bannerKind);
+            if (showBannerImage && bannerImage != null) {
+                final float scale = Math.max(w / (float) bannerImage.getWidth(), bannerH / bannerImage.getHeight());
+                final float dw = bannerImage.getWidth() * scale;
+                final float dh = bannerImage.getHeight() * scale;
+                final float top = -(dh - bannerH) * (pendingJpeg != null && !pendingIsBackground ? 0.5f : bannerOffset);
                 canvas.save();
                 canvas.clipRect(0, 0, w, bannerH);
                 rect.set((w - dw) / 2f, top, (w + dw) / 2f, top + dh);
-                canvas.drawBitmap(bannerBitmap, null, rect, bitmapPaint);
+                canvas.drawBitmap(bannerImage, null, rect, bitmapPaint);
                 canvas.restore();
             } else if ("color".equals(bannerKind)) {
                 paint.setColor(bannerColor);
