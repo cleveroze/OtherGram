@@ -17,7 +17,7 @@ import android.view.animation.LinearInterpolator;
 import org.telegram.othergram.OtherGramConfig;
 
 /**
- * OtherGram launch animation, drawn in code (4.6 s, like the reference GIF): a thin line in the
+ * OtherGram launch animation, drawn in code (2 s including the fade-out): a thin line in the
  * middle, three dots pop out of it, wavy petals grow from two corners, the dots run a wave, then
  * settle into the OtherGram logo exactly in the center of the screen and the app fades in.
  */
@@ -25,8 +25,8 @@ public class OtherGramLaunchAnimation extends View {
 
     public static final String KEY_ENABLED = "ui_launch_animation";
 
-    private static final long DURATION_MS = 4600;
-    private static final long FADE_MS = 280;
+    private static final long DURATION_MS = 1800;
+    private static final long FADE_MS = 200;
 
     private static final int BACKGROUND = 0xFFE3CEB3;
     private static final int[] DOT_COLORS = {0xFFC4A68A, 0xFFA0876F, 0xFF7C5D46};
@@ -131,7 +131,7 @@ public class OtherGramLaunchAnimation extends View {
     }
 
     private void drawPetals(Canvas canvas, int w, int h) {
-        final float grow = overshoot(range(t, 0.35f, 0.85f));
+        final float grow = overshoot(range(t, 0.15f, 0.45f));
         if (grow <= 0f) {
             return;
         }
@@ -140,7 +140,7 @@ public class OtherGramLaunchAnimation extends View {
             buildPetal(w * 0.62f);
         }
         // A slow wobble while the dots dance, calm at the end
-        final float wobble = (float) Math.sin(t * 2.4f) * 5f * (1f - range(t, 2.9f, 3.6f));
+        final float wobble = (float) Math.sin(t * 5f) * 5f * (1f - range(t, 1.1f, 1.45f));
         petalPaint.setShader(new LinearGradient(-w * 0.62f, -w * 0.62f, w * 0.62f, w * 0.62f, PETAL_DARK, PETAL_LIGHT, Shader.TileMode.CLAMP));
 
         canvas.save();
@@ -180,9 +180,9 @@ public class OtherGramLaunchAnimation extends View {
         final float baseR = w * 0.055f;
 
         // Thin line the dots come out of
-        final float lineAlpha = 1f - range(t, 0.15f, 0.45f);
+        final float lineAlpha = 1f - range(t, 0.08f, 0.24f);
         if (lineAlpha > 0f) {
-            final float lineW = spacing * 2.6f * easeOut(range(t, 0f, 0.12f));
+            final float lineW = spacing * 2.6f * (0.4f + 0.6f * easeOut(range(t, 0f, 0.08f)));
             paint.setColor(DOT_COLORS[1]);
             paint.setAlpha((int) (200 * lineAlpha));
             paint.setStrokeWidth(Math.max(2f, w * 0.006f));
@@ -190,23 +190,23 @@ public class OtherGramLaunchAnimation extends View {
         }
 
         // Final grow: the dots end a little bigger, like in the logo
-        final float settle = easeOut(range(t, 2.9f, 3.4f));
+        final float settle = easeOut(range(t, 1.15f, 1.4f));
         final float finalScale = 1f + 0.25f * settle;
         // Wave amplitude: strongest in the middle of the dance, gone once settled
-        final float wave = range(t, 0.7f, 1.0f) * (1f - settle);
+        final float wave = range(t, 0.3f, 0.45f) * (1f - settle);
 
         for (int i = 0; i < 3; i++) {
-            final float appear = overshoot(range(t, 0.05f + i * 0.06f, 0.32f + i * 0.06f));
+            final float appear = overshoot(range(t, 0.03f + i * 0.04f, 0.2f + i * 0.04f));
             if (appear <= 0f) {
                 continue;
             }
-            final double phase = t * 2 * Math.PI * 1.25 - i * 0.9;
+            final double phase = t * 2 * Math.PI * 1.8 - i * 0.9;
             final float bob = (float) Math.sin(phase);
             final float y = cy - bob * baseR * 0.9f * wave;
             // Squash and stretch: wide when low, tall when high
             final float squash = 1f + 0.18f * (float) Math.cos(phase) * wave;
             final float rx = baseR * finalScale * appear * squash;
-            final float ry = baseR * finalScale * appear / squash * (0.15f + 0.85f * range(t, 0.05f + i * 0.06f, 0.2f + i * 0.06f));
+            final float ry = baseR * finalScale * appear / squash * (0.15f + 0.85f * range(t, 0.03f + i * 0.04f, 0.12f + i * 0.04f));
             final float x = cx + (i - 1) * spacing * (0.85f + 0.15f * settle);
             paint.setColor(DOT_COLORS[i]);
             paint.setAlpha(255);
