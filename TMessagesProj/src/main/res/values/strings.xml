@@ -11766,6 +11766,7 @@
     <string name="OG_PluginsInstalled">Installed plugins</string>
     <string name="OG_PluginsEmpty">No plugins yet</string>
     <string name="OG_PluginsEngineInfo">Plugins run in the built-in Python 3.11. Supported: settings, send-message hooks, request hooks (add_hook), message menu items, bulletins and dialogs, Telegram requests, files. Method hooks (hook_method) are not available: such plugins still load, only that part does nothing. Plugins never change your OtherGram appearance settings.</string>
+    <string name="OG_LaunchAnimation">OtherGram animation at launch</string>
     <string name="OG_ApplyBanner">Apply banner</string>
     <string name="OG_ApplyBackground">Apply background</string>
     <string name="OG_ApplyInfo">This is a preview. Nobody sees the new picture until you apply it.</string>

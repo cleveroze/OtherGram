@@ -35,6 +35,7 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
     private static final int ID_TAB_LENS = 3;
     private static final int ID_TAB_BOUNCE = 4;
     private static final int ID_TAB_HAPTICS = 5;
+    private static final int ID_LAUNCH_ANIM = 6;
     private static final int ID_PRESET_BASE = 100;
     private static final int ID_GROUP_BASE = 1000;
 
@@ -93,6 +94,7 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
         items.add(UItem.asCheck(ID_TAB_LENS, getString(R.string.OG_TabLens)).setChecked(OtherGramInterface.tabLens()));
         items.add(UItem.asCheck(ID_TAB_BOUNCE, getString(R.string.OG_TabBounce)).setChecked(OtherGramInterface.tabBounce()));
         items.add(UItem.asCheck(ID_TAB_HAPTICS, getString(R.string.OG_TabHaptics)).setChecked(OtherGramInterface.tabHaptics()));
+        items.add(UItem.asCheck(ID_LAUNCH_ANIM, getString(R.string.OG_LaunchAnimation)).setChecked(org.telegram.othergram.ui.OtherGramLaunchAnimation.enabled()));
         items.add(UItem.asShadow(getString(R.string.OG_InterfaceStyleInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_Palettes)));
@@ -119,6 +121,11 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
 
     private void onItemClick(UItem item, View view, int position, float x, float y) {
         final boolean dark = isDark();
+        if (item.id == ID_LAUNCH_ANIM) {
+            OtherGramConfig.putBoolean(org.telegram.othergram.ui.OtherGramLaunchAnimation.KEY_ENABLED, !org.telegram.othergram.ui.OtherGramLaunchAnimation.enabled());
+            listView.adapter.update(true);
+            return;
+        }
         if (item.id == ID_TAB_LENS || item.id == ID_TAB_BOUNCE || item.id == ID_TAB_HAPTICS) {
             final String key = item.id == ID_TAB_LENS ? OtherGramInterface.KEY_TAB_LENS
                     : item.id == ID_TAB_BOUNCE ? OtherGramInterface.KEY_TAB_BOUNCE : OtherGramInterface.KEY_TAB_HAPTICS;

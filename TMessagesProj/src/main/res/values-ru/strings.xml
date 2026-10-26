@@ -494,6 +494,7 @@
     <string name="OG_PluginsInstalled">Установленные плагины</string>
     <string name="OG_PluginsEmpty">Плагинов пока нет</string>
     <string name="OG_PluginsEngineInfo">Плагины работают во встроенном Python 3.11. Поддерживаются: настройки, хуки отправки сообщений, хуки запросов (add_hook), пункты в меню сообщения, уведомления и окна, запросы к Telegram, файлы. Перехват методов (hook_method) недоступен: такие плагины всё равно загрузятся, просто эта часть не будет работать. Плагины не меняют ваши настройки оформления OtherGram.</string>
+    <string name="OG_LaunchAnimation">Анимация OtherGram при запуске</string>
     <string name="OG_ApplyBanner">Применить баннер</string>
     <string name="OG_ApplyBackground">Применить фон</string>
     <string name="OG_ApplyInfo">Это предпросмотр. Новую картинку никто не увидит, пока вы её не примените.</string>
