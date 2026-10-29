@@ -228,14 +228,50 @@ public class RadialProgressView extends View {
         int x = (getMeasuredWidth() - size) / 2;
         int y = (getMeasuredHeight() - size) / 2;
         cicleRect.set(x, y, x + size, y + size);
-        canvas.drawArc(cicleRect, radOffset, drawingCircleLenght = currentCircleLength, false, progressPaint);
+        if (!ogDrawExpressive(canvas)) {
+            canvas.drawArc(cicleRect, radOffset, drawingCircleLenght = currentCircleLength, false, progressPaint);
+        }
         updateAnimation();
     }
 
     public void draw(Canvas canvas, float cx, float cy) {
         cicleRect.set(cx - size / 2f, cy - size / 2f, cx + size / 2f, cy +  size / 2f);
-        canvas.drawArc(cicleRect, radOffset, drawingCircleLenght = currentCircleLength, false, progressPaint);
+        if (!ogDrawExpressive(canvas)) {
+            canvas.drawArc(cicleRect, radOffset, drawingCircleLenght = currentCircleLength, false, progressPaint);
+        }
         updateAnimation();
+    }
+
+    // OtherGram: Material 3 Expressive loading indicator for the endless spinner — a filled shape that
+    // turns and morphs through cookie, pentagon, clover, burst... Real progress keeps Telegram's ring.
+    private static final int[] OG_SHAPES = {
+            org.telegram.othergram.ui.OtherGramShapes.COOKIE_9, org.telegram.othergram.ui.OtherGramShapes.PENTAGON,
+            org.telegram.othergram.ui.OtherGramShapes.CLOVER_4, org.telegram.othergram.ui.OtherGramShapes.SOFT_BURST,
+            org.telegram.othergram.ui.OtherGramShapes.COOKIE_4, org.telegram.othergram.ui.OtherGramShapes.SUNNY};
+    private static final long OG_STEP_MS = 650;
+    private final Paint ogFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final android.graphics.Path ogPath = new android.graphics.Path();
+    private float[] ogRadii;
+
+    private boolean ogDrawExpressive(Canvas canvas) {
+        if (!noProgress || toCircle || toCircleProgress != 0f) {
+            return false;
+        }
+        final long now = android.os.SystemClock.uptimeMillis();
+        final int step = (int) ((now / OG_STEP_MS) % OG_SHAPES.length);
+        final float into = (now % OG_STEP_MS) / (float) OG_STEP_MS;
+        // Hold a shape, then spring into the next one
+        final float morph = into < 0.45f ? 0f : org.telegram.messenger.AndroidUtilities.overshootInterpolator.getInterpolation((into - 0.45f) / 0.55f);
+        ogRadii = org.telegram.othergram.ui.OtherGramShapes.morph(
+                org.telegram.othergram.ui.OtherGramShapes.radii(OG_SHAPES[step]),
+                org.telegram.othergram.ui.OtherGramShapes.radii(OG_SHAPES[(step + 1) % OG_SHAPES.length]),
+                Math.min(1f, morph), ogRadii);
+        final float r = cicleRect.width() / 2f * 0.9f;
+        org.telegram.othergram.ui.OtherGramShapePath.build(ogPath, ogRadii, cicleRect.centerX(), cicleRect.centerY(), r, r, radOffset);
+        ogFill.setColor(progressPaint.getColor());
+        ogFill.setAlpha(progressPaint.getAlpha());
+        canvas.drawPath(ogPath, ogFill);
+        return true;
     }
 
     public boolean isCircle() {

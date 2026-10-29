@@ -130,6 +130,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     }
 
     private static final RectF tmpRectF = new RectF();
+    private final android.graphics.Path ogMorphPath = new android.graphics.Path();
 
     private boolean hasGestureSelectedOverride;
     private float gestureSelectedOverride;
@@ -162,7 +163,15 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
                     * (ogBounce < 1f ? 0.9f + 0.1f * OtherGramInterface.spring(ogBounce) : 1f); // OtherGram: pill bounces too
             canvas.save();
             canvas.scale(s, s, tmpRectF.centerX(), tmpRectF.centerY());
-            canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
+            if (ogBounce < 1f) {
+                // OtherGram: Material 3 Expressive shape morph — the pill turns into a cookie and back
+                final float morph = (float) Math.sin(Math.PI * ogBounce);
+                org.telegram.othergram.ui.OtherGramShapePath.morphPill(ogMorphPath, tmpRectF,
+                        org.telegram.othergram.ui.OtherGramShapes.radii(org.telegram.othergram.ui.OtherGramShapes.COOKIE_12), morph);
+                canvas.drawPath(ogMorphPath, paintCounterBackground);
+            } else {
+                canvas.drawRoundRect(tmpRectF, r, r, paintCounterBackground);
+            }
             canvas.restore();
         }
 
@@ -237,9 +246,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     private float ogBounce = 1f;
 
     private void ogPlayBounce() {
-        if (!OtherGramInterface.tabBounce()) {
-            return;
-        }
+        // The Expressive shape morph always plays; the icon jump follows the "bouncy tabs" setting
         OtherGramInterface.tick(this);
         if (ogBounceAnimator != null) {
             ogBounceAnimator.cancel();
@@ -263,7 +270,7 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
 
     @Override
     protected boolean drawChild(@NonNull Canvas canvas, android.view.View child, long drawingTime) {
-        if (ogBounce < 1f && (child == imageView || child == backupImageView)) {
+        if (ogBounce < 1f && OtherGramInterface.tabBounce() && (child == imageView || child == backupImageView)) {
             final float scale = 0.72f + 0.28f * OtherGramInterface.spring(ogBounce);
             final float hop = -dp(4) * (float) Math.sin(Math.PI * Math.min(1f, ogBounce * 1.6f)) * (1f - ogBounce);
             final float cx = child.getX() + child.getWidth() / 2f;

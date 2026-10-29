@@ -32,17 +32,57 @@ public class OtherGramAvatars {
     public static final int SHAPE_MATERIAL_STAR = 5;
     public static final int SHAPE_HEXAGON = 6;
     public static final int SHAPE_OCTAGON = 7;
+    // Material 3 Expressive shapes (2.0)
+    public static final int SHAPE_COOKIE_4 = 8;
+    public static final int SHAPE_COOKIE_6 = 9;
+    public static final int SHAPE_COOKIE_12 = 10;
+    public static final int SHAPE_CLOVER_4 = 11;
+    public static final int SHAPE_CLOVER_8 = 12;
+    public static final int SHAPE_SUNNY = 13;
+    public static final int SHAPE_SOFT_BURST = 14;
+    public static final int SHAPE_BURST = 15;
+    public static final int SHAPE_FLOWER = 16;
+    public static final int SHAPE_PUFFY = 17;
+    public static final int SHAPE_PENTAGON = 18;
+    public static final int SHAPE_GEM = 19;
+    public static final int SHAPE_HEART = 20;
 
-    public static final int[] SHAPES = {SHAPE_CIRCLE, SHAPE_SQUIRCLE, SHAPE_ROUNDED, SHAPE_SQUARE, SHAPE_MATERIAL_STAR, SHAPE_STAR, SHAPE_HEXAGON, SHAPE_OCTAGON};
-    public static final int[] SHAPE_TITLES = {R.string.OG_AvatarCircle, R.string.OG_AvatarSquircle, R.string.OG_AvatarRounded, R.string.OG_AvatarSquare,
-            R.string.OG_AvatarMaterialStar, R.string.OG_AvatarStar, R.string.OG_AvatarHexagon, R.string.OG_AvatarOctagon};
+    public static final int[] SHAPES = {SHAPE_MATERIAL_STAR, SHAPE_COOKIE_4, SHAPE_COOKIE_6, SHAPE_COOKIE_12, SHAPE_CLOVER_4, SHAPE_CLOVER_8,
+            SHAPE_SUNNY, SHAPE_SOFT_BURST, SHAPE_BURST, SHAPE_FLOWER, SHAPE_PUFFY, SHAPE_PENTAGON, SHAPE_GEM, SHAPE_HEART,
+            SHAPE_CIRCLE, SHAPE_SQUIRCLE, SHAPE_ROUNDED, SHAPE_SQUARE, SHAPE_STAR, SHAPE_HEXAGON, SHAPE_OCTAGON};
+    public static final int[] SHAPE_TITLES = {R.string.OG_AvatarMaterialStar, R.string.OG_ShapeCookie4, R.string.OG_ShapeCookie6, R.string.OG_ShapeCookie12,
+            R.string.OG_ShapeClover4, R.string.OG_ShapeClover8, R.string.OG_ShapeSunny, R.string.OG_ShapeSoftBurst, R.string.OG_ShapeBurst,
+            R.string.OG_ShapeFlower, R.string.OG_ShapePuffy, R.string.OG_ShapePentagon, R.string.OG_ShapeGem, R.string.OG_ShapeHeart,
+            R.string.OG_AvatarCircle, R.string.OG_AvatarSquircle, R.string.OG_AvatarRounded, R.string.OG_AvatarSquare,
+            R.string.OG_AvatarStar, R.string.OG_AvatarHexagon, R.string.OG_AvatarOctagon};
+
+    /** Library shape behind an avatar shape id, or -1 for shapes drawn by this class. */
+    private static int libraryShape(int s) {
+        switch (s) {
+            case SHAPE_MATERIAL_STAR: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_9;
+            case SHAPE_COOKIE_4: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_4;
+            case SHAPE_COOKIE_6: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_6;
+            case SHAPE_COOKIE_12: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_12;
+            case SHAPE_CLOVER_4: return org.telegram.othergram.ui.OtherGramShapes.CLOVER_4;
+            case SHAPE_CLOVER_8: return org.telegram.othergram.ui.OtherGramShapes.CLOVER_8;
+            case SHAPE_SUNNY: return org.telegram.othergram.ui.OtherGramShapes.SUNNY;
+            case SHAPE_SOFT_BURST: return org.telegram.othergram.ui.OtherGramShapes.SOFT_BURST;
+            case SHAPE_BURST: return org.telegram.othergram.ui.OtherGramShapes.BURST;
+            case SHAPE_FLOWER: return org.telegram.othergram.ui.OtherGramShapes.FLOWER;
+            case SHAPE_PUFFY: return org.telegram.othergram.ui.OtherGramShapes.PUFFY;
+            case SHAPE_PENTAGON: return org.telegram.othergram.ui.OtherGramShapes.PENTAGON;
+            case SHAPE_GEM: return org.telegram.othergram.ui.OtherGramShapes.GEM;
+            case SHAPE_HEART: return org.telegram.othergram.ui.OtherGramShapes.HEART;
+            default: return -1;
+        }
+    }
 
     private static final String KEY_SHAPE = "avatar_shape";
     private static volatile int shape = -1;
 
     public static int getShape() {
         if (shape < 0) {
-            shape = OtherGramConfig.getInt(KEY_SHAPE, SHAPE_CIRCLE);
+            shape = OtherGramConfig.getInt(KEY_SHAPE, SHAPE_MATERIAL_STAR); // 2.0: Material 3 Expressive cookie by default
         }
         return shape;
     }
@@ -62,7 +102,7 @@ public class OtherGramAvatars {
     /** Shapes that are clipped with a path instead of a corner radius. */
     public static boolean hasPathShape() {
         final int s = getShape();
-        return s == SHAPE_STAR || s == SHAPE_MATERIAL_STAR || s == SHAPE_HEXAGON || s == SHAPE_OCTAGON;
+        return s == SHAPE_STAR || s == SHAPE_HEXAGON || s == SHAPE_OCTAGON || libraryShape(s) >= 0;
     }
 
     /** Share of the circle radius kept by rounded shapes. Path shapes keep the circle as fallback. */
@@ -94,6 +134,11 @@ public class OtherGramAvatars {
         final float cx = r.centerX();
         final float cy = r.centerY();
         final float radius = Math.min(r.width(), r.height()) / 2f;
+        final int library = libraryShape(getShape());
+        if (library >= 0) {
+            org.telegram.othergram.ui.OtherGramShapePath.build(out, org.telegram.othergram.ui.OtherGramShapes.radii(library), cx, cy, radius, radius, 0);
+            return;
+        }
         switch (getShape()) {
             case SHAPE_MATERIAL_STAR:
                 // Material You style "cookie" star: smooth scalloped edge

@@ -79,7 +79,7 @@ public class OtherGramChatsActivity extends BaseFragment {
 
         FrameLayout contentView = new FrameLayout(context);
         listView = new UniversalRecyclerView(this, this::fillItems, this::onItemClick, null);
-        listView.setSections();
+        listView.setSections(org.telegram.messenger.AndroidUtilities.dp(12), org.telegram.messenger.AndroidUtilities.dp(24), false); // Material 3 Expressive: large rounded cards
         listView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray, resourceProvider));
         contentView.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
         actionBar.setAdaptiveBackground(listView);

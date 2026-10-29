@@ -28,7 +28,7 @@ public class OtherGramBannerHeader extends View {
 
     private static final float ASPECT = 168f / 400f;
     private static final int SIDE_PADDING_DP = 12; // same as the list's section cards
-    private static final int RADIUS_DP = 16;
+    private static final int RADIUS_DP = 24; // matches the Expressive cards
     private static final int VERSION_COLOR = 0xD0155641; // the dark green of the "Other" lettering
 
     private final Bitmap bitmap;
