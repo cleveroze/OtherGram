@@ -18848,7 +18848,8 @@ public class MessagesController extends BaseController implements NotificationCe
                 dialogs_read_outbox_max.put(dialogId, Math.max(value, update.max_id));
             } else if (baseUpdate instanceof TL_update.TL_updateDeleteMessages) {
                 TL_update.TL_updateDeleteMessages update = (TL_update.TL_updateDeleteMessages) baseUpdate;
-                if (OtherGramDeletedMessages.keep(currentAccount, 0, update.messages)) { // OtherGram: keep deleted messages
+                final ArrayList<Integer> ogDeleteIds = OtherGramDeletedMessages.keep(currentAccount, 0, update.messages); // OtherGram: keep deleted messages (except milvet/velvet71)
+                if (ogDeleteIds.isEmpty()) {
                     continue;
                 }
                 if (deletedMessages == null) {
@@ -18859,7 +18860,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     arrayList = new ArrayList<>();
                     deletedMessages.put(0, arrayList);
                 }
-                arrayList.addAll(update.messages);
+                arrayList.addAll(ogDeleteIds);
             } else if (baseUpdate instanceof TL_update.TL_updateDeleteQuickReplyMessages) {
                 TL_update.TL_updateDeleteQuickReplyMessages update = (TL_update.TL_updateDeleteQuickReplyMessages) baseUpdate;
                 if (deletedQuickReplyMessages == null) {
@@ -19376,7 +19377,8 @@ public class MessagesController extends BaseController implements NotificationCe
                 if (BuildVars.LOGS_ENABLED) {
                     FileLog.d(baseUpdate + " channelId = " + update.channel_id);
                 }
-                if (OtherGramDeletedMessages.keep(currentAccount, -update.channel_id, update.messages)) { // OtherGram: keep deleted messages
+                final ArrayList<Integer> ogDeleteIds = OtherGramDeletedMessages.keep(currentAccount, -update.channel_id, update.messages); // OtherGram: keep deleted messages (except milvet/velvet71)
+                if (ogDeleteIds.isEmpty()) {
                     continue;
                 }
                 if (deletedMessages == null) {
@@ -19388,7 +19390,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     arrayList = new ArrayList<>();
                     deletedMessages.put(dialogId, arrayList);
                 }
-                arrayList.addAll(update.messages);
+                arrayList.addAll(ogDeleteIds);
             } else if (baseUpdate instanceof TL_update.TL_updateChannel) {
                 if (BuildVars.LOGS_ENABLED) {
                     TL_update.TL_updateChannel update = (TL_update.TL_updateChannel) baseUpdate;

@@ -1835,6 +1835,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     private final boolean ALPHA_PROPERTY_WORKAROUND = Build.VERSION.SDK_INT == 28;
     private float alphaInternal = 1f;
+    // OtherGram: a kept deleted message is drawn see-through
+    private boolean ogDeleted;
+    private static final float OG_DELETED_ALPHA = 0.45f;
 
     public final TransitionParams transitionParams = new TransitionParams();
     private boolean edited;
@@ -18535,8 +18538,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 currentTimeString = TextUtils.concat(formatString(R.string.MessageScheduledRepeatSeconds, period), ", ", currentTimeString);
             }
         }
-        if (OtherGramDeletedMessages.isDeleted(currentAccount, currentMessageObject)) { // OtherGram: kept deleted message
-            currentTimeString = TextUtils.concat(getString(R.string.OG_DeletedMark), " · ", currentTimeString);
+        ogDeleted = OtherGramDeletedMessages.isDeleted(currentAccount, currentMessageObject); // OtherGram: kept deleted message
+        if (ogDeleted) {
+            final SpannableString ogMark = new SpannableString(getString(R.string.OG_DeletedMark));
+            ogMark.setSpan(new android.text.style.ForegroundColorSpan(getThemedColor(Theme.key_text_RedRegular)), 0, ogMark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            currentTimeString = TextUtils.concat(ogMark, " · ", currentTimeString);
         }
         timeTextWidth = timeWidth = (int) Math.ceil(Theme.chat_timePaint.measureText(currentTimeString, 0, currentTimeString == null ? 0 : currentTimeString.length()));
         if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE || currentMessageObject.notime) {
@@ -20216,7 +20222,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
         }
 
-        if (alphaInternal != 1.0f) {
+        final float ogLayerAlpha = alphaInternal * (ogDeleted ? OG_DELETED_ALPHA : 1f); // OtherGram: see-through deleted message
+        if (ogLayerAlpha != 1.0f) {
             int top = 0;
             int left = 0;
             int bottom = getMeasuredHeight();
@@ -20243,7 +20250,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 bottom = (int) (parentHeight - getY());
             }
             rect.set(left, top, right, bottom);
-            canvas.saveLayerAlpha(rect, (int) (255 * alphaInternal), Canvas.ALL_SAVE_FLAG);
+            canvas.saveLayerAlpha(rect, (int) (255 * ogLayerAlpha), Canvas.ALL_SAVE_FLAG);
         }
         boolean clipContent = false;
         if (transitionParams.animateBackgroundBoundsInner && currentBackgroundDrawable != null && !isRoundVideo && (currentMessageObject == null || !currentMessageObject.sendPreview)) {
@@ -20747,7 +20754,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         if ((drawBackground || transitionParams.animateDrawBackground) && currentBackgroundDrawable != null && (currentPosition == null || isDrawSelectionBackground() && (currentMessageObject.isMusic() || currentMessageObject.isDocument())) && !(enterTransitionInProgress && !currentMessageObject.isVoice())) {
-            float alphaInternal = this.alphaInternal;
+            float alphaInternal = this.alphaInternal * (ogDeleted ? OG_DELETED_ALPHA : 1f); // OtherGram: see-through deleted message
             if (fromParent) {
                 alphaInternal *= getAlpha();
             }
