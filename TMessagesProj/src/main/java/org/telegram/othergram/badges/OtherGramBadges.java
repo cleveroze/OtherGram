@@ -48,7 +48,12 @@ public class OtherGramBadges {
 
     private static final long BATCH_DELAY_MS = 300;
     /** Cached badges are refreshed after this time, so badges granted by admins show up without a restart. */
-    private static final long REFRESH_AFTER_MS = 10 * 60 * 1000;
+    private static final long REFRESH_AFTER_MS = 30 * 60 * 1000;
+    /** After a failed request (server busy or over its daily limit) wait before asking again: 1, 2, 4 … 30 min. */
+    private static final long FIRST_BACKOFF_MS = 60 * 1000;
+    private static final long MAX_BACKOFF_MS = 30 * 60 * 1000;
+    private static long backoffMs;
+    private static long retryAt;
 
     private static final Map<Long, List<OtherGramBadge>> cache = new ConcurrentHashMap<>();
     private static final Map<Long, Long> fetchedAt = new ConcurrentHashMap<>();
@@ -65,10 +70,32 @@ public class OtherGramBadges {
         if (f == null || pending.isEmpty()) {
             return;
         }
+        final long wait = retryAt - System.currentTimeMillis();
+        if (wait > 0) {
+            // The server failed recently: keep showing cached badges and ask again later, once
+            AndroidUtilities.cancelRunOnUIThread(OtherGramBadges.flushPendingRef);
+            AndroidUtilities.runOnUIThread(OtherGramBadges.flushPendingRef, wait);
+            return;
+        }
+        // Ids whose badges arrived from the device cache in the meantime and are still fresh need no request
+        final long now = System.currentTimeMillis();
+        for (java.util.Iterator<Long> it = pending.iterator(); it.hasNext(); ) {
+            final Long id = it.next();
+            final Long at = fetchedAt.get(id);
+            if (cache.containsKey(id) && at != null && now - at <= REFRESH_AFTER_MS) {
+                it.remove();
+                requested.remove(id);
+            }
+        }
+        if (pending.isEmpty()) {
+            return;
+        }
         final Set<Long> batch = new HashSet<>(pending);
         pending.clear();
         f.fetch(batch);
     };
+
+    private static final Runnable flushPendingRef = () -> flushPending.run();
 
     public static void setFetcher(Fetcher f) {
         fetcher = f;
@@ -91,9 +118,33 @@ public class OtherGramBadges {
         return badges;
     }
 
-    /** The server could not be reached: allow these ids to be requested again later. */
+    /**
+     * The server could not be reached or is over its limit: badges already shown stay as they are,
+     * and these ids are asked for again after a growing pause instead of on every redraw.
+     */
     public static void onFetchFailed(Set<Long> userIds) {
         requested.removeAll(userIds);
+        backoffMs = backoffMs == 0 ? FIRST_BACKOFF_MS : Math.min(MAX_BACKOFF_MS, backoffMs * 2);
+        retryAt = System.currentTimeMillis() + backoffMs;
+        for (Long id : userIds) {
+            // Cached ones count as fresh until the pause ends, so get() does not queue them again at once
+            if (cache.containsKey(id)) {
+                fetchedAt.put(id, retryAt - REFRESH_AFTER_MS);
+            }
+        }
+    }
+
+    /** Badges saved on this device from an earlier run; shown right away, refreshed when they get old. */
+    public static void putCached(Map<Long, List<OtherGramBadge>> badges, Map<Long, Long> savedAt) {
+        for (Map.Entry<Long, List<OtherGramBadge>> e : badges.entrySet()) {
+            if (cache.containsKey(e.getKey())) {
+                continue; // fresher data from the server already arrived
+            }
+            cache.put(e.getKey(), Collections.unmodifiableList(new ArrayList<>(e.getValue())));
+            final Long at = savedAt.get(e.getKey());
+            fetchedAt.put(e.getKey(), at != null ? at : 0L);
+        }
+        notifyNamesChanged();
     }
 
     private static void request(long userId) {
@@ -111,6 +162,8 @@ public class OtherGramBadges {
     /** Stores fetched badges (an empty list means "no badges") and redraws names everywhere. */
     public static void put(Map<Long, List<OtherGramBadge>> badges) {
         final long now = System.currentTimeMillis();
+        backoffMs = 0; // the server answers again
+        retryAt = 0;
         for (Map.Entry<Long, List<OtherGramBadge>> e : badges.entrySet()) {
             cache.put(e.getKey(), Collections.unmodifiableList(new ArrayList<>(e.getValue())));
             fetchedAt.put(e.getKey(), now);

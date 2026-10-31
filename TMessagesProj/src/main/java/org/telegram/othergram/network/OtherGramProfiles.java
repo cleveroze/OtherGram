@@ -56,6 +56,94 @@ public class OtherGramProfiles {
     public static void init() {
         if (OtherGramApi.isConfigured()) {
             OtherGramBadges.setFetcher(OtherGramProfiles::fetch);
+            loadDiskCache();
+        }
+    }
+
+    // ------------------------------------------------------------ cache on the device
+    // Badges and decoration of users seen before are kept on the phone, so names show their badges right
+    // after a restart and while the server is busy, and the server is asked far less often.
+
+    private static final String CACHE_PREFS = "othergram_profiles_cache";
+    private static final int CACHE_MAX_USERS = 3000;
+    private static final long CACHE_MAX_AGE_MS = 7L * 24 * 60 * 60 * 1000;
+    private static final Map<Long, JSONObject> diskEntries = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> diskTimes = new ConcurrentHashMap<>();
+    private static volatile boolean diskLoaded;
+    private static final Runnable saveDiskCache = () -> org.telegram.messenger.Utilities.globalQueue.postRunnable(OtherGramProfiles::writeDiskCache);
+
+    private static android.content.SharedPreferences cachePrefs() {
+        return org.telegram.messenger.ApplicationLoader.applicationContext.getSharedPreferences(CACHE_PREFS, android.content.Context.MODE_PRIVATE);
+    }
+
+    private static void loadDiskCache() {
+        if (diskLoaded) {
+            return;
+        }
+        diskLoaded = true;
+        org.telegram.messenger.Utilities.globalQueue.postRunnable(() -> {
+            try {
+                final String raw = cachePrefs().getString("users", null);
+                if (raw == null) {
+                    return;
+                }
+                final JSONObject all = new JSONObject(raw);
+                final long now = System.currentTimeMillis();
+                final Map<Long, List<OtherGramBadge>> badges = new HashMap<>();
+                final Map<Long, Long> times = new HashMap<>();
+                final Iterator<String> keys = all.keys();
+                while (keys.hasNext()) {
+                    final String key = keys.next();
+                    final JSONObject entry = all.optJSONObject(key);
+                    if (entry == null) continue;
+                    final long at = entry.optLong("t");
+                    if (now - at > CACHE_MAX_AGE_MS) continue;
+                    final long userId;
+                    try {
+                        userId = Long.parseLong(key);
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
+                    final JSONObject user = entry.optJSONObject("d");
+                    if (user == null) continue;
+                    diskEntries.put(userId, user);
+                    diskTimes.put(userId, at);
+                    badges.put(userId, parseBadges(user.optJSONArray("badges")));
+                    times.put(userId, at);
+                    final Profile profile = parseProfile(user.optJSONObject("profile"));
+                    if (profile != null && !profiles.containsKey(userId)) {
+                        profiles.put(userId, profile);
+                    }
+                }
+                org.telegram.messenger.AndroidUtilities.runOnUIThread(() -> OtherGramBadges.putCached(badges, times));
+            } catch (Throwable e) {
+                org.telegram.messenger.FileLog.e(e);
+            }
+        });
+    }
+
+    private static void rememberOnDisk(long userId, JSONObject user) {
+        diskEntries.put(userId, user);
+        diskTimes.put(userId, System.currentTimeMillis());
+        org.telegram.messenger.AndroidUtilities.cancelRunOnUIThread(saveDiskCache);
+        org.telegram.messenger.AndroidUtilities.runOnUIThread(saveDiskCache, 3000);
+    }
+
+    private static void writeDiskCache() {
+        try {
+            final List<Long> ids = new ArrayList<>(diskEntries.keySet());
+            ids.sort((a, b) -> Long.compare(diskTimes.getOrDefault(b, 0L), diskTimes.getOrDefault(a, 0L)));
+            final JSONObject all = new JSONObject();
+            for (int i = 0; i < ids.size() && i < CACHE_MAX_USERS; i++) {
+                final long id = ids.get(i);
+                final JSONObject entry = new JSONObject();
+                entry.put("t", diskTimes.getOrDefault(id, 0L));
+                entry.put("d", diskEntries.get(id));
+                all.put(String.valueOf(id), entry);
+            }
+            cachePrefs().edit().putString("users", all.toString()).apply();
+        } catch (Throwable e) {
+            org.telegram.messenger.FileLog.e(e);
         }
     }
 
@@ -202,6 +290,7 @@ public class OtherGramProfiles {
                 continue;
             }
             badges.put(userId, parseBadges(user.optJSONArray("badges")));
+            rememberOnDisk(userId, user);
             final Profile profile = parseProfile(user.optJSONObject("profile"));
             if (profile != null) {
                 profiles.put(userId, profile);
