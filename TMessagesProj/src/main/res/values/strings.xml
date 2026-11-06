@@ -11688,6 +11688,12 @@
     <string name="OG_ShapeHeart">Heart</string>
     <string name="OG_ShapeOval">Oval</string>
     <string name="OG_ShapePill">Pill</string>
+    <string name="OG_ShapeCookie7">7-sided cookie</string>
+    <string name="OG_ShapeCookie9">9-sided cookie</string>
+    <string name="OG_ShapeVerySunny">Very sunny</string>
+    <string name="OG_ShapeBoom">Boom</string>
+    <string name="OG_ShapeSoftBoom">Soft boom</string>
+    <string name="OG_ShapePuffyDiamond">Puffy diamond</string>
     <string name="OG_AvatarStar">Star</string>
     <string name="OG_AvatarHexagon">Hexagon</string>
     <string name="OG_AvatarOctagon">Octagon</string>

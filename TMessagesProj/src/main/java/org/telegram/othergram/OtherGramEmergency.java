@@ -99,6 +99,11 @@ public class OtherGramEmergency {
         if (!active) {
             return;
         }
+        // A minimum version limits the notice to older builds; test mode shows it anyway.
+        if (!isTestMode() && !TextUtils.isEmpty(e.minVersion)
+                && OtherGramUpdates.compare(OtherGramConfig.VERSION, e.minVersion) >= 0) {
+            return;
+        }
         if (!e.hard && softShownThisProcess) {
             return;
         }

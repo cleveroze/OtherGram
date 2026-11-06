@@ -49,14 +49,22 @@ public class OtherGramAvatars {
     // Material 3 Expressive basics (2.1)
     public static final int SHAPE_OVAL = 21;
     public static final int SHAPE_PILL = 22;
+    public static final int SHAPE_COOKIE_7 = 23;
+    public static final int SHAPE_COOKIE_9 = 24;
+    public static final int SHAPE_VERY_SUNNY = 25;
+    public static final int SHAPE_BOOM = 26;
+    public static final int SHAPE_SOFT_BOOM = 27;
+    public static final int SHAPE_PUFFY_DIAMOND = 28;
 
-    public static final int[] SHAPES = {SHAPE_MATERIAL_STAR, SHAPE_COOKIE_4, SHAPE_COOKIE_6, SHAPE_COOKIE_12, SHAPE_CLOVER_4, SHAPE_CLOVER_8,
-            SHAPE_SUNNY, SHAPE_SOFT_BURST, SHAPE_BURST, SHAPE_FLOWER, SHAPE_PUFFY, SHAPE_PENTAGON, SHAPE_GEM, SHAPE_HEART, SHAPE_OVAL, SHAPE_PILL,
+    public static final int[] SHAPES = {SHAPE_MATERIAL_STAR, SHAPE_COOKIE_4, SHAPE_COOKIE_6, SHAPE_COOKIE_7, SHAPE_COOKIE_9, SHAPE_COOKIE_12,
+            SHAPE_CLOVER_4, SHAPE_CLOVER_8, SHAPE_SUNNY, SHAPE_VERY_SUNNY, SHAPE_SOFT_BURST, SHAPE_BURST, SHAPE_BOOM, SHAPE_SOFT_BOOM,
+            SHAPE_FLOWER, SHAPE_PUFFY, SHAPE_PENTAGON, SHAPE_GEM, SHAPE_HEART, SHAPE_OVAL, SHAPE_PILL, SHAPE_PUFFY_DIAMOND,
             SHAPE_CIRCLE, SHAPE_SQUIRCLE, SHAPE_ROUNDED, SHAPE_SQUARE, SHAPE_STAR, SHAPE_HEXAGON, SHAPE_OCTAGON};
-    public static final int[] SHAPE_TITLES = {R.string.OG_AvatarMaterialStar, R.string.OG_ShapeCookie4, R.string.OG_ShapeCookie6, R.string.OG_ShapeCookie12,
-            R.string.OG_ShapeClover4, R.string.OG_ShapeClover8, R.string.OG_ShapeSunny, R.string.OG_ShapeSoftBurst, R.string.OG_ShapeBurst,
-            R.string.OG_ShapeFlower, R.string.OG_ShapePuffy, R.string.OG_ShapePentagon, R.string.OG_ShapeGem, R.string.OG_ShapeHeart,
-            R.string.OG_ShapeOval, R.string.OG_ShapePill,
+    public static final int[] SHAPE_TITLES = {R.string.OG_AvatarMaterialStar, R.string.OG_ShapeCookie4, R.string.OG_ShapeCookie6, R.string.OG_ShapeCookie7,
+            R.string.OG_ShapeCookie9, R.string.OG_ShapeCookie12, R.string.OG_ShapeClover4, R.string.OG_ShapeClover8,
+            R.string.OG_ShapeSunny, R.string.OG_ShapeVerySunny, R.string.OG_ShapeSoftBurst, R.string.OG_ShapeBurst, R.string.OG_ShapeBoom,
+            R.string.OG_ShapeSoftBoom, R.string.OG_ShapeFlower, R.string.OG_ShapePuffy, R.string.OG_ShapePentagon, R.string.OG_ShapeGem,
+            R.string.OG_ShapeHeart, R.string.OG_ShapeOval, R.string.OG_ShapePill, R.string.OG_ShapePuffyDiamond,
             R.string.OG_AvatarCircle, R.string.OG_AvatarSquircle, R.string.OG_AvatarRounded, R.string.OG_AvatarSquare,
             R.string.OG_AvatarStar, R.string.OG_AvatarHexagon, R.string.OG_AvatarOctagon};
 
@@ -79,6 +87,12 @@ public class OtherGramAvatars {
             case SHAPE_HEART: return org.telegram.othergram.ui.OtherGramShapes.HEART;
             case SHAPE_OVAL: return org.telegram.othergram.ui.OtherGramShapes.OVAL;
             case SHAPE_PILL: return org.telegram.othergram.ui.OtherGramShapes.PILL;
+            case SHAPE_COOKIE_7: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_7;
+            case SHAPE_COOKIE_9: return org.telegram.othergram.ui.OtherGramShapes.COOKIE_9;
+            case SHAPE_VERY_SUNNY: return org.telegram.othergram.ui.OtherGramShapes.VERY_SUNNY;
+            case SHAPE_BOOM: return org.telegram.othergram.ui.OtherGramShapes.BOOM;
+            case SHAPE_SOFT_BOOM: return org.telegram.othergram.ui.OtherGramShapes.SOFT_BOOM;
+            case SHAPE_PUFFY_DIAMOND: return org.telegram.othergram.ui.OtherGramShapes.PUFFY_DIAMOND;
             default: return -1;
         }
     }

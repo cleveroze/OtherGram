@@ -23,7 +23,7 @@ public class OtherGramConfig {
     }
 
     /** OtherGram version shown in the settings banner and written into exported settings. */
-    public static final String VERSION = "2.0.0";
+    public static final String VERSION = "2.1.0";
 
     private static final String PREFS_NAME = "othergram_config";
     private static final String SUFFIX_LIGHT = "_light";

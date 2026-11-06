@@ -416,6 +416,12 @@
     <string name="OG_ShapeHeart">Сердце</string>
     <string name="OG_ShapeOval">Овал</string>
     <string name="OG_ShapePill">Пилюля</string>
+    <string name="OG_ShapeCookie7">Печенька на 7 волн</string>
+    <string name="OG_ShapeCookie9">Печенька на 9 волн</string>
+    <string name="OG_ShapeVerySunny">Очень солнечно</string>
+    <string name="OG_ShapeBoom">Бум</string>
+    <string name="OG_ShapeSoftBoom">Мягкий бум</string>
+    <string name="OG_ShapePuffyDiamond">Пухлый ромб</string>
     <string name="OG_AvatarStar">Звезда</string>
     <string name="OG_AvatarHexagon">Шестиугольник</string>
     <string name="OG_AvatarOctagon">Восьмиугольник</string>
