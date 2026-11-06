@@ -414,6 +414,8 @@
     <string name="OG_ShapePentagon">Пятиугольник</string>
     <string name="OG_ShapeGem">Самоцвет</string>
     <string name="OG_ShapeHeart">Сердце</string>
+    <string name="OG_ShapeOval">Овал</string>
+    <string name="OG_ShapePill">Пилюля</string>
     <string name="OG_AvatarStar">Звезда</string>
     <string name="OG_AvatarHexagon">Шестиугольник</string>
     <string name="OG_AvatarOctagon">Восьмиугольник</string>
@@ -571,4 +573,9 @@
     <string name="OG_EmergencyLink">Ссылка на обновление</string>
     <string name="OG_EmergencyMinVersion">Минимальная версия</string>
     <string name="OG_EmergencySaved">Сохранено</string>
+    <string name="OG_MainScreen">Главный экран</string>
+    <string name="OG_MainTitle">Надпись вместо «Telegram»</string>
+    <string name="OG_MainTitleHint">Например, MyGram</string>
+    <string name="OG_MainTitleDefault">Telegram (по умолчанию)</string>
+    <string name="OG_MainTitleInfo">Показывается вверху экрана чатов. Оставьте пустым для стандартной.</string>
 </resources>

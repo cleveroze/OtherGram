@@ -11686,6 +11686,8 @@
     <string name="OG_ShapePentagon">Pentagon</string>
     <string name="OG_ShapeGem">Gem</string>
     <string name="OG_ShapeHeart">Heart</string>
+    <string name="OG_ShapeOval">Oval</string>
+    <string name="OG_ShapePill">Pill</string>
     <string name="OG_AvatarStar">Star</string>
     <string name="OG_AvatarHexagon">Hexagon</string>
     <string name="OG_AvatarOctagon">Octagon</string>
@@ -11843,4 +11845,9 @@
     <string name="OG_EmergencyLink">Update link</string>
     <string name="OG_EmergencyMinVersion">Minimum version</string>
     <string name="OG_EmergencySaved">Saved</string>
+    <string name="OG_MainScreen">Main screen</string>
+    <string name="OG_MainTitle">Title instead of \"Telegram\"</string>
+    <string name="OG_MainTitleHint">For example, MyGram</string>
+    <string name="OG_MainTitleDefault">Telegram (default)</string>
+    <string name="OG_MainTitleInfo">Shown at the top of the chats screen. Leave it empty for the default.</string>
 </resources>

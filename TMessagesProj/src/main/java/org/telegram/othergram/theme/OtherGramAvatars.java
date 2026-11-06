@@ -46,13 +46,17 @@ public class OtherGramAvatars {
     public static final int SHAPE_PENTAGON = 18;
     public static final int SHAPE_GEM = 19;
     public static final int SHAPE_HEART = 20;
+    // Material 3 Expressive basics (2.1)
+    public static final int SHAPE_OVAL = 21;
+    public static final int SHAPE_PILL = 22;
 
     public static final int[] SHAPES = {SHAPE_MATERIAL_STAR, SHAPE_COOKIE_4, SHAPE_COOKIE_6, SHAPE_COOKIE_12, SHAPE_CLOVER_4, SHAPE_CLOVER_8,
-            SHAPE_SUNNY, SHAPE_SOFT_BURST, SHAPE_BURST, SHAPE_FLOWER, SHAPE_PUFFY, SHAPE_PENTAGON, SHAPE_GEM, SHAPE_HEART,
+            SHAPE_SUNNY, SHAPE_SOFT_BURST, SHAPE_BURST, SHAPE_FLOWER, SHAPE_PUFFY, SHAPE_PENTAGON, SHAPE_GEM, SHAPE_HEART, SHAPE_OVAL, SHAPE_PILL,
             SHAPE_CIRCLE, SHAPE_SQUIRCLE, SHAPE_ROUNDED, SHAPE_SQUARE, SHAPE_STAR, SHAPE_HEXAGON, SHAPE_OCTAGON};
     public static final int[] SHAPE_TITLES = {R.string.OG_AvatarMaterialStar, R.string.OG_ShapeCookie4, R.string.OG_ShapeCookie6, R.string.OG_ShapeCookie12,
             R.string.OG_ShapeClover4, R.string.OG_ShapeClover8, R.string.OG_ShapeSunny, R.string.OG_ShapeSoftBurst, R.string.OG_ShapeBurst,
             R.string.OG_ShapeFlower, R.string.OG_ShapePuffy, R.string.OG_ShapePentagon, R.string.OG_ShapeGem, R.string.OG_ShapeHeart,
+            R.string.OG_ShapeOval, R.string.OG_ShapePill,
             R.string.OG_AvatarCircle, R.string.OG_AvatarSquircle, R.string.OG_AvatarRounded, R.string.OG_AvatarSquare,
             R.string.OG_AvatarStar, R.string.OG_AvatarHexagon, R.string.OG_AvatarOctagon};
 
@@ -73,6 +77,8 @@ public class OtherGramAvatars {
             case SHAPE_PENTAGON: return org.telegram.othergram.ui.OtherGramShapes.PENTAGON;
             case SHAPE_GEM: return org.telegram.othergram.ui.OtherGramShapes.GEM;
             case SHAPE_HEART: return org.telegram.othergram.ui.OtherGramShapes.HEART;
+            case SHAPE_OVAL: return org.telegram.othergram.ui.OtherGramShapes.OVAL;
+            case SHAPE_PILL: return org.telegram.othergram.ui.OtherGramShapes.PILL;
             default: return -1;
         }
     }

@@ -33,7 +33,10 @@ public final class OtherGramShapes {
     public static final int DIAMOND = 19;
     public static final int HEART = 20;
     public static final int PUFFY_DIAMOND = 21;
-    public static final int COUNT = 22;
+    // Material 3 Expressive basics (2.1)
+    public static final int OVAL = 22;
+    public static final int PILL = 23;
+    public static final int COUNT = 24;
 
     private static final float[][] cache = new float[COUNT][];
 
@@ -78,6 +81,8 @@ public final class OtherGramShapes {
             case DIAMOND: return smooth(ray(polygon(4, 0)), 9);
             case HEART: return smooth(ray(heart()), 2);
             case PUFFY_DIAMOND: return smooth(ray(puffyDiamond()), 2);
+            case OVAL: return oval(1.0, 0.68);
+            case PILL: return pill();
             default: return circle();
         }
     }
@@ -161,6 +166,41 @@ public final class OtherGramShapes {
             v[k] = new double[]{r * Math.cos(t), r * Math.sin(t)};
         }
         return v;
+    }
+
+    /** Ellipse with half-axes {@code a} (horizontal) and {@code b} (vertical). */
+    private static double[] oval(double a, double b) {
+        final double[] r = new double[N];
+        for (int i = 0; i < N; i++) {
+            final double t = angle(i);
+            final double c = Math.cos(t), s = Math.sin(t);
+            r[i] = (a * b) / Math.sqrt(b * b * c * c + a * a * s * s);
+        }
+        return r;
+    }
+
+    /** Stadium/capsule: a rectangle with semicircular ends. */
+    private static double[] pill() {
+        final double R = 1.0;
+        final double L = 0.55;
+        final int seg = 24;
+        final double[][] v = new double[4 * seg][];
+        int k = 0;
+        for (int i = 0; i <= seg; i++) {
+            v[k++] = new double[]{-L + 2 * L * i / seg, -R};
+        }
+        for (int i = 1; i < seg; i++) {
+            final double a = -Math.PI / 2 + Math.PI * i / seg;
+            v[k++] = new double[]{L + R * Math.cos(a), R * Math.sin(a)};
+        }
+        for (int i = 0; i <= seg; i++) {
+            v[k++] = new double[]{L - 2 * L * i / seg, R};
+        }
+        for (int i = 1; i < seg; i++) {
+            final double a = Math.PI / 2 + Math.PI * i / seg;
+            v[k++] = new double[]{-L + R * Math.cos(a), R * Math.sin(a)};
+        }
+        return smooth(ray(v), 3);
     }
 
     /** Distance from the center to the outline along each sample direction. */
