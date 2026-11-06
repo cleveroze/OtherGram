@@ -12,14 +12,15 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 
 /**
- * Emergency update notice delivered through /v1/config, so the owner can switch it on or off from
- * the admin panel without shipping a new build.
+ * Launcher notices: an emergency update from the server (/v1/config) and a "new version on GitHub"
+ * plaque. Both are shown over the main screen on every cold start.
  *
- * soft: a dialog with "Update" and "Later"; chats keep working.
- * hard: a non-cancellable dialog for real emergencies; only the news channel stays reachable.
+ * The server notice wins when it is enabled; otherwise the GitHub notice appears when the latest
+ * release is newer than the installed build. Neither is shown again until the app is restarted,
+ * and the GitHub notice keeps returning on every launch until the user actually updates.
  *
- * Test mode is local (OtherGramConfig "emergency_test"): it shows the dialog on this device only,
- * so an admin can preview it without affecting anyone else.
+ * Test mode (OtherGramConfig "emergency_test") shows the server notice on this device only, so an
+ * admin can preview it without affecting anyone.
  */
 public class OtherGramEmergency {
 
@@ -29,7 +30,7 @@ public class OtherGramEmergency {
     private static OtherGramEmergency current;
     private static long checkedAt;
     private static boolean showing;
-    private static boolean softShownThisProcess;
+    private static boolean noticeShownThisProcess;
 
     public boolean loaded;
     public boolean enabled;
@@ -47,24 +48,22 @@ public class OtherGramEmergency {
 
     public static void setTestMode(boolean on) {
         OtherGramConfig.putBoolean(KEY_TEST, on);
-        softShownThisProcess = false;
+        noticeShownThisProcess = false;
     }
 
-    /** Called from the main screen; fetches the config at most once per few minutes and shows the notice. */
+    /** Called from the main screen: fetches the config, then shows the server notice or the update plaque. */
     public static void checkAndShow(BaseFragment fragment) {
         if (fragment == null || fragment.getParentActivity() == null) {
             return;
         }
         if (current != null && System.currentTimeMillis() - checkedAt < RECHECK_MS) {
-            maybeShow(fragment);
+            dispatch(fragment);
             return;
         }
         OtherGramApi.getJson("/v1/config", (status, response) -> {
-            if (status == 200 && response != null) {
-                current = parse(response.optJSONObject("emergency"));
-                checkedAt = System.currentTimeMillis();
-                maybeShow(fragment);
-            }
+            current = parse(status == 200 && response != null ? response.optJSONObject("emergency") : null);
+            checkedAt = System.currentTimeMillis();
+            dispatch(fragment);
         });
     }
 
@@ -90,40 +89,59 @@ public class OtherGramEmergency {
         return out;
     }
 
-    private static void maybeShow(BaseFragment fragment) {
-        final OtherGramEmergency e = current;
-        if (e == null || !e.loaded || showing) {
-            return;
+    private static void dispatch(BaseFragment fragment) {
+        if (current != null && isEmergencyActive(current)) {
+            maybeShowEmergency(fragment);
+        } else {
+            checkUpdate(fragment);
         }
-        final boolean active = e.enabled || isTestMode();
-        if (!active) {
-            return;
+    }
+
+    private static boolean isEmergencyActive(OtherGramEmergency e) {
+        if (!e.enabled && !isTestMode()) {
+            return false;
         }
         // A minimum version limits the notice to older builds; test mode shows it anyway.
         if (!isTestMode() && !TextUtils.isEmpty(e.minVersion)
                 && OtherGramUpdates.compare(OtherGramConfig.VERSION, e.minVersion) >= 0) {
-            return;
+            return false;
         }
-        if (!e.hard && softShownThisProcess) {
+        return true;
+    }
+
+    private static void maybeShowEmergency(BaseFragment fragment) {
+        final OtherGramEmergency e = current;
+        if (e == null || !e.loaded || showing || noticeShownThisProcess) {
             return;
         }
         if (fragment.getParentActivity() == null) {
             return;
         }
+        noticeShownThisProcess = true;
         showing = true;
         AndroidUtilities.runOnUIThread(() -> {
             try {
-                showDialog(fragment, e);
-                if (!e.hard) {
-                    softShownThisProcess = true;
-                }
+                showEmergencyDialog(fragment, e);
             } finally {
                 showing = false;
             }
         }, 600);
     }
 
-    private static void showDialog(BaseFragment fragment, OtherGramEmergency e) {
+    private static void checkUpdate(BaseFragment fragment) {
+        if (noticeShownThisProcess) {
+            return;
+        }
+        OtherGramUpdates.check((version, url) -> {
+            if (version == null || !OtherGramUpdates.isNewer(version) || noticeShownThisProcess) {
+                return;
+            }
+            noticeShownThisProcess = true;
+            AndroidUtilities.runOnUIThread(() -> showUpdateDialog(fragment, version, url), 600);
+        });
+    }
+
+    private static void showEmergencyDialog(BaseFragment fragment, OtherGramEmergency e) {
         final Activity activity = fragment.getParentActivity();
         if (activity == null) {
             return;
@@ -146,5 +164,21 @@ public class OtherGramEmergency {
             builder.setNegativeButton(LocaleController.getString(R.string.OG_EmergencyLater), null);
             fragment.showDialog(builder.create());
         }
+    }
+
+    private static void showUpdateDialog(BaseFragment fragment, String version, String url) {
+        final Activity activity = fragment.getParentActivity();
+        if (activity == null) {
+            return;
+        }
+        final String target = url != null ? url : "https://github.com/cleveroze/OtherGram/releases/latest";
+        final AlertDialog dialog = new AlertDialog.Builder(activity)
+                .setTitle(LocaleController.getString(R.string.OG_NewVersionTitle))
+                .setMessage(LocaleController.formatString(R.string.OG_NewVersionText, version))
+                .setPositiveButton(LocaleController.getString(R.string.OG_EmergencyUpdate), (d, w) ->
+                        org.telegram.messenger.browser.Browser.openUrl(activity, target))
+                .setNegativeButton(LocaleController.getString(R.string.OG_EmergencyLater), null)
+                .create();
+        fragment.showDialog(dialog);
     }
 }
