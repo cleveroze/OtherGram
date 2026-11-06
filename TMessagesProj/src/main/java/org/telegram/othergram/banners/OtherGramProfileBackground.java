@@ -94,9 +94,10 @@ public class OtherGramProfileBackground extends RecyclerView.ItemDecoration {
             image.setImage(ImageLocation.getForPath(loadedUrl), (String) null, (Drawable) null, (String) null, (Object) null, 1);
         }
 
-        // Find where the region is on screen: rows above the screen extend it up, rows below end it
+        // 2.1: the background covers the whole profile, not just the info rows — it runs down to the
+        // last row. It is drawn under the rows, so the banner and the texts stay on top of it.
         final int media = rows.mediaRow();
-        final int end = media >= 0 ? media : rows.endRow();
+        final int end = parent.getAdapter() != null ? parent.getAdapter().getItemCount() - 1 : rows.endRow();
         float top = Float.NaN;
         float bottom = Float.NaN;
         int firstPos = Integer.MAX_VALUE;

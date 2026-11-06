@@ -605,6 +605,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int enable_no_forwards = 46;
     private final static int disable_no_forwards = 47;
     private final static int send_money = 48;
+    private final static int og_show_id = 60;
 
     private Rect rect = new Rect();
 
@@ -2558,6 +2559,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
                     finishFragment();
+                } else if (id == og_show_id) {
+                    showOtherGramUserId();
                 } else if (id == block_contact) {
                     onBlockContactClicked(false);
                 } else if (id == add_contact) {
@@ -12136,6 +12139,27 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return color;
     }
 
+    /** OtherGram: a dialog with the user id and the estimated account creation year. */
+    private void showOtherGramUserId() {
+        final long id = userId != 0 ? userId : getDialogId();
+        if (id <= 0) {
+            return;
+        }
+        final int year = org.telegram.othergram.OtherGramAccountAge.estimateYear(id);
+        final String text = year > 0
+                ? LocaleController.formatString(R.string.OG_UserIdInfoAge, id, year)
+                : LocaleController.formatString(R.string.OG_UserIdInfo, id);
+        new AlertDialog.Builder(getParentActivity(), resourcesProvider)
+                .setTitle(getString(R.string.OG_UserIdTitle))
+                .setMessage(text)
+                .setPositiveButton(getString(R.string.OK), null)
+                .setNeutralButton(getString(R.string.Copy), (d, w) -> {
+                    AndroidUtilities.addToClipboard(String.valueOf(id));
+                    BulletinFactory.of(ProfileActivity.this).createCopyBulletin(LocaleController.formatString(R.string.OG_UserIdCopied, id)).show();
+                })
+                .show();
+    }
+
     private void createActionBarMenu(boolean animated) {
         if (actionBar == null || otherItem == null) {
             return;
@@ -12404,6 +12428,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         if (userId != 0 && !isBot && !myProfile) {
             otherItem.addSubItem(report, R.drawable.msg_report, LocaleController.getString(R.string.ReportBot)).setColors(getThemedColor(Theme.key_text_RedRegular), getThemedColor(Theme.key_text_RedRegular));
+        }
+        // OtherGram: user id and the approximate account creation date
+        if (userId != 0) {
+            otherItem.addSubItem(og_show_id, R.drawable.msg_info, getString(R.string.OG_ShowId));
         }
 
         if (selfUser && !myProfile) {

@@ -11850,4 +11850,8 @@
     <string name="OG_MainTitleHint">For example, MyGram</string>
     <string name="OG_MainTitleDefault">Telegram (default)</string>
     <string name="OG_MainTitleInfo">Shown at the top of the chats screen. Leave it empty for the default.</string>
+    <string name="OG_ShowId">ID and account age</string>
+    <string name="OG_UserIdTitle">About this account</string>
+    <string name="OG_UserIdInfo">User ID: %1$d</string>
+    <string name="OG_UserIdInfoAge">User ID: %1$d\nAccount created around %2$d</string>
 </resources>
