@@ -556,4 +556,19 @@
     <string name="OG_TabBounce">Пружинящие вкладки внизу</string>
     <string name="OG_TabHaptics">Вибрация при переключении вкладок</string>
     <string name="OG_InterfaceStyleInfo">Стеклянная линза: при переключении вкладок по нижней панели скользит стеклянная капля и увеличивает иконку под собой. Цвета берутся из вашей темы OtherGram.</string>
+    <string name="OG_EmergencyTitle">Важное обновление</string>
+    <string name="OG_EmergencyText">Доступна новая версия OtherGram. Пожалуйста, обновитесь.</string>
+    <string name="OG_EmergencyUpdate">Обновить</string>
+    <string name="OG_EmergencyLater">Позже</string>
+    <string name="OG_EmergencyOpenChannel">Открыть канал с новостями</string>
+    <string name="OG_EmergencyAdmin">Аварийные обновления</string>
+    <string name="OG_EmergencyEnable">Показывать баннер всем</string>
+    <string name="OG_EmergencyTest">Проверить только на этом устройстве</string>
+    <string name="OG_EmergencyTestInfo">Показывает баннер только на этом телефоне, даже если для всех он выключен. Закончили — выключите.</string>
+    <string name="OG_EmergencyMode">Режим</string>
+    <string name="OG_EmergencySoft">Мягкий: баннер с обновлением, чаты работают</string>
+    <string name="OG_EmergencyHard">Жёсткий: блокирует приложение, работает только канал с новостями</string>
+    <string name="OG_EmergencyLink">Ссылка на обновление</string>
+    <string name="OG_EmergencyMinVersion">Минимальная версия</string>
+    <string name="OG_EmergencySaved">Сохранено</string>
 </resources>

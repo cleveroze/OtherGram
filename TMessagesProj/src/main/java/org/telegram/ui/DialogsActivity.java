@@ -7018,6 +7018,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onResume() {
         super.onResume();
+        // OtherGram: emergency update notice delivered through the server
+        org.telegram.othergram.OtherGramEmergency.checkAndShow(this);
         if (dialogStoriesCell != null) {
             dialogStoriesCell.onResume();
         }

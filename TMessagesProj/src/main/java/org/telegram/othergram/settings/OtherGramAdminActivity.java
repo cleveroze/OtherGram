@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
+import org.telegram.othergram.OtherGramEmergency;
 import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.othergram.network.OtherGramApi;
 import org.telegram.tgnet.TLRPC;
@@ -47,9 +48,14 @@ public class OtherGramAdminActivity extends BaseFragment {
     private static final int ID_CREATE_TYPE = 3;
     private static final int ID_HISTORY = 4;
     private static final int ID_TYPE_BASE = 1000;
+    private static final int ID_EMERGENCY_ENABLED = 20;
+    private static final int ID_EMERGENCY_MODE = 21;
+    private static final int ID_EMERGENCY_EDIT = 22;
+    private static final int ID_EMERGENCY_TEST = 23;
 
     private UniversalRecyclerView listView;
     private final List<JSONObject> badgeTypes = new ArrayList<>();
+    private JSONObject emergency;
 
     @Override
     public View createView(Context context) {
@@ -73,6 +79,7 @@ public class OtherGramAdminActivity extends BaseFragment {
         actionBar.setAdaptiveBackground(listView);
 
         loadBadgeTypes();
+        loadEmergency();
         return fragmentView = contentView;
     }
 
@@ -90,6 +97,13 @@ public class OtherGramAdminActivity extends BaseFragment {
         items.add(UItem.asButton(ID_CREATE_TYPE, R.drawable.msg_add, getString(R.string.OG_AdminCreateType)).accent());
         items.add(UItem.asShadow(null));
 
+        items.add(UItem.asHeader(getString(R.string.OG_EmergencyAdmin)));
+        items.add(UItem.asCheck(ID_EMERGENCY_ENABLED, getString(R.string.OG_EmergencyEnable)).setChecked(emergency != null && emergency.optBoolean("enabled")));
+        items.add(UItem.asButton(ID_EMERGENCY_MODE, R.drawable.msg_info, getString(R.string.OG_EmergencyMode), modeLabel()));
+        items.add(UItem.asButton(ID_EMERGENCY_EDIT, R.drawable.msg_info, getString(R.string.OG_EmergencyTitle)));
+        items.add(UItem.asCheck(ID_EMERGENCY_TEST, getString(R.string.OG_EmergencyTest)).setChecked(OtherGramEmergency.isTestMode()));
+        items.add(UItem.asShadow(getString(R.string.OG_EmergencyTestInfo)));
+
         items.add(UItem.asButton(ID_HISTORY, R.drawable.msg_log, getString(R.string.OG_AdminHistory)));
         items.add(UItem.asShadow(getString(R.string.OG_AdminInfo)));
     }
@@ -101,6 +115,16 @@ public class OtherGramAdminActivity extends BaseFragment {
             askUser(this::showUserBadges);
         } else if (item.id == ID_CREATE_TYPE) {
             editBadgeType(null);
+        } else if (item.id == ID_EMERGENCY_ENABLED) {
+            setEmergencyFlag("enabled", !(emergency != null && emergency.optBoolean("enabled")));
+        } else if (item.id == ID_EMERGENCY_MODE) {
+            final boolean hard = emergency != null && "hard".equals(emergency.optString("mode"));
+            setEmergencyString("mode", hard ? "soft" : "hard");
+        } else if (item.id == ID_EMERGENCY_EDIT) {
+            showEmergencyEdit();
+        } else if (item.id == ID_EMERGENCY_TEST) {
+            OtherGramEmergency.setTestMode(!OtherGramEmergency.isTestMode());
+            listView.adapter.update(true);
         } else if (item.id == ID_HISTORY) {
             showHistory();
         } else if (item.id >= ID_TYPE_BASE && item.id - ID_TYPE_BASE < badgeTypes.size()) {
@@ -251,6 +275,97 @@ public class OtherGramAdminActivity extends BaseFragment {
                     .setPositiveButton(getString(R.string.OK), null)
                     .show();
         });
+    }
+
+    // ------------------------------------------------------------ emergency updates
+
+    private void loadEmergency() {
+        OtherGramApi.getJson("/v1/admin/emergency", (status, response) -> {
+            if (status == 200 && response != null) {
+                emergency = response.optJSONObject("emergency");
+                if (listView != null) {
+                    listView.adapter.update(true);
+                }
+            }
+        });
+    }
+
+    private void putEmergency() {
+        if (emergency == null) {
+            emergency = new JSONObject();
+        }
+        OtherGramApi.sendJson("PUT", "/v1/admin/emergency", emergency, (status, response) -> {
+            if (checkOk(status, response)) {
+                emergency = response.optJSONObject("emergency");
+                if (listView != null) {
+                    listView.adapter.update(true);
+                }
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.done, getString(R.string.OG_EmergencySaved)).show();
+            }
+        });
+    }
+
+    private void setEmergencyFlag(String key, boolean value) {
+        if (emergency == null) {
+            emergency = new JSONObject();
+        }
+        try {
+            emergency.put(key, value);
+        } catch (Exception ignore) {
+        }
+        putEmergency();
+    }
+
+    private void setEmergencyString(String key, String value) {
+        if (emergency == null) {
+            emergency = new JSONObject();
+        }
+        try {
+            emergency.put(key, value);
+        } catch (Exception ignore) {
+        }
+        putEmergency();
+    }
+
+    private String modeLabel() {
+        final boolean hard = emergency != null && "hard".equals(emergency.optString("mode"));
+        return hard ? getString(R.string.OG_EmergencyHard) : getString(R.string.OG_EmergencySoft);
+    }
+
+    private void showEmergencyEdit() {
+        final Context context = getParentActivity();
+        if (context == null) {
+            return;
+        }
+        if (emergency == null) {
+            emergency = new JSONObject();
+        }
+        final LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        final EditTextBoldCursor title = createInput(context, getString(R.string.OG_EmergencyTitle), emergency.optString("title"), InputType.TYPE_CLASS_TEXT);
+        final EditTextBoldCursor text = createInput(context, getString(R.string.OG_EmergencyText), emergency.optString("text"), InputType.TYPE_CLASS_TEXT);
+        text.setSingleLine(false);
+        text.setMaxLines(4);
+        final EditTextBoldCursor link = createInput(context, getString(R.string.OG_EmergencyLink), emergency.optString("link"), InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        final EditTextBoldCursor minVersion = createInput(context, getString(R.string.OG_EmergencyMinVersion), emergency.optString("min_version"), InputType.TYPE_CLASS_TEXT);
+        for (View v : new View[]{title, text, link, minVersion}) {
+            layout.addView(v, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 36, 24, 6, 24, 6));
+        }
+        new AlertDialog.Builder(context, resourceProvider)
+                .setTitle(getString(R.string.OG_EmergencyAdmin))
+                .setView(layout)
+                .setPositiveButton(getString(R.string.Save), (dialog, which) -> {
+                    try {
+                        emergency.put("title", title.getText().toString().trim());
+                        emergency.put("text", text.getText().toString().trim());
+                        emergency.put("link", link.getText().toString().trim());
+                        emergency.put("min_version", minVersion.getText().toString().trim());
+                    } catch (Exception ignore) {
+                    }
+                    putEmergency();
+                })
+                .setNegativeButton(getString(R.string.Cancel), null)
+                .show();
     }
 
     private boolean checkOk(int status, JSONObject response) {
