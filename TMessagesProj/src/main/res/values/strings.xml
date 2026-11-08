@@ -11845,6 +11845,7 @@
     <string name="OG_EmergencyEnable">Show the banner to everyone</string>
     <string name="OG_EmergencyTest">Test on this device only</string>
     <string name="OG_EmergencyTestInfo">Shows the banner only on this phone, even when it is switched off for everyone else. Turn it off when you are done.</string>
+    <string name="OG_UpdateTest">Test the update plaque on this device</string>
     <string name="OG_EmergencyMode">Mode</string>
     <string name="OG_EmergencySoft">Soft: an update banner, chats keep working</string>
     <string name="OG_EmergencyHard">Hard: blocks the app, only the news channel works</string>

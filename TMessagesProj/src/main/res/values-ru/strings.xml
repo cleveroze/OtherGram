@@ -573,6 +573,7 @@
     <string name="OG_EmergencyEnable">Показывать баннер всем</string>
     <string name="OG_EmergencyTest">Проверить только на этом устройстве</string>
     <string name="OG_EmergencyTestInfo">Показывает баннер только на этом телефоне, даже если для всех он выключен. Закончили — выключите.</string>
+    <string name="OG_UpdateTest">Проверить плашку обновления на этом устройстве</string>
     <string name="OG_EmergencyMode">Режим</string>
     <string name="OG_EmergencySoft">Мягкий: баннер с обновлением, чаты работают</string>
     <string name="OG_EmergencyHard">Жёсткий: блокирует приложение, работает только канал с новостями</string>

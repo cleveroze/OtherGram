@@ -28,6 +28,8 @@ import org.telegram.ui.Components.LayoutHelper;
 public class OtherGramEmergency {
 
     public static final String KEY_TEST = "emergency_test";
+    /** Local-only preview of the update plaque, so an admin can see it without publishing a newer release. */
+    public static final String KEY_UPDATE_TEST = "update_test";
 
     private static final long RECHECK_MS = 5 * 60 * 1000L;
     /** Do not show the plaque again within this window; a fresh cold start resets it. */
@@ -54,6 +56,15 @@ public class OtherGramEmergency {
 
     public static void setTestMode(boolean on) {
         OtherGramConfig.putBoolean(KEY_TEST, on);
+        lastShownAt = 0;
+    }
+
+    public static boolean isUpdateTest() {
+        return OtherGramConfig.getBoolean(KEY_UPDATE_TEST, false);
+    }
+
+    public static void setUpdateTest(boolean on) {
+        OtherGramConfig.putBoolean(KEY_UPDATE_TEST, on);
         lastShownAt = 0;
     }
 
@@ -139,6 +150,18 @@ public class OtherGramEmergency {
 
     private static void checkUpdate(BaseFragment fragment) {
         if (showing) {
+            return;
+        }
+        if (isUpdateTest()) {
+            lastShownAt = System.currentTimeMillis();
+            showing = true;
+            AndroidUtilities.runOnUIThread(() -> {
+                try {
+                    showUpdateDialog(fragment, null);
+                } finally {
+                    showing = false;
+                }
+            }, 600);
             return;
         }
         OtherGramUpdates.check((version, url) -> {

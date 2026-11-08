@@ -52,6 +52,7 @@ public class OtherGramAdminActivity extends BaseFragment {
     private static final int ID_EMERGENCY_MODE = 21;
     private static final int ID_EMERGENCY_EDIT = 22;
     private static final int ID_EMERGENCY_TEST = 23;
+    private static final int ID_UPDATE_TEST = 24;
 
     private UniversalRecyclerView listView;
     private final List<JSONObject> badgeTypes = new ArrayList<>();
@@ -102,6 +103,7 @@ public class OtherGramAdminActivity extends BaseFragment {
         items.add(UItem.asButton(ID_EMERGENCY_MODE, R.drawable.msg_info, getString(R.string.OG_EmergencyMode), modeLabel()));
         items.add(UItem.asButton(ID_EMERGENCY_EDIT, R.drawable.msg_info, getString(R.string.OG_EmergencyTitle)));
         items.add(UItem.asCheck(ID_EMERGENCY_TEST, getString(R.string.OG_EmergencyTest)).setChecked(OtherGramEmergency.isTestMode()));
+        items.add(UItem.asCheck(ID_UPDATE_TEST, getString(R.string.OG_UpdateTest)).setChecked(OtherGramEmergency.isUpdateTest()));
         items.add(UItem.asShadow(getString(R.string.OG_EmergencyTestInfo)));
 
         items.add(UItem.asButton(ID_HISTORY, R.drawable.msg_log, getString(R.string.OG_AdminHistory)));
@@ -124,6 +126,9 @@ public class OtherGramAdminActivity extends BaseFragment {
             showEmergencyEdit();
         } else if (item.id == ID_EMERGENCY_TEST) {
             OtherGramEmergency.setTestMode(!OtherGramEmergency.isTestMode());
+            listView.adapter.update(true);
+        } else if (item.id == ID_UPDATE_TEST) {
+            OtherGramEmergency.setUpdateTest(!OtherGramEmergency.isUpdateTest());
             listView.adapter.update(true);
         } else if (item.id == ID_HISTORY) {
             showHistory();
