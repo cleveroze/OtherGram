@@ -581,6 +581,7 @@
     <string name="OG_EmergencySaved">Сохранено</string>
     <string name="OG_NewVersionTitle">Доступна новая версия</string>
     <string name="OG_NewVersionText">Доступна версия OtherGram %1$s. Обновитесь, чтобы не пропустить исправления и новые функции.</string>
+    <string name="OG_UpdatePlaqueText">Доступно обновление!</string>
     <string name="OG_MainScreen">Главный экран</string>
     <string name="OG_MainTitle">Надпись вместо «Telegram»</string>
     <string name="OG_MainTitleHint">Например, MyGram</string>

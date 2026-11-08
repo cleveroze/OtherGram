@@ -125,6 +125,12 @@ public class OtherGramAvatars {
         return s == SHAPE_STAR || s == SHAPE_HEXAGON || s == SHAPE_OCTAGON || libraryShape(s) >= 0;
     }
 
+    /** Library radii for an avatar shape, or null for shapes drawn by custom path code (star, hexagon…). */
+    public static float[] libraryRadii(int s) {
+        final int lib = libraryShape(s);
+        return lib >= 0 ? org.telegram.othergram.ui.OtherGramShapes.radii(lib) : null;
+    }
+
     /** Share of the circle radius kept by rounded shapes. Path shapes keep the circle as fallback. */
     public static float radiusFactor() {
         switch (getShape()) {

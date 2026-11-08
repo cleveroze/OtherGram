@@ -11495,7 +11495,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         onlineTextView[a].setText(textView.getText());
                     }
                 } else {
-                    onlineTextView[a].setText(newString2);
+                    // OtherGram: the id and the approximate account age are shown right in the profile
+                    onlineTextView[a].setText(ogSubtitleWithId(newString2, ogBadgesUserId));
                 }
                 onlineTextView[a].setDrawablePadding(dp(9));
                 onlineTextView[a].setRightDrawableInside(true);
@@ -12137,6 +12138,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             return Theme.changeColorAccent(getThemedColor(Theme.key_windowBackgroundWhiteBlueIcon), accentColor, color, Theme.isCurrentThemeDark(), accentColor);
         }
         return color;
+    }
+
+    /** OtherGram: adds "ID … · year" to the status line so it is visible without opening the menu. */
+    private CharSequence ogSubtitleWithId(CharSequence base, long userId) {
+        if (userId <= 0) {
+            return base;
+        }
+        final int year = org.telegram.othergram.OtherGramAccountAge.estimateYear(userId);
+        final String suffix = year > 0 ? " · ID " + userId + " · " + year : " · ID " + userId;
+        return base == null ? suffix : base + suffix;
     }
 
     /** OtherGram: a dialog with the user id and the estimated account creation year. */

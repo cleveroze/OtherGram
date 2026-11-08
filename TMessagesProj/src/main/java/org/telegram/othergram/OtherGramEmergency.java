@@ -2,6 +2,11 @@ package org.telegram.othergram;
 
 import android.app.Activity;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
@@ -10,27 +15,28 @@ import org.telegram.messenger.R;
 import org.telegram.othergram.network.OtherGramApi;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.Components.LayoutHelper;
 
 /**
- * Launcher notices: an emergency update from the server (/v1/config) and a "new version on GitHub"
- * plaque. Both are shown over the main screen on every cold start.
+ * Notices shown over the main screen: the "new version on GitHub" plaque with the OtherGram banner,
+ * and the server emergency notice from /v1/config.
  *
- * The server notice wins when it is enabled; otherwise the GitHub notice appears when the latest
- * release is newer than the installed build. Neither is shown again until the app is restarted,
- * and the GitHub notice keeps returning on every launch until the user actually updates.
- *
- * Test mode (OtherGramConfig "emergency_test") shows the server notice on this device only, so an
- * admin can preview it without affecting anyone.
+ * The update plaque appears on every entry into the app (with a short cooldown so it does not pop
+ * twice during one resume burst) and keeps returning until the user actually installs a newer build.
+ * The server notice wins when it is enabled; test mode shows it on this device only.
  */
 public class OtherGramEmergency {
 
     public static final String KEY_TEST = "emergency_test";
 
     private static final long RECHECK_MS = 5 * 60 * 1000L;
+    /** Do not show the plaque again within this window; a fresh cold start resets it. */
+    private static final long SHOW_COOLDOWN_MS = 60 * 1000L;
+
     private static OtherGramEmergency current;
     private static long checkedAt;
+    private static long lastShownAt;
     private static boolean showing;
-    private static boolean noticeShownThisProcess;
 
     public boolean loaded;
     public boolean enabled;
@@ -48,12 +54,15 @@ public class OtherGramEmergency {
 
     public static void setTestMode(boolean on) {
         OtherGramConfig.putBoolean(KEY_TEST, on);
-        noticeShownThisProcess = false;
+        lastShownAt = 0;
     }
 
     /** Called from the main screen: fetches the config, then shows the server notice or the update plaque. */
     public static void checkAndShow(BaseFragment fragment) {
         if (fragment == null || fragment.getParentActivity() == null) {
+            return;
+        }
+        if (System.currentTimeMillis() - lastShownAt < SHOW_COOLDOWN_MS) {
             return;
         }
         if (current != null && System.currentTimeMillis() - checkedAt < RECHECK_MS) {
@@ -111,13 +120,13 @@ public class OtherGramEmergency {
 
     private static void maybeShowEmergency(BaseFragment fragment) {
         final OtherGramEmergency e = current;
-        if (e == null || !e.loaded || showing || noticeShownThisProcess) {
+        if (e == null || !e.loaded || showing) {
             return;
         }
         if (fragment.getParentActivity() == null) {
             return;
         }
-        noticeShownThisProcess = true;
+        lastShownAt = System.currentTimeMillis();
         showing = true;
         AndroidUtilities.runOnUIThread(() -> {
             try {
@@ -129,15 +138,22 @@ public class OtherGramEmergency {
     }
 
     private static void checkUpdate(BaseFragment fragment) {
-        if (noticeShownThisProcess) {
+        if (showing) {
             return;
         }
         OtherGramUpdates.check((version, url) -> {
-            if (version == null || !OtherGramUpdates.isNewer(version) || noticeShownThisProcess) {
+            if (version == null || !OtherGramUpdates.isNewer(version) || showing) {
                 return;
             }
-            noticeShownThisProcess = true;
-            AndroidUtilities.runOnUIThread(() -> showUpdateDialog(fragment, version, url), 600);
+            lastShownAt = System.currentTimeMillis();
+            showing = true;
+            AndroidUtilities.runOnUIThread(() -> {
+                try {
+                    showUpdateDialog(fragment, url);
+                } finally {
+                    showing = false;
+                }
+            }, 600);
         });
     }
 
@@ -166,19 +182,38 @@ public class OtherGramEmergency {
         }
     }
 
-    private static void showUpdateDialog(BaseFragment fragment, String version, String url) {
+    private static void showUpdateDialog(BaseFragment fragment, String url) {
         final Activity activity = fragment.getParentActivity();
         if (activity == null) {
             return;
         }
         final String target = url != null ? url : "https://github.com/cleveroze/OtherGram/releases/latest";
         final AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle(LocaleController.getString(R.string.OG_NewVersionTitle))
-                .setMessage(LocaleController.formatString(R.string.OG_NewVersionText, version))
+                .setView(buildUpdateView(activity))
                 .setPositiveButton(LocaleController.getString(R.string.OG_EmergencyUpdate), (d, w) ->
                         org.telegram.messenger.browser.Browser.openUrl(activity, target))
                 .setNegativeButton(LocaleController.getString(R.string.OG_EmergencyLater), null)
                 .create();
         fragment.showDialog(dialog);
+    }
+
+    /** The banner the owner supplied, with the localized "Update available!" line over its lower part. */
+    private static View buildUpdateView(Activity activity) {
+        final FrameLayout root = new FrameLayout(activity);
+        final ImageView banner = new ImageView(activity);
+        banner.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        banner.setImageResource(R.drawable.og_update_banner);
+        root.addView(banner, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 172, Gravity.TOP));
+
+        final TextView label = new TextView(activity);
+        label.setText(LocaleController.getString(R.string.OG_UpdatePlaqueText));
+        label.setTextColor(0xFF30241C);
+        label.setTextSize(17);
+        label.setGravity(Gravity.CENTER);
+        label.setTypeface(AndroidUtilities.bold());
+        label.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(6), AndroidUtilities.dp(10), AndroidUtilities.dp(6));
+        label.setBackgroundColor(0xB3FFF7ED);
+        root.addView(label, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 0, 0, 0, 10));
+        return root;
     }
 }

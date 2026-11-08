@@ -72,18 +72,51 @@ public class OtherGramAvatarsActivity extends BaseFragment {
         final int index = item.id - ID_SHAPE_BASE;
         if (index >= 0 && index < OtherGramAvatars.SHAPES.length) {
             OtherGramAvatars.setShape(OtherGramAvatars.SHAPES[index]);
-            preview.invalidate();
+            preview.animateTo(OtherGramAvatars.SHAPES[index]);
             listView.adapter.update(true);
         }
     }
 
-    /** Three sample avatars in the theme colors, drawn with the selected shape. */
+    /** Three sample avatars in the theme colors; the shape morphs when the selection changes. */
     private class PreviewView extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path = new Path();
+        private int shownShape = OtherGramAvatars.getShape();
+        private float[] fromRadii;
+        private float[] toRadii;
+        private float[] morphBuffer;
+        private float morphT = 1f;
+        private android.animation.ValueAnimator animator;
 
         PreviewView(Context context) {
             super(context);
+        }
+
+        void animateTo(int newShape) {
+            final int from = shownShape;
+            shownShape = newShape;
+            final float[] a = OtherGramAvatars.libraryRadii(from);
+            final float[] b = OtherGramAvatars.libraryRadii(newShape);
+            if (a == null || b == null) {
+                fromRadii = null;
+                toRadii = null;
+                morphT = 1f;
+                invalidate();
+                return;
+            }
+            fromRadii = a;
+            toRadii = b;
+            if (animator != null) {
+                animator.cancel();
+            }
+            animator = android.animation.ValueAnimator.ofFloat(0f, 1f);
+            animator.setDuration(320);
+            animator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+            animator.addUpdateListener(v -> {
+                morphT = (float) v.getAnimatedValue();
+                invalidate();
+            });
+            animator.start();
         }
 
         @Override
@@ -99,10 +132,16 @@ public class OtherGramAvatarsActivity extends BaseFragment {
             float left = (getWidth() - total) / 2f;
             final float top = (getHeight() - size) / 2f;
             final float r = size / 2f * OtherGramAvatars.radiusFactor();
+            final boolean morphing = fromRadii != null && toRadii != null && morphT < 1f;
             for (int color : colors) {
                 paint.setColor(color);
                 AndroidUtilities.rectTmp.set(left, top, left + size, top + size);
-                if (OtherGramAvatars.hasPathShape()) {
+                if (morphing) {
+                    morphBuffer = org.telegram.othergram.ui.OtherGramShapes.morph(fromRadii, toRadii, morphT, morphBuffer);
+                    org.telegram.othergram.ui.OtherGramShapePath.build(path, morphBuffer,
+                            AndroidUtilities.rectTmp.centerX(), AndroidUtilities.rectTmp.centerY(), size / 2f, size / 2f, 0);
+                    canvas.drawPath(path, paint);
+                } else if (OtherGramAvatars.hasPathShape()) {
                     OtherGramAvatars.shapePath(AndroidUtilities.rectTmp, path);
                     canvas.drawPath(path, paint);
                 } else {

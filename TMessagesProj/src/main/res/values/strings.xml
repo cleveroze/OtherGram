@@ -11853,6 +11853,7 @@
     <string name="OG_EmergencySaved">Saved</string>
     <string name="OG_NewVersionTitle">New version available</string>
     <string name="OG_NewVersionText">OtherGram %1$s is available. Update so you don\'t miss fixes and new features.</string>
+    <string name="OG_UpdatePlaqueText">Update available!</string>
     <string name="OG_MainScreen">Main screen</string>
     <string name="OG_MainTitle">Title instead of \"Telegram\"</string>
     <string name="OG_MainTitleHint">For example, MyGram</string>
