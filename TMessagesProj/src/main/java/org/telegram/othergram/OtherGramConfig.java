@@ -7,11 +7,13 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.ui.ActionBar.Theme;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Storage for all OtherGram settings. Kept in its own SharedPreferences file so that
- * Telegram's configs stay untouched and "restore default design" is a single clear().
+ * Telegram's configs stay untouched and "restore default design" drops only look keys.
  *
  * Themed values are stored separately for light and dark themes: key + "_light" / "_dark".
  */
@@ -149,10 +151,35 @@ public class OtherGramConfig {
         notifyChanged(null);
     }
 
-    /** Restores the default OtherGram design by dropping every stored OtherGram setting. */
+    /**
+     * Look-only keys: colors, fonts, bubbles, avatars, interface style and the main-screen title.
+     * Account tokens, privacy, auto-reply and admin test flags are not design.
+     */
+    public static boolean isDesignKey(String key) {
+        return key.startsWith("color_")
+                || key.startsWith("ui_")
+                || key.startsWith("avatar_")
+                || key.startsWith("font_")
+                || key.startsWith("bubble_")
+                || key.startsWith("chats_")
+                || "main_title".equals(key);
+    }
+
+    /** Drops every stored OtherGram setting, including the account. Prefer {@link #resetDesign()}. */
     public static void resetAll() {
         prefs().edit().clear().apply();
         notifyChanged(null);
+    }
+
+    /** Restores the default look without signing out or touching privacy and auto-reply. */
+    public static void resetDesign() {
+        final ArrayList<String> toRemove = new ArrayList<>();
+        for (String key : getAll().keySet()) {
+            if (isDesignKey(key)) {
+                toRemove.add(key);
+            }
+        }
+        replace(toRemove, Collections.emptyMap());
     }
 
     public static void addListener(Listener listener) {

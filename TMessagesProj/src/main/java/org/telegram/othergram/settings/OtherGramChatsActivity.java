@@ -111,7 +111,9 @@ public class OtherGramChatsActivity extends BaseFragment {
         }
         items.add(UItem.asButton(ID_BUBBLE_SHAPE, R.drawable.msg_msgbubble3, getString(R.string.OG_BubbleShape), OtherGramBubbles.shapeTitle()));
         final int radiusDp = OtherGramBubbles.customRadius() >= 0 ? OtherGramBubbles.customRadius() : OtherGramBubbles.shapeRadiusDp();
-        items.add(UItem.asIntSlideView(1, 0, radiusDp, 24, val -> val + " dp", val -> OtherGramBubbles.setCustomRadius(val)));
+        items.add(UItem.asIntSlideView(1, 0, radiusDp, 24,
+                val -> LocaleController.formatString(R.string.OG_BubbleRadiusValue, val),
+                val -> OtherGramBubbles.setCustomRadius(val)));
         items.add(UItem.asShadow(getString(R.string.OG_MyBubblesInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_ChatTweaks)));

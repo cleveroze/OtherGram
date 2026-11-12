@@ -277,6 +277,8 @@
     <string name="OG_ProfileCustomization">Кастомизация профиля</string>
     <string name="OG_ExportImport">Экспорт и импорт</string>
     <string name="OG_ResetAll">Восстановить стандартное оформление</string>
+    <string name="OG_ResetAllConfirm">Цвета, шрифты, пузыри, аватарки и стиль интерфейса вернутся к стандартному оформлению OtherGram. Аккаунт OtherGram, приватность и автоответчик не изменятся.</string>
+    <string name="OG_ResetAllDone">Стандартное оформление восстановлено</string>
     <string name="OG_ThemeVanillaBeige">Vanilla Beige</string>
     <string name="OG_ThemeVanillaBeigeDark">Vanilla Beige тёмная</string>
     <string name="OG_BadgesTitle">Бейджи OtherGram</string>
@@ -345,6 +347,8 @@
     <string name="OG_ColorTabIcons">Иконки нижней панели</string>
     <string name="OG_ColorTabSelected">Выбранная вкладка</string>
     <string name="OG_ColorChatWallpaper">Фон чата</string>
+    <string name="OG_ColorLinkIn">Ссылки во входящих</string>
+    <string name="OG_ColorLinkOut">Ссылки в исходящих</string>
     <string name="OG_AvatarShape">Форма аватарок</string>
     <string name="OG_AvatarCircle">Круг</string>
     <string name="OG_AvatarSquircle">Сквиркл</string>
@@ -461,7 +465,9 @@
     <string name="OG_BubbleShapeSquare">Квадратные</string>
     <string name="OG_BubbleShapeRounded">Скруглённые</string>
     <string name="OG_BubbleShapeSoft">Мягкие</string>
-    <string name="OG_MyBubblesInfo">Ваши сообщения получают этот стиль и прозрачность. Если OtherGram подключён, другие пользователи OtherGram тоже видят ваши сообщения в этом стиле. Если на вашем цвете текст будет плохо читаться, цвет подстроится для того, кто читает.</string>
+    <string name="OG_BubbleRadius">Радиус скругления</string>
+    <string name="OG_BubbleRadiusValue">%1$d dp</string>
+    <string name="OG_MyBubblesInfo">Ваши сообщения получают этот стиль, прозрачность и радиус скругления. Если OtherGram подключён, другие пользователи OtherGram тоже видят ваши сообщения в этом стиле. Если на вашем цвете текст будет плохо читаться, цвет подстроится для того, кто читает. Открытые чаты обновятся после повторного открытия.</string>
     <string name="OG_BubbleLocalOnly">Применено на этом телефоне. Подключите OtherGram, чтобы видели и другие.</string>
     <string name="OG_ChatTweaks">Дополнительно</string>
     <string name="OG_SendAnimation">Анимация при отправке сообщения</string>
