@@ -237,6 +237,15 @@ public class OtherGramEmergency {
         label.setPadding(AndroidUtilities.dp(10), AndroidUtilities.dp(6), AndroidUtilities.dp(10), AndroidUtilities.dp(6));
         label.setBackgroundColor(0xB3FFF7ED);
         root.addView(label, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM, 0, 0, 0, 10));
+
+        // Material 3 Expressive: the plaque springs in instead of just appearing
+        root.setScaleX(0.92f);
+        root.setScaleY(0.92f);
+        root.setAlpha(0f);
+        root.animate().scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(260)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                .start();
         return root;
     }
 }
