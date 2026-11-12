@@ -11596,6 +11596,8 @@
     <string name="OG_PresetSage">Sage</string>
     <string name="OG_PresetRose">Rose</string>
     <string name="OG_PresetSlate">Slate</string>
+    <string name="OG_PresetRed">Red</string>
+    <string name="OG_PresetPurple">Purple</string>
     <string name="OG_EditingLight">You are editing the light theme. Colors for the dark theme are stored separately: switch the theme to change them.</string>
     <string name="OG_EditingDark">You are editing the dark theme. Colors for the light theme are stored separately: switch the theme to change them.</string>
     <string name="OG_InterfaceColors">Interface colors</string>
@@ -11725,6 +11727,11 @@
     <string name="OG_BubbleSolid">Solid color</string>
     <string name="OG_BubbleGlass">Liquid glass</string>
     <string name="OG_BubbleColor">Bubble color</string>
+    <string name="OG_BubbleShape">Bubble shape</string>
+    <string name="OG_BubbleShapeTelegram">As in Telegram</string>
+    <string name="OG_BubbleShapeSquare">Square</string>
+    <string name="OG_BubbleShapeRounded">Rounded</string>
+    <string name="OG_BubbleShapeSoft">Soft</string>
     <string name="OG_MyBubblesInfo">Your messages get this style and transparency. With OtherGram connected, other OtherGram users see your messages in this style too. If text would be hard to read on your color, the color is adjusted for the person reading.</string>
     <string name="OG_BubbleLocalOnly">Applied on this phone. Connect OtherGram so others see it too.</string>
     <string name="OG_ChatTweaks">Extra</string>

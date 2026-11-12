@@ -172,6 +172,12 @@ public class OtherGramColors {
             new Preset(R.string.OG_PresetSlate, PRESET_GROUPS,
                     new int[]{0xFF5E6E80, 0xFFECEFF2, 0xFFDCE1E7, 0xFFECEFF2, 0xFFCFD8E2, 0xFF5E6E80},
                     new int[]{0xFF9FB1C4, 0xFF1A1E23, 0xFF13161A, 0xFF1A1E23, 0xFF3C4A5A, 0xFF9FB1C4}),
+            new Preset(R.string.OG_PresetRed, PRESET_GROUPS,
+                    new int[]{0xFFB23A48, 0xFFFDECEA, 0xFFF6D9D6, 0xFFFDECEA, 0xFFE8B4B0, 0xFFB23A48},
+                    new int[]{0xFFE06C75, 0xFF241819, 0xFF1A1213, 0xFF241819, 0xFF5C3A3D, 0xFFE06C75}),
+            new Preset(R.string.OG_PresetPurple, PRESET_GROUPS,
+                    new int[]{0xFF7E57C2, 0xFFF3EDFA, 0xFFE6DCF5, 0xFFF3EDFA, 0xFFD8C7F0, 0xFF7E57C2},
+                    new int[]{0xFFB39DDB, 0xFF1B1624, 0xFF141019, 0xFF1B1624, 0xFF4A3F5C, 0xFFB39DDB}),
     };
 
     public static void applyPreset(Preset preset, boolean dark) {

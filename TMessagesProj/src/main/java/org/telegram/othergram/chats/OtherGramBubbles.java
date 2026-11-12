@@ -9,11 +9,15 @@ import android.graphics.Shader;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.R;
 import org.telegram.othergram.OtherGramConfig;
 import org.telegram.othergram.badges.OtherGramBadges;
 import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.ui.ActionBar.MessageDrawable;
+
+import java.util.Objects;
 
 /**
  * Bubble style a user publishes: a solid color or "liquid glass", with a transparency level. Own
@@ -30,6 +34,11 @@ public class OtherGramBubbles {
     public static final String KEY_STYLE = "bubble_style";
     public static final String KEY_COLOR = "bubble_color";
     public static final String KEY_ALPHA = "bubble_alpha";
+    public static final String KEY_SHAPE = "bubble_shape";
+
+    private static final String[] SHAPE_IDS = {null, "square", "rounded", "soft"};
+    private static final int[] SHAPE_TITLES = {R.string.OG_BubbleShapeTelegram, R.string.OG_BubbleShapeSquare,
+            R.string.OG_BubbleShapeRounded, R.string.OG_BubbleShapeSoft};
 
     private static final double MIN_TEXT_CONTRAST = 3.5;
 
@@ -52,6 +61,46 @@ public class OtherGramBubbles {
 
     public static int myAlpha() {
         return OtherGramConfig.getInt(KEY_ALPHA, 100);
+    }
+
+    public static int shapeIndex() {
+        final String shape = OtherGramConfig.getString(KEY_SHAPE, null);
+        for (int i = 0; i < SHAPE_IDS.length; i++) {
+            if (Objects.equals(SHAPE_IDS[i], shape)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    public static String shapeTitle() {
+        return LocaleController.getString(SHAPE_TITLES[shapeIndex()]);
+    }
+
+    public static int shapeCount() {
+        return SHAPE_IDS.length;
+    }
+
+    public static String shapeTitleAt(int index) {
+        return LocaleController.getString(SHAPE_TITLES[index]);
+    }
+
+    /** Corner radius in px for the chosen shape: 0 means Telegram's own bubble. */
+    public static int shapeRoundRadius() {
+        switch (shapeIndex()) {
+            case 1: return AndroidUtilities.dp(4);
+            case 2: return AndroidUtilities.dp(14);
+            case 3: return AndroidUtilities.dp(20);
+            default: return 0;
+        }
+    }
+
+    public static void setShapeIndex(int index) {
+        if (index <= 0) {
+            OtherGramConfig.remove(KEY_SHAPE);
+        } else {
+            OtherGramConfig.putString(KEY_SHAPE, SHAPE_IDS[index]);
+        }
     }
 
     /**

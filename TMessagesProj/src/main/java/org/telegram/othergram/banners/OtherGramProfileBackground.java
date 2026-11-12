@@ -85,8 +85,9 @@ public class OtherGramProfileBackground extends RecyclerView.ItemDecoration {
     @Override
     public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         final OtherGramProfiles.Profile profile = rows.userId() > 0 ? OtherGramProfiles.getProfile(rows.userId()) : null;
-        final int start = rows.startRow();
-        if (profile == null || profile.backgroundUrl == null || start < 0) {
+        // 2.1: start from the very top of the list (the header row) so the picture covers the whole profile
+        final int start = 0;
+        if (profile == null || profile.backgroundUrl == null) {
             return;
         }
         if (!profile.backgroundUrl.equals(loadedUrl)) {

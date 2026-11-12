@@ -18675,6 +18675,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     // OtherGram: bubble in the style its sender published (or own local style for outgoing messages)
     private void ogDrawBubble(Canvas canvas, int alpha) {
         final int textColor = getThemedColor(currentMessageObject != null && currentMessageObject.isOutOwner() ? Theme.key_chat_messageTextOut : Theme.key_chat_messageTextIn);
+        if (currentBackgroundDrawable != null) {
+            currentBackgroundDrawable.setRoundRadius(OtherGramBubbles.shapeRoundRadius()); // OtherGram: bubble shape
+        }
         if (!OtherGramBubbles.draw(canvas, currentBackgroundDrawable, currentMessageObject, alpha, textColor)) {
             currentBackgroundDrawable.drawCached(canvas, backgroundCacheParams);
         }

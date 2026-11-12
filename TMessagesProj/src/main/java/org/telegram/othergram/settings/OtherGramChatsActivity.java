@@ -54,6 +54,7 @@ public class OtherGramChatsActivity extends BaseFragment {
     private static final int ID_AR_SCHEDULE = 11;
     private static final int ID_AR_COOLDOWN = 12;
     private static final int ID_AR_BATTERY = 13;
+    private static final int ID_BUBBLE_SHAPE = 14;
 
     private static final String[] BUBBLE_STYLES = {null, OtherGramBubbles.STYLE_SOLID, OtherGramBubbles.STYLE_GLASS};
     private static final int[] BUBBLE_STYLE_TITLES = {R.string.OG_BubbleTelegram, R.string.OG_BubbleSolid, R.string.OG_BubbleGlass};
@@ -107,6 +108,7 @@ public class OtherGramChatsActivity extends BaseFragment {
                         publishBubble();
                     }));
         }
+        items.add(UItem.asButton(ID_BUBBLE_SHAPE, R.drawable.msg_msgbubble3, getString(R.string.OG_BubbleShape), OtherGramBubbles.shapeTitle()));
         items.add(UItem.asShadow(getString(R.string.OG_MyBubblesInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_ChatTweaks)));
@@ -195,6 +197,21 @@ public class OtherGramChatsActivity extends BaseFragment {
                             }
                             listView.adapter.update(true);
                             publishBubble();
+                        })
+                        .setNegativeButton(getString(R.string.Cancel), null)
+                        .show();
+                break;
+            }
+            case ID_BUBBLE_SHAPE: {
+                final CharSequence[] shapeNames = new CharSequence[OtherGramBubbles.shapeCount()];
+                for (int i = 0; i < shapeNames.length; i++) {
+                    shapeNames[i] = OtherGramBubbles.shapeTitleAt(i);
+                }
+                new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                        .setTitle(getString(R.string.OG_BubbleShape))
+                        .setItems(shapeNames, (dialog, which) -> {
+                            OtherGramBubbles.setShapeIndex(which);
+                            listView.adapter.update(true);
                         })
                         .setNegativeButton(getString(R.string.Cancel), null)
                         .show();
