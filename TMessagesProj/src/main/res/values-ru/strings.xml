@@ -344,6 +344,7 @@
     <string name="OG_ColorTabBar">Нижняя панель</string>
     <string name="OG_ColorTabIcons">Иконки нижней панели</string>
     <string name="OG_ColorTabSelected">Выбранная вкладка</string>
+    <string name="OG_ColorChatWallpaper">Фон чата</string>
     <string name="OG_AvatarShape">Форма аватарок</string>
     <string name="OG_AvatarCircle">Круг</string>
     <string name="OG_AvatarSquircle">Сквиркл</string>

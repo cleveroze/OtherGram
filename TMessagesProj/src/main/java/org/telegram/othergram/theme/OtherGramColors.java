@@ -39,7 +39,8 @@ public class OtherGramColors {
             Theme.key_featuredStickers_addButton, Theme.key_switchTrackChecked, Theme.key_radioBackgroundChecked,
             Theme.key_checkboxSquareBackground, Theme.key_chat_messagePanelSend, Theme.key_chats_actionBackground,
             Theme.key_chats_unreadCounter, Theme.key_dialogButton, Theme.key_chats_onlineCircle,
-            Theme.key_chat_messageLinkIn, Theme.key_chats_sentCheck, Theme.key_chats_sentReadCheck}, new int[0]);
+            Theme.key_chat_messageLinkIn, Theme.key_chat_messageLinkOut, Theme.key_chats_sentCheck,
+            Theme.key_chats_sentReadCheck}, new int[0]);
 
     public static final Group BACKGROUND = new Group("background", R.string.OG_ColorBackground, new int[]{
             Theme.key_windowBackgroundWhite, Theme.key_dialogBackground, Theme.key_chats_menuBackground,
@@ -82,9 +83,14 @@ public class OtherGramColors {
     public static final Group TAB_SELECTED = new Group("tab_selected", R.string.OG_ColorTabSelected, new int[]{
             Theme.key_glass_tabSelected, Theme.key_glass_tabSelectedText}, new int[0]);
 
+    /** Chat background: the solid wallpaper and all gradient stops, so the whole chat repaints. */
+    public static final Group CHAT_WALLPAPER = new Group("chat_wallpaper", R.string.OG_ColorChatWallpaper, new int[]{
+            Theme.key_chat_wallpaper, Theme.key_chat_wallpaper_gradient_to1,
+            Theme.key_chat_wallpaper_gradient_to2, Theme.key_chat_wallpaper_gradient_to3}, new int[0]);
+
     public static final Group[] GROUPS = {
             ACCENT, BACKGROUND, SECONDARY_BACKGROUND, HEADER, HEADER_TEXT, TEXT, SECONDARY_TEXT, ICONS,
-            IN_BUBBLE, OUT_BUBBLE, MESSAGE_TEXT, TAB_BAR, TAB_ICONS, TAB_SELECTED
+            IN_BUBBLE, OUT_BUBBLE, MESSAGE_TEXT, TAB_BAR, TAB_ICONS, TAB_SELECTED, CHAT_WALLPAPER
     };
 
     /** Called from Theme.refreshThemeColors() after the theme and its accent are applied. */
