@@ -55,6 +55,7 @@ public class OtherGramChatsActivity extends BaseFragment {
     private static final int ID_AR_COOLDOWN = 12;
     private static final int ID_AR_BATTERY = 13;
     private static final int ID_BUBBLE_SHAPE = 14;
+    private static final int ID_BUBBLE_RADIUS = 15;
 
     private static final String[] BUBBLE_STYLES = {null, OtherGramBubbles.STYLE_SOLID, OtherGramBubbles.STYLE_GLASS};
     private static final int[] BUBBLE_STYLE_TITLES = {R.string.OG_BubbleTelegram, R.string.OG_BubbleSolid, R.string.OG_BubbleGlass};
@@ -109,6 +110,8 @@ public class OtherGramChatsActivity extends BaseFragment {
                     }));
         }
         items.add(UItem.asButton(ID_BUBBLE_SHAPE, R.drawable.msg_msgbubble3, getString(R.string.OG_BubbleShape), OtherGramBubbles.shapeTitle()));
+        final int radiusDp = OtherGramBubbles.customRadius() >= 0 ? OtherGramBubbles.customRadius() : OtherGramBubbles.shapeRadiusDp();
+        items.add(UItem.asIntSlideView(1, 0, radiusDp, 24, val -> val + " dp", val -> OtherGramBubbles.setCustomRadius(val)));
         items.add(UItem.asShadow(getString(R.string.OG_MyBubblesInfo)));
 
         items.add(UItem.asHeader(getString(R.string.OG_ChatTweaks)));

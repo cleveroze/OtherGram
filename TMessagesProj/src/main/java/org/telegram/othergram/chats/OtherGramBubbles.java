@@ -35,6 +35,7 @@ public class OtherGramBubbles {
     public static final String KEY_COLOR = "bubble_color";
     public static final String KEY_ALPHA = "bubble_alpha";
     public static final String KEY_SHAPE = "bubble_shape";
+    public static final String KEY_SHAPE_RADIUS = "bubble_shape_radius";
 
     private static final String[] SHAPE_IDS = {null, "square", "rounded", "soft"};
     private static final int[] SHAPE_TITLES = {R.string.OG_BubbleShapeTelegram, R.string.OG_BubbleShapeSquare,
@@ -85,17 +86,33 @@ public class OtherGramBubbles {
         return LocaleController.getString(SHAPE_TITLES[index]);
     }
 
-    /** Corner radius in px for the chosen shape: 0 means Telegram's own bubble. */
-    public static int shapeRoundRadius() {
+    /** Preset radius in dp for the chosen shape (0 = Telegram's own). */
+    public static int shapeRadiusDp() {
         switch (shapeIndex()) {
-            case 1: return AndroidUtilities.dp(4);
-            case 2: return AndroidUtilities.dp(14);
-            case 3: return AndroidUtilities.dp(20);
+            case 1: return 4;
+            case 2: return 14;
+            case 3: return 20;
             default: return 0;
         }
     }
 
+    /** Custom radius in dp, or -1 when the preset shape value is used. */
+    public static int customRadius() {
+        return OtherGramConfig.getInt(KEY_SHAPE_RADIUS, -1);
+    }
+
+    public static void setCustomRadius(int dp) {
+        OtherGramConfig.putInt(KEY_SHAPE_RADIUS, dp);
+    }
+
+    /** Corner radius in px for the chosen shape: 0 means Telegram's own bubble. */
+    public static int shapeRoundRadius() {
+        final int custom = customRadius();
+        return AndroidUtilities.dp(custom >= 0 ? custom : shapeRadiusDp());
+    }
+
     public static void setShapeIndex(int index) {
+        OtherGramConfig.remove(KEY_SHAPE_RADIUS);
         if (index <= 0) {
             OtherGramConfig.remove(KEY_SHAPE);
         } else {
