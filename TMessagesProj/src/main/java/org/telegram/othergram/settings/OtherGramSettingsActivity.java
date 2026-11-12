@@ -7,14 +7,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.json.JSONObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.othergram.OtherGramConfig;
 import org.telegram.othergram.OtherGramUpdates;
 import org.telegram.othergram.badges.OtherGramBadges;
+import org.telegram.othergram.chats.OtherGramBubbles;
 import org.telegram.othergram.network.OtherGramApi;
 import org.telegram.othergram.network.OtherGramAuth;
+import org.telegram.othergram.network.OtherGramProfiles;
 import org.telegram.ui.ActionBar.ActionBar;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BulletinFactory;
@@ -156,7 +160,7 @@ public class OtherGramSettingsActivity extends BaseFragment {
 
         items.add(UItem.asHeader(getString(R.string.OG_SectionData)));
         items.add(UItem.asButton(ID_EXPORT_IMPORT, R.drawable.msg_share, getString(R.string.OG_ExportImport)));
-        items.add(section(ID_RESET, R.drawable.msg_reset, R.string.OG_ResetAll));
+        items.add(UItem.asButton(ID_RESET, R.drawable.msg_reset, getString(R.string.OG_ResetAll)).red());
         items.add(UItem.asShadow(getString(R.string.OG_InDevelopmentInfo)));
     }
 
@@ -200,6 +204,8 @@ public class OtherGramSettingsActivity extends BaseFragment {
             presentFragment(new OtherGramChatsActivity());
         } else if (item.id == ID_EXPORT_IMPORT) {
             presentFragment(new OtherGramBackupActivity());
+        } else if (item.id == ID_RESET) {
+            confirmResetDesign();
         } else if (item.id == ID_PLUGINS) {
             presentFragment(new OtherGramPluginsActivity());
         } else if (item.id == ID_CHAT) {
@@ -226,5 +232,43 @@ public class OtherGramSettingsActivity extends BaseFragment {
             }, 900);
         }
         // Customization sections open their screens here as they are implemented.
+    }
+
+    private void confirmResetDesign() {
+        if (getParentActivity() == null) {
+            return;
+        }
+        new AlertDialog.Builder(getParentActivity(), resourceProvider)
+                .setTitle(getString(R.string.OG_ResetAll))
+                .setMessage(getString(R.string.OG_ResetAllConfirm))
+                .setPositiveButton(getString(R.string.OG_ResetAll), (d, w) -> resetDesign())
+                .setNegativeButton(getString(R.string.Cancel), null)
+                .show();
+    }
+
+    private void resetDesign() {
+        OtherGramConfig.resetDesign();
+        Theme.refreshThemeColors();
+        if (listView != null) {
+            listView.adapter.update(true);
+        }
+        publishDefaultBubbles();
+        BulletinFactory.of(this).createSimpleBulletin(R.raw.done, getString(R.string.OG_ResetAllDone)).show();
+    }
+
+    /** Own published bubble style follows the restored defaults when OtherGram is connected. */
+    private void publishDefaultBubbles() {
+        if (!OtherGramApi.isLoggedIn()) {
+            return;
+        }
+        try {
+            final JSONObject changes = new JSONObject();
+            final String style = OtherGramBubbles.myStyle();
+            changes.put("bubble_style", style == null ? JSONObject.NULL : style);
+            changes.put("bubble_color", OtherGramBubbles.myColor());
+            changes.put("bubble_alpha", OtherGramBubbles.myAlpha());
+            OtherGramProfiles.updateMyProfile(changes, (status, me) -> { });
+        } catch (Exception ignore) {
+        }
     }
 }

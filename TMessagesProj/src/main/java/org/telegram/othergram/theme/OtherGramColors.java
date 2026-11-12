@@ -39,8 +39,7 @@ public class OtherGramColors {
             Theme.key_featuredStickers_addButton, Theme.key_switchTrackChecked, Theme.key_radioBackgroundChecked,
             Theme.key_checkboxSquareBackground, Theme.key_chat_messagePanelSend, Theme.key_chats_actionBackground,
             Theme.key_chats_unreadCounter, Theme.key_dialogButton, Theme.key_chats_onlineCircle,
-            Theme.key_chat_messageLinkIn, Theme.key_chat_messageLinkOut, Theme.key_chats_sentCheck,
-            Theme.key_chats_sentReadCheck}, new int[0]);
+            Theme.key_chats_sentCheck, Theme.key_chats_sentReadCheck}, new int[0]);
 
     public static final Group BACKGROUND = new Group("background", R.string.OG_ColorBackground, new int[]{
             Theme.key_windowBackgroundWhite, Theme.key_dialogBackground, Theme.key_chats_menuBackground,
@@ -74,6 +73,12 @@ public class OtherGramColors {
     public static final Group MESSAGE_TEXT = new Group("message_text", R.string.OG_ColorMessageText, new int[]{
             Theme.key_chat_messageTextIn, Theme.key_chat_messageTextOut}, new int[0]);
 
+    public static final Group IN_LINK = new Group("in_link", R.string.OG_ColorLinkIn, new int[]{
+            Theme.key_chat_messageLinkIn}, new int[0]);
+
+    public static final Group OUT_LINK = new Group("out_link", R.string.OG_ColorLinkOut, new int[]{
+            Theme.key_chat_messageLinkOut}, new int[0]);
+
     public static final Group TAB_BAR = new Group("tab_bar", R.string.OG_ColorTabBar, new int[]{
             Theme.key_glass_targetMainTabs, Theme.key_glass_targetMainTopPanel}, new int[0]);
 
@@ -90,7 +95,7 @@ public class OtherGramColors {
 
     public static final Group[] GROUPS = {
             ACCENT, BACKGROUND, SECONDARY_BACKGROUND, HEADER, HEADER_TEXT, TEXT, SECONDARY_TEXT, ICONS,
-            IN_BUBBLE, OUT_BUBBLE, MESSAGE_TEXT, TAB_BAR, TAB_ICONS, TAB_SELECTED, CHAT_WALLPAPER
+            IN_BUBBLE, OUT_BUBBLE, MESSAGE_TEXT, IN_LINK, OUT_LINK, TAB_BAR, TAB_ICONS, TAB_SELECTED, CHAT_WALLPAPER
     };
 
     /** Called from Theme.refreshThemeColors() after the theme and its accent are applied. */
