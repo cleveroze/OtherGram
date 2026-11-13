@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07080c" />
+  <title>VELORA — бумажный спот</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body data-view="trade">
+  <div class="atmosphere" aria-hidden="true">
+    <i class="orb a"></i>
+    <i class="orb b"></i>
+    <i class="orb c"></i>
+  </div>
+
+  <header class="topbar glass">
+    <button class="brand" data-view="trade" type="button">
+      <svg viewBox="0 0 32 32" class="mark" aria-hidden="true">
+        <path d="M6 23 L16 7 L26 23" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M11 23h10" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="16" cy="15" r="1.4" fill="currentColor"/>
+      </svg>
+      <span>
+        <strong>VELORA</strong>
+        <small>бумажный спот</small>
+      </span>
+    </button>
+    <nav class="nav">
+      <button type="button" data-view="trade" class="on">Торговля</button>
+      <button type="button" data-view="nft">NFT</button>
+      <button type="button" data-view="portfolio">Портфель</button>
+    </nav>
+    <div class="top-gap"></div>
+    <button class="equity" data-view="portfolio" type="button">
+      <span>Капитал</span>
+      <strong id="hdr-eq" class="num">—</strong>
+      <em id="hdr-pnl" class="num">—</em>
+    </button>
+    <span class="live" id="live-ind"><i></i><b id="live-label">поток</b></span>
+    <time id="hdr-clock" class="clock num" title="Новосибирск">—</time>
+    <button id="admin-toggle" class="admin-toggle" type="button" aria-pressed="false" title="Панель симуляции" aria-label="Панель симуляции">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path d="M4 7h16M4 12h10M4 17h13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="16" cy="7" r="1.6" fill="currentColor"/>
+        <circle cx="10" cy="12" r="1.6" fill="currentColor"/>
+        <circle cx="15" cy="17" r="1.6" fill="currentColor"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="tape glass" id="tape">
+    <div class="tape-track" id="tape-track"></div>
+  </div>
+
+  <main class="desk">
+    <aside class="markets glass" id="markets">
+      <div class="panel-h">
+        <strong>Рынки</strong>
+        <button id="markets-close" class="icon-x" type="button" aria-label="Закрыть список">×</button>
+      </div>
+      <div class="market-tools">
+        <input id="q" type="search" placeholder="Поиск пары" autocomplete="off" enterkeyhint="search" />
+        <button id="only-fav" type="button" aria-label="Только избранное" title="Избранное">★</button>
+        <select id="sort" aria-label="Сортировка">
+          <option value="vol">Объём</option>
+          <option value="chg">Изм.</option>
+          <option value="name">Имя</option>
+        </select>
+      </div>
+      <div class="mhead"><span>Пара</span><span>Цена</span><span>24ч</span></div>
+      <div id="mlist" class="mlist"></div>
+      <p id="m-empty" class="empty" hidden>Ничего не найдено</p>
+    </aside>
+
+    <section class="stage">
+      <section class="chart-card glass">
+        <div class="pairbar">
+          <button id="markets-btn" class="markets-btn" type="button">Рынки</button>
+          <i id="pair-ident" class="ident"></i>
+          <div class="pair-title">
+            <div class="pair-name"><b id="pair-sym">BTC/USDT</b> <span id="pair-full">Bitcoin</span> <em>SPOT</em></div>
+            <div class="pair-sub">Spot · USDT</div>
+          </div>
+          <div class="pair-px">
+            <strong id="pair-px" class="num">—</strong>
+            <span id="pair-chg" class="num">—</span>
+          </div>
+          <dl class="stats">
+            <div><dt>Макс 24ч</dt><dd id="st-high" class="num">—</dd></div>
+            <div><dt>Мин 24ч</dt><dd id="st-low" class="num">—</dd></div>
+            <div><dt>Объём</dt><dd id="st-vol" class="num">—</dd></div>
+          </dl>
+        </div>
+        <div class="tfbar">
+          <div id="tfs" class="tfs"></div>
+          <div class="chart-tools">
+            <button id="toggle-ema" type="button" class="on">EMA</button>
+            <button id="toggle-vol" type="button" class="on">Объём</button>
+            <button id="pin-btn" type="button" hidden>К рынку</button>
+            <span class="hint">колесо — масштаб, тянуть — история</span>
+          </div>
+        </div>
+        <div class="plot">
+          <canvas id="chart"></canvas>
+          <div id="ohlc" class="ohlc">
+            <span>O <b id="o-o" class="num"></b></span>
+            <span>H <b id="o-h" class="num"></b></span>
+            <span>L <b id="o-l" class="num"></b></span>
+            <span>C <b id="o-c" class="num"></b></span>
+            <b id="o-ch" class="num"></b>
+          </div>
+        </div>
+      </section>
+
+      <section class="blotter glass">
+        <div class="tabs" id="blotter-tabs">
+          <button type="button" data-tab="pos" class="on">Позиции</button>
+          <button type="button" data-tab="ord">Ордера <span id="ord-count"></span></button>
+          <button type="button" data-tab="hist">История</button>
+        </div>
+        <div id="blotter-scroll" class="blotter-scroll"></div>
+      </section>
+    </section>
+
+    <aside class="dock" id="dock" data-tab="book">
+      <div class="dock-tabs" id="dock-tabs">
+        <button type="button" data-dock="book" class="on">Стакан</button>
+        <button type="button" data-dock="trades">Сделки</button>
+        <button type="button" data-dock="order">Заявка</button>
+      </div>
+      <section class="book glass">
+        <div class="panel-h">
+          <strong>Стакан</strong>
+          <span class="dim">клик ставит лимит</span>
+        </div>
+        <div class="book-h"><span>Цена</span><span>Кол-во</span><span>Всего</span></div>
+        <div class="book-body">
+          <div id="asks"></div>
+          <div class="spread">
+            <b id="spread-px" class="num">—</b>
+            <span id="spread-bps" class="num"></span>
+          </div>
+          <div id="bids"></div>
+        </div>
+      </section>
+      <section class="trades glass">
+        <div class="panel-h"><strong>Сделки</strong></div>
+        <ul id="trades"></ul>
+      </section>
+      <section class="ticket glass">
+        <div class="seg" id="side-seg">
+          <button type="button" id="side-buy" class="on buy">Купить</button>
+          <button type="button" id="side-sell">Продать</button>
+        </div>
+        <div class="seg slim" id="type-seg">
+          <button type="button" id="type-market" class="on">Рыночный</button>
+          <button type="button" id="type-limit">Лимитный</button>
+        </div>
+        <div class="ba">
+          <button type="button" id="bid-btn">Bid <b id="bid-px" class="num">—</b></button>
+          <button type="button" id="ask-btn">Ask <b id="ask-px" class="num">—</b></button>
+        </div>
+        <label class="field">
+          <span>Цена</span>
+          <input id="price-input" inputmode="decimal" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Количество <em id="qty-unit">BTC</em></span>
+          <input id="qty-input" inputmode="decimal" autocomplete="off" />
+        </label>
+        <div class="pcts" id="pcts">
+          <button type="button" data-pct="0.25">25%</button>
+          <button type="button" data-pct="0.5">50%</button>
+          <button type="button" data-pct="0.75">75%</button>
+          <button type="button" data-pct="1">100%</button>
+        </div>
+        <div class="ticket-meta">
+          <span>Доступно <b id="avail" class="num">—</b></span>
+          <span>Итого <b id="total" class="num">—</b></span>
+          <span>Комиссия <b id="fee-line" class="num">—</b></span>
+        </div>
+        <button id="submit" class="submit buy" type="button">Купить BTC</button>
+      </section>
+    </aside>
+  </main>
+
+  <section id="view-nft" class="subview">
+    <div class="page-head">
+      <div>
+        <h1>Маркет NFT</h1>
+        <p>Четыре коллекции. Покупка списывает бумажный USDT, продажа возвращает 97% пола.</p>
+      </div>
+      <div class="page-stat">
+        <span class="k">Пол</span>
+        <strong id="nft-floor" class="num">—</strong>
+      </div>
+    </div>
+    <div id="nft-chips" class="chips"></div>
+    <div id="nft-grid" class="nft-grid"></div>
+  </section>
+
+  <section id="view-portfolio" class="subview">
+    <div class="hero glass">
+      <div>
+        <span class="k">Капитал</span>
+        <strong id="eq" class="num">—</strong>
+        <div id="eq-pnl" class="num pnl">—</div>
+        <p id="eq-real" class="dim"></p>
+      </div>
+      <div class="eq-plot"><canvas id="eq-chart"></canvas></div>
+    </div>
+    <div class="port-grid">
+      <section class="glass pad">
+        <h2>Активы</h2>
+        <div id="holdings"></div>
+      </section>
+      <section class="glass pad">
+        <h2>Коллекция</h2>
+        <div id="owned-nfts" class="owned"></div>
+      </section>
+    </div>
+  </section>
+
+  <div id="markets-backdrop" class="backdrop" hidden></div>
+
+  <aside id="admin" class="admin glass" hidden>
+    <header class="admin-bar" id="admin-bar">
+      <svg class="grip" viewBox="0 0 12 18" aria-hidden="true">
+        <circle cx="3" cy="3" r="1.1"/><circle cx="9" cy="3" r="1.1"/>
+        <circle cx="3" cy="9" r="1.1"/><circle cx="9" cy="9" r="1.1"/>
+        <circle cx="3" cy="15" r="1.1"/><circle cx="9" cy="15" r="1.1"/>
+      </svg>
+      <div class="admin-title">
+        <strong>Симуляция</strong>
+        <em>локально, без сети</em>
+      </div>
+      <button id="admin-close" class="icon-x" type="button" aria-label="Закрыть панель">×</button>
+    </header>
+    <div class="admin-body">
+      <label class="field">
+        <span>Баланс USDT</span>
+        <span class="inline">
+          <input id="adm-usdt" type="number" min="0" step="100" />
+          <button id="adm-usdt-apply" class="mini" type="button">Ок</button>
+        </span>
+      </label>
+      <label class="field">
+        <span>Волатильность <b id="adm-vol-v">1.0×</b></span>
+        <input id="adm-vol" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+      <label class="field">
+        <span>Скорость времени <b id="adm-speed-v">1×</b></span>
+        <input id="adm-speed" type="range" min="1" max="40" step="1" value="1" />
+      </label>
+      <label class="field">
+        <span>Комиссия <b id="adm-fee-v">4.0 б.п.</b></span>
+        <input id="adm-fee" type="range" min="0" max="20" step="0.5" value="4" />
+      </label>
+      <label class="field">
+        <span>Пол NFT <b id="adm-floor-v">1.00×</b></span>
+        <input id="adm-floor" type="range" min="0.5" max="2.5" step="0.05" value="1" />
+      </label>
+      <label class="check">
+        <input id="adm-audio" type="checkbox" />
+        <span>Тихий звук сделок</span>
+      </label>
+      <div class="shock">
+        <span id="adm-shock-label">Импульс BTC</span>
+        <div class="inline">
+          <button id="adm-dump" class="mini bear" type="button">−8%</button>
+          <button id="adm-pump" class="mini bull" type="button">+8%</button>
+        </div>
+      </div>
+      <button id="adm-pause" class="mini wide" type="button">Пауза</button>
+      <button id="adm-reset" class="mini wide danger" type="button">Сбросить счёт</button>
+      <p id="adm-status" class="status"></p>
+    </div>
+  </aside>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-back" data-close="1"></div>
+    <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="m-name">
+      <button id="modal-close" class="icon-x" type="button" aria-label="Закрыть">×</button>
+      <div id="modal-art" class="modal-art"></div>
+      <div class="modal-meta">
+        <span id="m-rarity" class="rarity"></span>
+        <h2 id="m-name"></h2>
+        <p id="m-col" class="dim"></p>
+        <dl id="m-traits"></dl>
+        <div class="m-price"><b id="m-price" class="num"></b><span id="m-sub"></span></div>
+        <button id="m-action" class="submit buy" type="button"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
