@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXORA — Paper Trading Terminal</title>
+  <meta name="description" content="Симулятор криптотрейдинга NEXORA. Бумажная торговля, свечи, NFT. Не настоящая биржа." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/terminal.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23080a10'/><path d='M8 22 L16 8 L24 22' stroke='%2300e0b8' stroke-width='2.4' fill='none'/><path d='M11 17 H21' stroke='%23f6465d' stroke-width='2'/></svg>" />
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <div id="splash" class="splash">
+    <div class="splash-mark">
+      <svg width="42" height="42" viewBox="0 0 32 32" fill="none">
+        <path d="M8 22 L16 8 L24 22" stroke="#00e0b8" stroke-width="2.2"/>
+        <path d="M11 17 H21" stroke="#f6465d" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="splash-name">NEXORA</div>
+    <div class="splash-sub">PAPER TRADING · SIMULATION</div>
+  </div>
+
+  <header class="topbar glass">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+          <path d="M8 22 L16 8 L24 22" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M11 17 H21" stroke="#f6465d" stroke-width="2"/>
+        </svg>
+      </span>
+      <span class="brand-word">NEXORA</span>
+      <span class="sim-pill">SIM</span>
+    </div>
+
+    <nav class="main-nav" id="mainNav">
+      <button class="nav-btn active" data-view="trade">Терминал</button>
+      <button class="nav-btn" data-view="nft">NFT</button>
+      <button class="nav-btn" data-view="wallet">Портфель</button>
+    </nav>
+
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" data-mode="spot">Спот</button>
+      <button class="mode-btn" data-mode="futures">Фьючерсы</button>
+    </div>
+
+    <div class="header-stats">
+      <div class="hstat">
+        <span class="muted">Эквити</span>
+        <strong id="hdrEquity">$25,000.00</strong>
+      </div>
+      <div class="hstat">
+        <span class="muted">PnL 24ч</span>
+        <strong id="hdrPnl" class="up">+$0.00</strong>
+      </div>
+      <div class="hstat hide-sm">
+        <span class="muted">Доступно</span>
+        <strong id="hdrAvail">$25,000.00</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="tape glass" id="tape" aria-label="Лента котировок"></div>
+
+  <main id="viewTrade" class="workspace">
+    <aside class="panel markets glass">
+      <div class="panel-head">
+        <h2>Рынки</h2>
+        <input id="marketSearch" class="search" type="search" placeholder="Поиск BTC, ETH…" autocomplete="off" />
+      </div>
+      <div class="market-tabs" id="marketCats">
+        <button class="chip active" data-cat="all">Все</button>
+        <button class="chip" data-cat="L1">L1</button>
+        <button class="chip" data-cat="DeFi">DeFi</button>
+        <button class="chip" data-cat="Meme">Meme</button>
+        <button class="chip" data-cat="AI">AI</button>
+      </div>
+      <div class="market-table-head">
+        <span>Пара</span><span>Цена</span><span>24ч</span>
+      </div>
+      <div class="market-list" id="marketList"></div>
+    </aside>
+
+    <section class="chart-wrap panel glass">
+      <div class="pair-bar" id="pairBar">
+        <div class="pair-id">
+          <div class="coin-stack" id="pairIcons"></div>
+          <div>
+            <div class="pair-name" id="pairName">BTC/USDT</div>
+            <div class="pair-meta" id="pairMeta">Bitcoin · Спот</div>
+          </div>
+        </div>
+        <div class="pair-price">
+          <div class="last-price" id="lastPrice">—</div>
+          <div class="last-chg" id="lastChg">—</div>
+        </div>
+        <div class="pair-kpis" id="pairKpis"></div>
+      </div>
+      <div class="chart-tools">
+        <div class="tf-row" id="tfRow"></div>
+        <div class="ind-row">
+          <button class="tool-btn active" data-ind="ema">EMA</button>
+          <button class="tool-btn active" data-ind="vol">VOL</button>
+          <button class="tool-btn" data-ind="bb">BB</button>
+          <button class="tool-btn" id="fitBtn" title="Сбросить масштаб">FIT</button>
+        </div>
+      </div>
+      <div class="chart-stage">
+        <canvas id="chart"></canvas>
+        <div class="chart-hud" id="chartHud"></div>
+      </div>
+    </section>
+
+    <aside class="side-col">
+      <div class="panel book glass">
+        <div class="panel-head tight">
+          <h2>Стакан</h2>
+          <span class="muted" id="spreadLbl">спред —</span>
+        </div>
+        <div class="book-head"><span>Цена</span><span>Объём</span><span>Сумма</span></div>
+        <div class="asks" id="asks"></div>
+        <div class="spread-row" id="spreadRow"></div>
+        <div class="bids" id="bids"></div>
+      </div>
+      <div class="panel trades glass">
+        <div class="panel-head tight"><h2>Сделки</h2><span class="live-dot">live</span></div>
+        <div class="trade-head"><span>Цена</span><span>Кол-во</span><span>Время</span></div>
+        <div class="trade-list" id="tradeList"></div>
+      </div>
+    </aside>
+
+    <section class="ticket panel glass">
+      <div class="ticket-tabs" id="sideTabs">
+        <button class="buy-tab active" data-side="buy">Купить</button>
+        <button class="sell-tab" data-side="sell">Продать</button>
+      </div>
+      <div class="otype" id="otypeRow">
+        <button class="chip active" data-otype="limit">Лимит</button>
+        <button class="chip" data-otype="market">Маркет</button>
+        <button class="chip" data-otype="stop">Стоп</button>
+      </div>
+      <div class="lev-row hidden" id="levRow">
+        <label>Плечо <strong id="levVal">10x</strong></label>
+        <input id="levSlider" type="range" min="1" max="125" value="10" />
+        <div class="lev-marks"><span>1x</span><span>25x</span><span>75x</span><span>125x</span></div>
+      </div>
+      <label class="field hidden" id="stopField">
+        <span>Стоп-цена</span>
+        <input id="stopInput" inputmode="decimal" />
+      </label>
+      <label class="field" id="priceField">
+        <span>Цена</span>
+        <input id="priceInput" inputmode="decimal" />
+        <em>USDT</em>
+      </label>
+      <label class="field">
+        <span>Количество</span>
+        <input id="qtyInput" inputmode="decimal" />
+        <em id="qtyUnit">BTC</em>
+      </label>
+      <div class="pct-row" id="pctRow">
+        <button data-pct="25">25%</button>
+        <button data-pct="50">50%</button>
+        <button data-pct="75">75%</button>
+        <button data-pct="100">100%</button>
+      </div>
+      <div class="total-row">
+        <span>Итого</span>
+        <strong id="orderTotal">0.00 USDT</strong>
+      </div>
+      <div class="avail-row">Доступно: <b id="ticketAvail">0.00 USDT</b></div>
+      <button class="submit buy" id="submitBtn">Купить BTC</button>
+      <p class="ticket-note">Симулятор. Ордера исполняются по внутренней книге, средства виртуальные.</p>
+    </section>
+
+    <section class="blotter panel glass">
+      <div class="blotter-tabs" id="blotterTabs">
+        <button class="active" data-tab="positions">Позиции</button>
+        <button data-tab="orders">Ордера <span class="badge" id="ordBadge">0</span></button>
+        <button data-tab="history">История</button>
+        <button data-tab="fills">Лента</button>
+      </div>
+      <div class="blotter-body" id="blotterBody"></div>
+    </section>
+  </main>
+
+  <main id="viewNft" class="workspace nft-space hidden">
+    <section class="panel glass nft-hero">
+      <div>
+        <h2>NFT Marketplace</h2>
+        <p>Ончейн-коллекции внутри симуляции. Покупка списывает USDT с бумажного баланса.</p>
+      </div>
+      <div class="nft-kpis" id="nftKpis"></div>
+    </section>
+    <aside class="panel glass nft-filters">
+      <h3>Коллекции</h3>
+      <div id="collectionList"></div>
+    </aside>
+    <section class="panel glass nft-grid-wrap">
+      <div class="panel-head">
+        <h2 id="nftGridTitle">Все лоты</h2>
+        <div class="sort-row">
+          <select id="nftSort">
+            <option value="new">Новые</option>
+            <option value="priceAsc">Цена ↑</option>
+            <option value="priceDesc">Цена ↓</option>
+            <option value="rare">Редкость</option>
+          </select>
+        </div>
+      </div>
+      <div class="nft-grid" id="nftGrid"></div>
+    </section>
+  </main>
+
+  <main id="viewWallet" class="workspace wallet-space hidden">
+    <section class="panel glass wallet-hero">
+      <div>
+        <div class="muted">Совокупный баланс</div>
+        <div class="wallet-total" id="walletTotal">$0.00</div>
+        <div id="walletPnl" class="up">PnL +$0.00</div>
+      </div>
+      <div class="alloc" id="allocBar"></div>
+    </section>
+    <section class="panel glass">
+      <div class="panel-head"><h2>Активы</h2></div>
+      <div class="asset-table" id="assetTable"></div>
+    </section>
+    <section class="panel glass">
+      <div class="panel-head"><h2>Мои NFT</h2></div>
+      <div class="owned-grid" id="ownedGrid"></div>
+    </section>
+  </main>
+
+  <button id="adminFab" class="admin-fab" title="Админ-панель" aria-label="Открыть админ-панель">
+    <span class="fab-ring"></span>
+    <span class="fab-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  </button>
+
+  <div id="adminPanel" class="admin-panel glass" aria-hidden="true">
+    <div class="admin-drag" id="adminDrag">
+      <span class="admin-grip" aria-hidden="true"></span>
+      <strong>ADMIN</strong>
+      <em>NEXORA CONTROL</em>
+      <button class="admin-x" id="adminClose" aria-label="Закрыть">×</button>
+    </div>
+    <div class="admin-body">
+      <label class="field">
+        <span>Начислить USDT</span>
+        <div class="inline">
+          <input id="admCash" type="number" value="10000" min="0" step="100" />
+          <button class="mini" id="admAddCash">+ баланс</button>
+        </div>
+      </label>
+      <label class="field">
+        <span>Волатильность рынка</span>
+        <input id="admVol" type="range" min="0.2" max="6" step="0.1" value="1" />
+        <div class="range-cap"><span>спокойно</span><span id="admVolLbl">1.0×</span><span>хаос</span></div>
+      </label>
+      <label class="field">
+        <span>Скорость тиков</span>
+        <input id="admSpeed" type="range" min="1" max="8" step="1" value="3" />
+        <div class="range-cap"><span>медленно</span><span id="admSpeedLbl">3</span><span>турбо</span></div>
+      </label>
+      <div class="admin-actions">
+        <button class="pump" id="admPump">Памп</button>
+        <button class="dump" id="admDump">Дамп</button>
+        <button id="admFreeze">Фриз</button>
+        <button id="admNews">Новость</button>
+      </div>
+      <label class="field">
+        <span>Выдать NFT</span>
+        <div class="inline">
+          <select id="admNft"></select>
+          <button class="mini" id="admGrantNft">выдать</button>
+        </div>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="admGod" />
+        <span>God mode — не списывать маржу</span>
+      </label>
+      <div class="admin-foot">
+        <button class="ghost" id="admReset">Сбросить аккаунт</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+  <div id="modal" class="modal hidden"></div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
