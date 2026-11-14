@@ -3515,9 +3515,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 logoDrawable = context.getResources().getDrawable(R.drawable.telegram_logo_2).mutate();
                 logoDrawable.setBounds(0, dp(2), logoDrawable.getIntrinsicWidth(), dp(2) + logoDrawable.getIntrinsicHeight());
                 logoDrawable.setColorFilter(getThemedColor(Theme.key_telegram_color_dialogsLogo), PorterDuff.Mode.MULTIPLY);
-                // OtherGram: custom title instead of "Telegram" on the main screen
-                final String ogMainTitle = org.telegram.othergram.OtherGramConfig.getString(org.telegram.othergram.settings.OtherGramAppearanceActivity.MAIN_TITLE_KEY, null);
-                SpannableStringBuilder ssb = new SpannableStringBuilder(ogMainTitle != null && !ogMainTitle.isEmpty() ? ogMainTitle : getString(R.string.AppName));
+                SpannableStringBuilder ssb = new SpannableStringBuilder(getString(R.string.AppName));
                 ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 actionBar.setTitle(ssb, statusDrawable);
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
@@ -7017,30 +7015,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
-    /** OtherGram: re-applies the custom main-screen title after the user changes it in settings. */
-    private void ogUpdateMainTitle() {
-        if (actionBar == null || logoDrawable == null || statusDrawable == null) {
-            return;
-        }
-        if (folderId != 0 || communityId != 0) {
-            return;
-        }
-        final String ogMainTitle = org.telegram.othergram.OtherGramConfig.getString(
-                org.telegram.othergram.settings.OtherGramAppearanceActivity.MAIN_TITLE_KEY, null);
-        final CharSequence title = ogMainTitle != null && !ogMainTitle.isEmpty()
-                ? ogMainTitle : getString(R.string.AppName);
-        final SpannableStringBuilder ssb = new SpannableStringBuilder(title);
-        ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        actionBar.setTitle(ssb, statusDrawable);
-    }
-
     @Override
     public void onResume() {
         super.onResume();
         // OtherGram: emergency update notice delivered through the server
         org.telegram.othergram.OtherGramEmergency.checkAndShow(this);
-        // OtherGram: keep the main-screen title in sync with the settings
-        ogUpdateMainTitle();
         if (dialogStoriesCell != null) {
             dialogStoriesCell.onResume();
         }

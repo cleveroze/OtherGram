@@ -36,8 +36,6 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
     private static final int ID_TAB_BOUNCE = 4;
     private static final int ID_TAB_HAPTICS = 5;
     private static final int ID_LAUNCH_ANIM = 6;
-    private static final int ID_MAIN_TITLE = 7;
-    public static final String MAIN_TITLE_KEY = "main_title";
     private static final int ID_PRESET_BASE = 100;
     private static final int ID_GROUP_BASE = 1000;
 
@@ -99,10 +97,6 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
         items.add(UItem.asCheck(ID_LAUNCH_ANIM, getString(R.string.OG_LaunchAnimation)).setChecked(org.telegram.othergram.ui.OtherGramLaunchAnimation.enabled()));
         items.add(UItem.asShadow(getString(R.string.OG_InterfaceStyleInfo)));
 
-        items.add(UItem.asHeader(getString(R.string.OG_MainScreen)));
-        items.add(UItem.asButton(ID_MAIN_TITLE, R.drawable.msg_text_outlined, getString(R.string.OG_MainTitle), mainTitleValue()));
-        items.add(UItem.asShadow(getString(R.string.OG_MainTitleInfo)));
-
         items.add(UItem.asHeader(getString(R.string.OG_Palettes)));
         items.add(UItem.asButton(ID_PRESET_DEFAULT, Theme.createCircleDrawable(dp(22), 0xFFA68770), getString(R.string.OG_PresetVanilla)));
         for (int i = 0; i < OtherGramColors.PRESETS.length; i++) {
@@ -127,10 +121,6 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
 
     private void onItemClick(UItem item, View view, int position, float x, float y) {
         final boolean dark = isDark();
-        if (item.id == ID_MAIN_TITLE) {
-            editMainTitle();
-            return;
-        }
         if (item.id == ID_LAUNCH_ANIM) {
             OtherGramConfig.putBoolean(org.telegram.othergram.ui.OtherGramLaunchAnimation.KEY_ENABLED, !org.telegram.othergram.ui.OtherGramLaunchAnimation.enabled());
             listView.adapter.update(true);
@@ -170,39 +160,4 @@ public class OtherGramAppearanceActivity extends BaseFragment implements Notific
         }
     }
 
-    private String mainTitleValue() {
-        final String title = OtherGramConfig.getString(MAIN_TITLE_KEY, null);
-        return title != null && !title.isEmpty() ? title : getString(R.string.OG_MainTitleDefault);
-    }
-
-    private void editMainTitle() {
-        final Context context = getParentActivity();
-        if (context == null) {
-            return;
-        }
-        final org.telegram.ui.Components.EditTextBoldCursor input = new org.telegram.ui.Components.EditTextBoldCursor(context);
-        input.setText(OtherGramConfig.getString(MAIN_TITLE_KEY, ""));
-        input.setHint(getString(R.string.OG_MainTitleHint));
-        input.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourceProvider));
-        input.setHintTextColor(Theme.getColor(Theme.key_dialogTextGray3, resourceProvider));
-        input.setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 16);
-        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(24)});
-        input.setBackground(null);
-        final FrameLayout container = new FrameLayout(context);
-        container.addView(input, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 24, 8, 24, 8));
-        new org.telegram.ui.ActionBar.AlertDialog.Builder(context, resourceProvider)
-                .setTitle(getString(R.string.OG_MainTitle))
-                .setView(container)
-                .setPositiveButton(getString(R.string.Save), (d, w) -> {
-                    final String value = input.getText().toString().trim();
-                    if (value.isEmpty()) {
-                        OtherGramConfig.remove(MAIN_TITLE_KEY);
-                    } else {
-                        OtherGramConfig.putString(MAIN_TITLE_KEY, value);
-                    }
-                    listView.adapter.update(true);
-                })
-                .setNegativeButton(getString(R.string.Cancel), null)
-                .show();
-    }
 }
