@@ -3526,10 +3526,15 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 float top = topRoundRadius;
                 float bottom = sectionTopOnly ? 0 : bottomRoundRadius;
                 if (sectionSegmented && SectionsDrawer.currentCount > 1) {
+                    // OtherGram: outer corners stay large, every inner corner is almost square
+                    final float small = AndroidUtilities.dp(2);
                     if (SectionsDrawer.currentIndex == 0) {
-                        bottom = Math.min(bottom, sectionRadius * 0.5f);
+                        bottom = small;
                     } else if (SectionsDrawer.currentIndex == SectionsDrawer.currentCount - 1) {
-                        top = Math.min(top, sectionRadius * 0.5f);
+                        top = small;
+                    } else {
+                        top = small;
+                        bottom = small;
                     }
                 }
                 AndroidUtilities.rectTmp.set(getPaddingLeft() + sectionsItemDecoration.padding, from, getWidth() - sectionsItemDecoration.padding - getPaddingRight(), to);
