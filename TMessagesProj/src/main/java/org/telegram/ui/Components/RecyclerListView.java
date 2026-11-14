@@ -3264,6 +3264,8 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
     private float sectionRadius;
     /** OtherGram: round only the top corners of each section (top rounded, bottom square). */
     public boolean sectionTopOnly;
+    /** OtherGram: first section's bottom and last section's top are less rounded. */
+    public boolean sectionSegmented;
     private float[] sectionRadiusTop, sectionRadiusBottom;
     public boolean applyPaddingToSections = false;
 
@@ -3521,8 +3523,17 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 sections.add(new SectionsDrawer.Section(from, to, child.getAlpha()));
             }
             SectionsDrawer.draw(sections, sectionRadius, (from, to, topRoundRadius, bottomRoundRadius, alpha) -> {
+                float top = topRoundRadius;
+                float bottom = sectionTopOnly ? 0 : bottomRoundRadius;
+                if (sectionSegmented && SectionsDrawer.currentCount > 1) {
+                    if (SectionsDrawer.currentIndex == 0) {
+                        bottom = Math.min(bottom, sectionRadius * 0.5f);
+                    } else if (SectionsDrawer.currentIndex == SectionsDrawer.currentCount - 1) {
+                        top = Math.min(top, sectionRadius * 0.5f);
+                    }
+                }
                 AndroidUtilities.rectTmp.set(getPaddingLeft() + sectionsItemDecoration.padding, from, getWidth() - sectionsItemDecoration.padding - getPaddingRight(), to);
-                drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, topRoundRadius, sectionTopOnly ? 0 : bottomRoundRadius, alpha);
+                drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, top, bottom, alpha);
             });
             sections.clear();
         } else {
@@ -3761,6 +3772,8 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         }
 
         private static final ArrayList<float[]> groups = new ArrayList<>();
+        /** OtherGram: index and total count of the section group currently being drawn. */
+        public static int currentIndex, currentCount;
 
         private static final float CONNECT_TOLERANCE = 1.5f;
 
@@ -3819,6 +3832,8 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                     }
                 }
 
+                currentIndex = i;
+                currentCount = groups.size();
                 drawRoundRect.run(drawFrom, drawTo, topRadius, bottomRadius, alpha);
             }
         }
