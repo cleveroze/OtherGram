@@ -351,7 +351,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
         listView = new UniversalRecyclerView(this, this::fillItems, this::onClick, this::onLongClick);
         listView.adapter.setApplyBackground(false);
-        listView.setSections();
+        // OtherGram: card look from the mockup — tighter gap between cards, larger rounded corners
+        listView.setSections(dp(8), dp(20), false);
         listView.setPadding(0, AndroidUtilities.statusBarHeight + dp(12), 0, AndroidUtilities.navigationBarHeight + additionNavigationBarHeight);
         listView.setClipToPadding(false);
         listView.addOnScrollListener(new RecyclerView.OnScrollListener() {
