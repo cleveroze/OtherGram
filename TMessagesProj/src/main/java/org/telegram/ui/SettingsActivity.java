@@ -698,7 +698,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         }
 
         // OtherGram: entry point to OtherGram Settings, shown as its own block above the standard settings
-        items.add(SettingCell.Factory.of(26, 0xFFC2A48C, 0xFFA68770, R.drawable.ic_ab_other, getString(R.string.OG_Settings), getString(R.string.OG_SettingsInfo)));
+        items.add(SettingCell.Factory.of(26, 0xFFC2A48C, 0xFFA68770, R.drawable.mini_more_dots, getString(R.string.OG_Settings), getString(R.string.OG_SettingsInfo)));
         items.add(UItem.asShadow(null));
 
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
@@ -1229,7 +1229,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
             iconBackground.setColor(0, 0);
             iconView.setImageResource(icon);
-            iconView.setColorFilter(icon != 0 ? Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider) : null);
+            if (icon != 0) {
+                iconView.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider));
+            } else {
+                iconView.clearColorFilter();
+            }
             titleView.setText(title);
             subtitleView.setVisibility((twoLines = !TextUtils.isEmpty(subtitle)) ? View.VISIBLE : View.GONE);
             subtitleView.setText(subtitle);
