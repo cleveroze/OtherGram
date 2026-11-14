@@ -3262,6 +3262,8 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
     private Utilities.Callback5<Canvas, RectF, Float, Float, Float> drawSectionBackground;
     public ArrayList<Long> forcedSections;
     private float sectionRadius;
+    /** OtherGram: round only the top corners of each section (top rounded, bottom square). */
+    public boolean sectionTopOnly;
     private float[] sectionRadiusTop, sectionRadiusBottom;
     public boolean applyPaddingToSections = false;
 
@@ -3443,7 +3445,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
             Math.min(getHeight() - (applyPaddingToSections ? getPaddingBottom() : -sectionRadius), bottom(to) + (hasBelow ? sectionRadius : 0) - bottomMargin)
         );
         if (AndroidUtilities.rectTmp.bottom < AndroidUtilities.rectTmp.top) return;
-        drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, sectionRadius, sectionRadius, from.getAlpha());
+        drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, sectionRadius, sectionTopOnly ? 0 : sectionRadius, from.getAlpha());
     }
 
     private boolean hasAbove(View view, int index) {
@@ -3520,7 +3522,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
             }
             SectionsDrawer.draw(sections, sectionRadius, (from, to, topRoundRadius, bottomRoundRadius, alpha) -> {
                 AndroidUtilities.rectTmp.set(getPaddingLeft() + sectionsItemDecoration.padding, from, getWidth() - sectionsItemDecoration.padding - getPaddingRight(), to);
-                drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, topRoundRadius, bottomRoundRadius, alpha);
+                drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, topRoundRadius, sectionTopOnly ? 0 : bottomRoundRadius, alpha);
             });
             sections.clear();
         } else {
@@ -3578,7 +3580,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                         getWidth() - getPaddingRight() - sectionsItemDecoration.padding,
                         to
                     );
-                    drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, sectionRadius, sectionRadius, 1.0f);
+                    drawSectionBackground.run(canvas, AndroidUtilities.rectTmp, sectionRadius, sectionTopOnly ? 0 : sectionRadius, 1.0f);
                 }
             }
         }

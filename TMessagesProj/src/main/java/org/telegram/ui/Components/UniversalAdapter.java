@@ -754,7 +754,7 @@ public class UniversalAdapter extends AdapterWithDiffUtils {
                 if (viewType == VIEW_TYPE_SHADOW || viewType == VIEW_TYPE_LARGE_SHADOW) {
                     TextInfoPrivacyCell cell2 = (TextInfoPrivacyCell) holder.itemView;
                     if (TextUtils.isEmpty(item.text)) {
-                        cell2.setFixedSize(viewType == VIEW_TYPE_LARGE_SHADOW ? 220 : 12);
+                        cell2.setFixedSize(viewType == VIEW_TYPE_LARGE_SHADOW ? 220 : (item.intValue > 0 ? item.intValue : 12));
                         cell2.setText("");
                     } else {
                         cell2.setFixedSize(0);
